@@ -23,6 +23,7 @@ The ultimate plug for student deals
         "type": "module" 
     }
 ```
+3. To start the server, cd into server dir and then type command `npm run start`
 
 ## Database
 - Use only SQL database
