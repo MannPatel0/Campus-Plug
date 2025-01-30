@@ -5,7 +5,7 @@ The ultimate plug for student deals
 1. Add both node_modules from client and server to your `gitignore` file
 2. Do not use `.ENV` variables
 3. For any functionality make a brach with the prefix of your name `Name-<some branch name>` use this namign convention 
-4. For all method added a comment as to how, why, what it does
+4. For all method added a comment as to what it does
 
 
 ## Client
