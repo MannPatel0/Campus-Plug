@@ -1,18 +1,29 @@
 # Campus-Plug
-    - The ultimate plug for student deals
+The ultimate plug for student deals
 
----
-## some ground rulles
-    - add both node_modules from client and server to your `gitignore` file
-    - WE DO NOT USE .ENV variables
+## some ground rules
+1. Add both node_modules from client and server to your `gitignore` file
+2. Do not use `.ENV` variables
+3. Databased cannot a
+
 
 ## Client
+- Use React Js or html&css
 
 
 ## Server
-
-    ```  
-        npm install express mysql2 dotenv cors
-    ```
+1. Install the needed lib with the command bellow
+```  bash
+    npm install express mysql2 dotenv cors
+```
+2. make sure in the `package.json` file type is set to module, if it not there add it. 
+```json
+    {
+        ...,
+        "type": "module" 
+    }
+```
 
 ## Database
+- Use only SQL database
+- Loading of initian database will be done
