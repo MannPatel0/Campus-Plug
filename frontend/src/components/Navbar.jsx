@@ -1,0 +1,63 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import UserDropdown from './UserDropdown';
+import { Search, Heart } from 'lucide-react';
+
+const Navbar = ({ onLogout, userName }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    console.log('Searching for:', searchQuery);
+    // TODO: Implement search functionality
+  };
+
+  return (
+    <nav className="bg-white shadow-sm border-b border-gray-200">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link to="/" className="flex items-center">
+              <span className="text-green-600 font-bold text-xl">Campus Plug</span>
+            </Link>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="flex-1 max-w-2xl px-4">
+            <form onSubmit={handleSearchSubmit} className="w-full">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search for books, electronics, furniture..."
+                  className="w-full p-2 pl-10 pr-4 border border-gray-300 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+            </form>
+          </div>
+          
+          {/* User Navigation */}
+          <div className="flex items-center space-x-4">
+            {/* Favorites Button */}
+            <Link to="/favorites" className="p-2 text-gray-600 hover:text-green-600">
+              <Heart className="h-6 w-6" />
+            </Link>
+            {/* User Profile */}
+            <UserDropdown onLogout={onLogout} userName={userName} />
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
