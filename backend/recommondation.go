@@ -41,5 +41,3 @@ func main() {
 		fmt.Printf("Similarity with product %d: %f\n", i, sim)
 	}
 }
-
-
