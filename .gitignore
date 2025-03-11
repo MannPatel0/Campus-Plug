@@ -1,5 +1,15 @@
-
 # Node_modules
-./backend/node_modules
-./frontend/node_modules
+*/node_modules
 .DS_Store
+
+*~/backend/index.js
+
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
