@@ -12,7 +12,8 @@ CREATE TABLE Users (
 -- Create a separate table for the multi-valued Role attribute
 CREATE TABLE UserRole (
     UserID INT,
-    Role VARCHAR(20) NOT NULL, -- Contains 'Buyer', 'Seller', or 'Admin'
-    PRIMARY KEY (UserID, Role),
+    Client BOOLEAN DEFAULT FALSE,
+    Admin BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (UserID),
     FOREIGN KEY (UserID) REFERENCES Users (ID) ON DELETE CASCADE
 );
