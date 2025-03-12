@@ -1,6 +1,6 @@
 ### Some ground rules
 1. Add both node_modules from Slient and Server to your `gitignore` file
-2. For any functionality make a brach with the prefix of your name `Name-<some branch name>` use this namign convention
+2. For any functionality make a brach with the prefix of your name `Name-<some branch name>` use this naming convention
 
 ### `frontend`
 - Use React Js
@@ -25,4 +25,5 @@
 3. To start the server, cd into the dir and then type command `npm run dev`
 
 ### Database
-- Use only mySQL database
+- MySql Version 9.2.0
+
