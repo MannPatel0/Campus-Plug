@@ -2,6 +2,7 @@ import express, { json } from "express";
 import cors from "cors";
 import mysql from "mysql2";
 import nodemailer from "nodemailer";
+
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
@@ -33,7 +34,7 @@ const transporter = nodemailer.createTransport({
   port: 465,
   auth: {
     user: "campusplug@zohomailcloud.ca", //Zoho email
-    pass: "NzaZ7FFKNh18", //Zoho password
+    pass: "e0YRrNSeJZQd", //Zoho password
   },
 });
 
@@ -74,7 +75,8 @@ app.post("/send-verification", async (req, res) => {
         if (results.length > 0) {
           // Update existing record
           db_con.query(
-            "UPDATE AuthVerification SET VerificationCode = ?, Authenticated = FALSE, Date = CURRENT_TIMESTAMP WHERE Email = ?",
+            `UPDATE AuthVerification SET VerificationCode = ?, Authenticated = FALSE, Date = CURRENT_TIMESTAMP
+            WHERE Email = ?`,
             [verificationCode, email],
             async (err) => {
               if (err) {
@@ -138,7 +140,7 @@ app.post("/verify-code", (req, res) => {
 
   // Check verification code
   db_con.query(
-    "SELECT * FROM AuthVerification WHERE Email = ? AND VerificationCode = ? AND Authenticated = FALSE AND Date > DATE_SUB(NOW(), INTERVAL 15 MINUTE)",
+    "SELECT * FROM AuthVerification WHERE Email = ? AND VerificationCode = ? AND Authenticated = 0 AND Date > DATE_SUB(NOW(), INTERVAL 15 MINUTE)",
     [email, code],
     (err, results) => {
       if (err) {
@@ -179,11 +181,11 @@ app.post("/verify-code", (req, res) => {
 });
 
 // Create a users and Complete user registration after verification
-app.post("/complete-registration", (req, res) => {
+app.post("/complete-signup", (req, res) => {
   const data = req.body;
 
   db_con.query(
-    `SELECT * FROM AuthVerification WHERE Email = ${data.email} AND Authenticated = 1`,
+    `SELECT * FROM AuthVerification WHERE Email = '${data.email}' AND Authenticated = 1;`,
     (err, results) => {
       if (err) {
         console.error("Database error:", err);
@@ -196,7 +198,7 @@ app.post("/complete-registration", (req, res) => {
       // Create the user
       db_con.query(
         `INSERT INTO User (Name, Email, UCID, Password, Phone, Address)
-        VALUES (${data.name}, ${data.email}, ${data.UCID}, ${data.password}, ${data.phone}, ${data.address})`,
+        VALUES ('${data.name}', '${data.email}', '${data.UCID}', '${data.password}', '${data.phone}', '${data.address}')`,
         (err, result) => {
           if (err) {
             console.error("Error creating user:", err);
@@ -215,7 +217,7 @@ app.post("/complete-registration", (req, res) => {
 
               // Delete verification record
               db_con.query(
-                `DELETE FROM AuthVerification WHERE Email = ${data.email}`,
+                `DELETE FROM AuthVerification WHERE Email = '${data.email}'`,
                 (deleteErr) => {
                   if (deleteErr) {
                     console.error("Error deleting verification:", deleteErr);
@@ -223,7 +225,10 @@ app.post("/complete-registration", (req, res) => {
                   res.json({
                     success: true,
                     message: "User registration completed successfully",
-                    userId: result.insertId,
+                    name: data.name,
+                    email: data.email,
+                    UCID: data.UCID,
+                    phone: data.phone,
                   });
                 },
               );
@@ -243,9 +248,7 @@ function cleanupExpiredCodes() {
       if (err) {
         console.error("Error cleaning up expired codes:", err);
       } else {
-        console.log(
-          `Cleaned up ${result.affectedRows} expired verification codes`,
-        );
+        console.log(`Cleaned up ${results} expired verification codes`);
       }
     },
   );
@@ -253,7 +256,7 @@ function cleanupExpiredCodes() {
 
 // Set up a scheduler to run cleanup every hour
 setInterval(cleanupExpiredCodes, 60 * 60 * 1000);
-//TODO: Fetch all users data:
+//Fetch all users data:
 app.get("/fetch_all_users", (req, res) => {
   db_con.query("SELECT * FROM User;", (err, data) => {
     if (err) {
@@ -264,7 +267,7 @@ app.get("/fetch_all_users", (req, res) => {
   });
 });
 
-//TODO: Fetch One user Data:
+//Fetch One user Data:
 app.post("/find_user", (req, res) => {
   const { email, password } = req.body;
 
@@ -310,7 +313,82 @@ app.post("/find_user", (req, res) => {
 });
 
 //TODO: Update A uses Data:
-//TODO: Delete A uses Data:
+app.post("/update", (req, res) => {
+  const { userId, ...updateData } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  // Create query dynamically based on provided fields
+  const updateFields = [];
+  const values = [];
+
+  Object.entries(updateData).forEach(([key, value]) => {
+    // Only include fields that are actually in the User table
+    if (["Name", "Email", "Password", "Phone", "UCID"].includes(key)) {
+      updateFields.push(`${key} = ?`);
+      values.push(value);
+    }
+  });
+
+  if (updateFields.length === 0) {
+    return res.status(400).json({ error: "No valid fields to update" });
+  }
+
+  // Add userId to values array
+  values.push(userId);
+
+  const query = `UPDATE User SET ${updateFields.join(", ")} WHERE UserID = ?`;
+
+  db_con.query(query, values, (err, result) => {
+    if (err) {
+      console.error("Error updating user:", err);
+      return res.status(500).json({ error: "Could not update user" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ success: true, message: "User updated successfully" });
+  });
+});
+
+//Delete A uses Data:
+app.post("/delete", (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  // Delete from UserRole first (assuming foreign key constraint)
+  db_con.query("DELETE FROM UserRole WHERE UserID = ?", [userId], (err) => {
+    if (err) {
+      console.error("Error deleting user role:", err);
+      return res.status(500).json({ error: "Could not delete user role" });
+    }
+
+    // Then delete from User table
+    db_con.query(
+      "DELETE FROM User WHERE UserID = ?",
+      [userId],
+      (err, result) => {
+        if (err) {
+          console.error("Error deleting user:", err);
+          return res.status(500).json({ error: "Could not delete user" });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ success: true, message: "User deleted successfully" });
+      },
+    );
+  });
+});
 
 app.listen(3030, () => {
   console.log(`Running Backend on http://localhost:3030/`);

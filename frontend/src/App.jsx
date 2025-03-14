@@ -29,6 +29,11 @@ function App() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // New verification states
+  const [verificationStep, setVerificationStep] = useState("initial"); // 'initial', 'code-sent', 'verifying'
+  const [tempUserData, setTempUserData] = useState(null);
+  const [verificationCode, setVerificationCode] = useState("");
+
   // Auto-hide image on smaller screens
   useEffect(() => {
     const handleResize = () => {
@@ -38,16 +43,161 @@ function App() {
         setShowImage(true);
       }
     };
-
-    // Initial check
     handleResize();
 
-    // Listen for window resize
     window.addEventListener("resize", handleResize);
 
-    // Cleanup
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Send verification code
+  const sendVerificationCode = async (userData) => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      console.log("Sending verification code to:", userData.email);
+
+      // Make API call to send verification code
+      const response = await fetch("http://localhost:3030/send-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: userData.email,
+          // Add any other required fields
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send verification code");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Store temporary user data
+        setTempUserData(userData);
+        // Move to verification step
+        setVerificationStep("code-sent");
+        console.log("Verification code sent successfully");
+        return true;
+      } else {
+        setError(result.message || "Failed to send verification code");
+        return false;
+      }
+    } catch (err) {
+      console.error("Error sending verification code:", err);
+      setError("Failed to send verification code. Please try again.");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Verify code
+  const verifyCode = async (code) => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      console.log("Verifying code:", code);
+
+      // Make API call to verify code
+      const response = await fetch("http://localhost:3030/verify-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: tempUserData.email,
+          code: code,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to verify code");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("Code verified successfully");
+        // Proceed to complete signup
+        return await completeSignUp(tempUserData);
+      } else {
+        setError(result.message || "Invalid verification code");
+        return false;
+      }
+    } catch (err) {
+      console.error("Error verifying code:", err);
+      setError("Failed to verify code. Please try again.");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Complete signup
+  const completeSignUp = async (userData) => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      console.log("Completing signup for:", userData.email);
+      console.log(userData);
+
+      // Make API call to complete signup
+      const response = await fetch("http://localhost:3030/complete-signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to complete signup");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Create user object from API response
+        const newUser = {
+          name: result.name || userData.name,
+          email: result.email || userData.email,
+          UCID: result.UCID || userData.ucid,
+          phone: result.phone || userData.phone,
+        };
+
+        // Set authenticated user
+        setUser(newUser);
+        setIsAuthenticated(true);
+
+        // Save to localStorage to persist across refreshes
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("user", JSON.stringify(newUser));
+
+        // Reset verification steps
+        setVerificationStep("initial");
+        setTempUserData(null);
+
+        console.log("Signup completed successfully");
+        return true;
+      } else {
+        setError(result.message || "Failed to complete signup");
+        return false;
+      }
+    } catch (err) {
+      console.error("Error completing signup:", err);
+      setError("Failed to complete signup. Please try again.");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,31 +213,30 @@ function App() {
       setError("Email and password are required");
       setIsLoading(false);
       return;
+    } else if (!formValues.email.endsWith("@ucalgary.ca")) {
+      setError("Please use your UCalgary email address (@ucalgary.ca)");
+      setIsLoading(false);
+      return;
     }
-
     try {
       if (isSignUp) {
-        // Handle Sign Up
+        // Handle Sign Up with verification
         console.log("Sign Up Form Data:", formValues);
 
-        // You could add API endpoint for registration here
-        // For now, we'll just simulate a successful registration
+        // Create a user object with the form data
         const newUser = {
           name: formValues.name,
           email: formValues.email,
-          ucid: formValues.ucid,
+          UCID: formValues.ucid,
           phone: formValues.phone,
+          password: formValues.password, // This will be needed for the final signup
+          address: "NOT_GIVEN",
+          client: 1,
+          admin: 0,
         };
 
-        // Set authenticated user
-        setUser(newUser);
-        setIsAuthenticated(true);
-
-        // Save to localStorage to persist across refreshes
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("user", JSON.stringify(newUser));
-
-        console.log("New user registered:", newUser);
+        // Send verification code
+        await sendVerificationCode(newUser);
       } else {
         // Handle Login with API
         console.log("Login Attempt:", {
@@ -144,10 +293,25 @@ function App() {
     }
   };
 
+  // Handle code verification submission
+  const handleVerifySubmit = async (e) => {
+    e.preventDefault();
+    const code = e.target.verificationCode.value;
+
+    if (!code) {
+      setError("Verification code is required");
+      return;
+    }
+
+    await verifyCode(code);
+  };
+
   const handleLogout = () => {
     // Clear authentication state
     setIsAuthenticated(false);
     setUser(null);
+    setVerificationStep("initial");
+    setTempUserData(null);
 
     // Clear localStorage
     localStorage.removeItem("isAuthenticated");
@@ -159,6 +323,20 @@ function App() {
   const toggleAuthMode = () => {
     setIsSignUp(!isSignUp);
     setError(""); // Clear errors when switching modes
+    setVerificationStep("initial"); // Reset verification step
+  };
+
+  // Resend verification code
+  const handleResendCode = async () => {
+    if (tempUserData) {
+      await sendVerificationCode(tempUserData);
+    }
+  };
+
+  // Back to signup form
+  const handleBackToSignup = () => {
+    setVerificationStep("initial");
+    setError("");
   };
 
   // Login component
@@ -168,9 +346,9 @@ function App() {
       {showImage && (
         <div className="w-1/2 relative">
           <img
-            src="../market.png"
+            src="../market.jpg"
             alt="auth illustration"
-            className="w-full h-full object-cover opacity-75"
+            className="w-full h-full object-scale-down"
           />
           <div className="absolute inset-0"></div>
         </div>
@@ -185,10 +363,18 @@ function App() {
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             <h2 className="text-2xl font-bold text-gray-800">
-              {isSignUp ? "Create Account" : "Welcome Back"}
+              {isSignUp
+                ? verificationStep === "initial"
+                  ? "Create Account"
+                  : "Verify Your Email"
+                : "Welcome Back"}
             </h2>
             <p className="mt-2 text-gray-600">
-              {isSignUp ? "Set up your new account" : "Sign in to your account"}
+              {isSignUp
+                ? verificationStep === "initial"
+                  ? "Set up your new account"
+                  : "Enter the verification code sent to your email"
+                : "Sign in to your account"}
             </p>
           </div>
 
@@ -199,132 +385,191 @@ function App() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name field - only for signup */}
-              {isSignUp && (
+            {/* Signup or Login Form */}
+            {(!isSignUp || (isSignUp && verificationStep === "initial")) && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Name field - only for signup */}
+                {isSignUp && (
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block mb-1 text-sm font-medium text-gray-800"
+                    >
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      placeholder="Enter your name"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      required={isSignUp}
+                    />
+                  </div>
+                )}
+
+                {isSignUp && (
+                  <div>
+                    <label
+                      htmlFor="ucid"
+                      className="block mb-1 text-sm font-medium text-gray-800"
+                    >
+                      UCID
+                    </label>
+                    <input
+                      type="text"
+                      id="ucid"
+                      name="ucid"
+                      placeholder="1234567"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      required={isSignUp}
+                    />
+                  </div>
+                )}
+
                 <div>
                   <label
-                    htmlFor="name"
+                    htmlFor="email"
                     className="block mb-1 text-sm font-medium text-gray-800"
                   >
-                    Full Name
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="your.email@ucalgary.ca"
+                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {isSignUp && (
+                  <div>
+                    <label
+                      htmlFor="phone"
+                      className="block mb-1 text-sm font-medium text-gray-800"
+                    >
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      placeholder="+1(123)456 7890"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      required={isSignUp}
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block mb-1 text-sm font-medium text-gray-800"
+                  >
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder={
+                      isSignUp
+                        ? "Create a secure password"
+                        : "Enter your password"
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full px-6 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-colors disabled:bg-green-300"
+                  >
+                    {isLoading
+                      ? "Please wait..."
+                      : isSignUp
+                        ? "Create Account"
+                        : "Sign In"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Verification Code Form */}
+            {isSignUp && verificationStep === "code-sent" && (
+              <form onSubmit={handleVerifySubmit} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="verificationCode"
+                    className="block mb-1 text-sm font-medium text-gray-800"
+                  >
+                    Verification Code
                   </label>
                   <input
                     type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Enter your name"
+                    id="verificationCode"
+                    name="verificationCode"
+                    placeholder="Enter the 6-digit code"
                     className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                    required={isSignUp}
+                    required
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    We've sent a verification code to {tempUserData?.email}
+                  </p>
                 </div>
-              )}
 
-              {isSignUp && (
-                <div>
-                  <label
-                    htmlFor="ucid"
-                    className="block mb-1 text-sm font-medium text-gray-800"
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full px-6 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-colors disabled:bg-green-300"
                   >
-                    UCID
-                  </label>
-                  <input
-                    type="text"
-                    id="ucid"
-                    name="ucid"
-                    placeholder="1234567"
-                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                    required={isSignUp}
-                  />
+                    {isLoading ? "Please wait..." : "Verify Code"}
+                  </button>
                 </div>
-              )}
 
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-1 text-sm font-medium text-gray-800"
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="your.email@ucalgary.ca"
-                  className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              {isSignUp && (
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block mb-1 text-sm font-medium text-gray-800"
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={handleBackToSignup}
+                    className="text-sm text-gray-600 hover:text-gray-800"
                   >
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    placeholder="+1(123)456 7890"
-                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                    required={isSignUp}
-                  />
+                    Back to signup
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={isLoading}
+                    className="text-sm text-green-500 hover:text-green-700"
+                  >
+                    Resend code
+                  </button>
                 </div>
-              )}
+              </form>
+            )}
 
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block mb-1 text-sm font-medium text-gray-800"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder={
-                    isSignUp
-                      ? "Create a secure password"
-                      : "Enter your password"
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                  required
-                />
+            {/* Auth mode toggle */}
+            {verificationStep === "initial" && (
+              <div className="mt-6 text-center text-sm text-gray-500">
+                <p>
+                  {isSignUp
+                    ? "Already have an account?"
+                    : "Don't have an account?"}{" "}
+                  <button
+                    onClick={toggleAuthMode}
+                    type="button"
+                    className="text-green-500 font-medium hover:text-green-700"
+                  >
+                    {isSignUp ? "Sign in" : "Sign up"}
+                  </button>
+                </p>
               </div>
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full px-6 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-colors disabled:bg-green-300"
-                >
-                  {isLoading
-                    ? "Please wait..."
-                    : isSignUp
-                      ? "Create Account"
-                      : "Sign In"}
-                </button>
-              </div>
-            </form>
-
-            <div className="mt-6 text-center text-sm text-gray-500">
-              <p>
-                {isSignUp
-                  ? "Already have an account?"
-                  : "Don't have an account?"}{" "}
-                <button
-                  onClick={toggleAuthMode}
-                  type="button"
-                  className="text-green-500 font-medium hover:text-green-700"
-                >
-                  {isSignUp ? "Sign in" : "Sign up"}
-                </button>
-              </p>
-            </div>
+            )}
           </div>
         </div>
       </div>

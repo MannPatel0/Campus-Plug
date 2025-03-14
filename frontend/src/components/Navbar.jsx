@@ -1,18 +1,18 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import UserDropdown from './UserDropdown';
-import { Search, Heart } from 'lucide-react';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import UserDropdown from "./UserDropdown";
+import { Search, Heart } from "lucide-react";
 
 const Navbar = ({ onLogout, userName }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  
+  const [searchQuery, setSearchQuery] = useState("");
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-  
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
+    console.log("Searching for:", searchQuery);
     // TODO: Implement search functionality
   };
 
@@ -23,10 +23,17 @@ const Navbar = ({ onLogout, userName }) => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
-              <span className="text-green-600 font-bold text-xl">Campus Plug</span>
+              <img
+                src="/icon/icon-512.png"
+                alt="Campus Plug"
+                className="h-8 px-2"
+              />
+              <span className="hidden md:block text-green-600 font-bold text-xl">
+                Campus Plug
+              </span>
             </Link>
           </div>
-          
+
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl px-4">
             <form onSubmit={handleSearchSubmit} className="w-full">
@@ -44,11 +51,14 @@ const Navbar = ({ onLogout, userName }) => {
               </div>
             </form>
           </div>
-          
+
           {/* User Navigation */}
           <div className="flex items-center space-x-4">
             {/* Favorites Button */}
-            <Link to="/favorites" className="p-2 text-gray-600 hover:text-green-600">
+            <Link
+              to="/favorites"
+              className="p-2 text-gray-600 hover:text-green-600"
+            >
               <Heart className="h-6 w-6" />
             </Link>
             {/* User Profile */}
