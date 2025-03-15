@@ -16,10 +16,10 @@ import ProductDetail from "./pages/ProductDetail";
 function App() {
   // Authentication state - initialize from localStorage if available
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem("isAuthenticated") === "true";
+    return sessionStorage.getItem("isAuthenticated") === "true";
   });
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
+    const savedUser = sessionStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
@@ -32,7 +32,6 @@ function App() {
   // New verification states
   const [verificationStep, setVerificationStep] = useState("initial"); // 'initial', 'code-sent', 'verifying'
   const [tempUserData, setTempUserData] = useState(null);
-  const [verificationCode, setVerificationCode] = useState("");
 
   // Auto-hide image on smaller screens
   useEffect(() => {
@@ -166,10 +165,10 @@ function App() {
       if (result.success) {
         // Create user object from API response
         const newUser = {
+          ID: result.userID,
           name: result.name || userData.name,
           email: result.email || userData.email,
           UCID: result.UCID || userData.ucid,
-          phone: result.phone || userData.phone,
         };
 
         // Set authenticated user
@@ -177,8 +176,8 @@ function App() {
         setIsAuthenticated(true);
 
         // Save to localStorage to persist across refreshes
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("user", JSON.stringify(newUser));
+        sessionStorage.setItem("isAuthenticated", "true");
+        sessionStorage.setItem("user", JSON.stringify(newUser));
 
         // Reset verification steps
         setVerificationStep("initial");
@@ -265,7 +264,8 @@ function App() {
         if (userData && userData.found) {
           // Create user object
           const userObj = {
-            name: userData.name || userData.email,
+            ID: userData.userID,
+            name: userData.name,
             email: userData.email,
             // Add any other user data returned from the API
           };
@@ -275,8 +275,10 @@ function App() {
           setIsAuthenticated(true);
 
           // Save to localStorage to persist across refreshes
-          localStorage.setItem("isAuthenticated", "true");
-          localStorage.setItem("user", JSON.stringify(userObj));
+          sessionStorage.setItem("isAuthenticated", "true");
+          sessionStorage.setItem("user", JSON.stringify(userObj));
+
+          sessionStorage.getItem("user");
 
           console.log("Login successful for:", userData.email);
         } else {
@@ -314,8 +316,9 @@ function App() {
     setTempUserData(null);
 
     // Clear localStorage
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("user");
+    //
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("isAuthenticated");
 
     console.log("User logged out");
   };
@@ -592,14 +595,12 @@ function App() {
         {isAuthenticated && (
           <Navbar onLogout={handleLogout} userName={user?.name} />
         )}
-
         <Routes>
           {/* Public routes */}
           <Route
             path="/login"
             element={isAuthenticated ? <Navigate to="/" /> : <LoginComponent />}
           />
-
           {/* Protected routes */}
           <Route
             path="/"
@@ -611,7 +612,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/product/:id"
             element={
@@ -620,7 +620,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/settings"
             element={
@@ -631,7 +630,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/selling"
             element={
@@ -653,7 +651,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/favorites"
             element={
@@ -664,7 +661,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           {/* Redirect to login for any unmatched routes */}
           <Route
             path="*"

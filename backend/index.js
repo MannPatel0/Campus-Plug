@@ -2,9 +2,7 @@ import express, { json } from "express";
 import cors from "cors";
 import mysql from "mysql2";
 import nodemailer from "nodemailer";
-
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
 
 const app = express();
 app.use(cors());
@@ -120,7 +118,7 @@ async function sendVerificationEmail(email, verificationCode) {
   await transporter.sendMail({
     from: "campusplug@zohomailcloud.ca",
     to: email,
-    subject: "Your Verification Code",
+    subject: "Campus Plug: Signup Verification Code",
     text: `Your verification code is: ${verificationCode}. This code will expire in 15 minutes.`,
     html: `<p>Your verification code is: <strong>${verificationCode}</strong></p><p>This code will expire in 15 minutes.</p>`,
   });
@@ -215,6 +213,11 @@ app.post("/complete-signup", (req, res) => {
                 return res.status(500).json({ error: "Could not create role" });
               }
 
+              db_con.query(
+                `SELECT * FROM User WHERE Email='${data.Email}'`,
+                (err, userID),
+              );
+
               // Delete verification record
               db_con.query(
                 `DELETE FROM AuthVerification WHERE Email = '${data.email}'`,
@@ -225,10 +228,10 @@ app.post("/complete-signup", (req, res) => {
                   res.json({
                     success: true,
                     message: "User registration completed successfully",
+                    userID: userID,
                     name: data.name,
                     email: data.email,
                     UCID: data.UCID,
-                    phone: data.phone,
                   });
                 },
               );
@@ -248,7 +251,7 @@ function cleanupExpiredCodes() {
       if (err) {
         console.error("Error cleaning up expired codes:", err);
       } else {
-        console.log(`Cleaned up ${results} expired verification codes`);
+        console.log(`Cleaned up ${result} expired verification codes`);
       }
     },
   );
@@ -267,22 +270,21 @@ app.get("/fetch_all_users", (req, res) => {
   });
 });
 
-//Fetch One user Data:
+//Fetch One user Data with all fields:
 app.post("/find_user", (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
 
   // Input validation
-  if (!email || !password) {
+  if (!email) {
     return res.status(400).json({
       found: false,
-      error: "Email and password are required",
+      error: "Email is required",
     });
   }
 
   // Query to find user with matching email and password
-  const query = "SELECT * FROM User WHERE email = ? AND password = ?";
-
-  db_con.query(query, [email, password], (err, data) => {
+  const query = "SELECT * FROM User WHERE email = ?";
+  db_con.query(query, [email], (err, data) => {
     if (err) {
       console.error("Error finding user:", err);
       return res.status(500).json({
@@ -296,11 +298,17 @@ app.post("/find_user", (req, res) => {
       console.log(data);
       const user = data[0];
 
-      // Return user data without sensitive information
+      // Return all user data except password
       return res.json({
         found: true,
+        userID: user.UserID,
         name: user.Name,
         email: user.Email,
+        UCID: user.UCID,
+        phone: user.Phone,
+        address: user.Address,
+        // Include any other fields your user might have
+        // Make sure the field names match exactly with your database column names
       });
     } else {
       // User not found or invalid credentials
