@@ -215,7 +215,7 @@ app.post("/complete-signup", (req, res) => {
 
               db_con.query(
                 `SELECT * FROM User WHERE Email='${data.Email}'`,
-                (err, userID),
+                (err, results) => {},
               );
 
               // Delete verification record
@@ -228,7 +228,7 @@ app.post("/complete-signup", (req, res) => {
                   res.json({
                     success: true,
                     message: "User registration completed successfully",
-                    userID: userID,
+                    userID: results.UserID,
                     name: data.name,
                     email: data.email,
                     UCID: data.UCID,
