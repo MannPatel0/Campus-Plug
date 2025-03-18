@@ -1,29 +1,25 @@
 ### Some ground rules
 1. Add both node_modules from Slient and Server to your `gitignore` file
-2. For any functionality make a brach with the prefix of your name `Name-<some branch name>` use this naming convention
+2. Make a brach with the following naming conventionp, refix it with your name `name-some branch name`.
 
 ### `frontend`
-- Use React Js
-- Use vite as the node manger
-```bash
+- Use React Js and vite as the node manger
+```Bash
     npm install
 ```
-3. To start the server, cd into the dir and then type command `npm run dev`
-
+2. **Start The Server**, `cd frontend` into the dir and then type command
+```Bash
+    npm run dev
+```
 ### `backend`
 1. Install the needed lib with the command bellow
-```  bash
+```Bash
     npm install
 ```
-2. make sure in the `package.json` file type is set to module, if it's not there, add it!
-```json
-    {
-        ...,
-        "type": "module"
-    }
+2. **Start The Server**, `cd backend` into the dir and then type command
+```Bash
+    npm run dev
 ```
-3. To start the server, cd into the dir and then type command `npm run dev`
 
 ### Database
 - MySql Version 9.2.0
-
