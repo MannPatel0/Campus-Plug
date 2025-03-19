@@ -30,4 +30,19 @@ function cleanupExpiredCodes() {
   );
 }
 
-module.exports = { sendVerificationEmail, cleanupExpiredCodes };
+const checkDatabaseConnection = async (db) => {
+  try {
+    const connection = await db.getConnection();
+    //If no error, release the connection
+    console.log("Connect to database successfully!");
+    connection.release();
+  } catch (error) {
+    console.log("Cannot connect to database: ", error.sqlMessage);
+  }
+};
+
+module.exports = {
+  sendVerificationEmail,
+  cleanupExpiredCodes,
+  checkDatabaseConnection,
+};

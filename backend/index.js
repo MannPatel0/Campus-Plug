@@ -6,7 +6,10 @@ const db = require("./utils/database");
 const userRouter = require("./routes/user");
 const productRouter = require("./routes/product");
 const { generateEmailTransporter } = require("./utils/mail");
-const { cleanupExpiredCodes } = require("./utils/helper");
+const {
+  cleanupExpiredCodes,
+  checkDatabaseConnection,
+} = require("./utils/helper");
 
 const app = express();
 
@@ -24,6 +27,9 @@ transporter
   .catch((error) => {
     console.error("Email connection failed:", error);
   });
+
+//Check database connection
+checkDatabaseConnection(db);
 
 //Routes
 app.use("/api/user", userRouter); //prefix with /api/user
