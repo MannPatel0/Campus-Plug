@@ -59,16 +59,19 @@ function App() {
       console.log("Sending verification code to:", userData.email);
 
       // Make API call to send verification code
-      const response = await fetch("http://localhost:3030/send-verification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userData.email,
-          // Add any other required fields
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:3030/api/user/send-verification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userData.email,
+            // Add any other required fields
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send verification code");
@@ -105,16 +108,19 @@ function App() {
       console.log("Verifying code:", code);
 
       // Make API call to verify code
-      const response = await fetch("http://localhost:3030/verify-code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: tempUserData.email,
-          code: code,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:3030/api/user/verify-code",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: tempUserData.email,
+            code: code,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to verify code");
@@ -149,13 +155,16 @@ function App() {
       console.log(userData);
 
       // Make API call to complete signup
-      const response = await fetch("http://localhost:3030/complete-signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
+      const response = await fetch(
+        "http://localhost:3030/api/user/complete-signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to complete signup");
@@ -245,16 +254,19 @@ function App() {
         });
 
         // Make API call to localhost:3030/find_user
-        const response = await fetch("http://localhost:3030/find_user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: formValues.email,
-            password: formValues.password,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:3030/api/user/find_user",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: formValues.email,
+              password: formValues.password,
+            }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -497,8 +509,8 @@ function App() {
                     {isLoading
                       ? "Please wait..."
                       : isSignUp
-                        ? "Create Account"
-                        : "Sign In"}
+                      ? "Create Account"
+                      : "Sign In"}
                   </button>
                 </div>
               </form>
