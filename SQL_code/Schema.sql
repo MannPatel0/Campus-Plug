@@ -17,6 +17,12 @@ CREATE TABLE UserRole (
     FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE
 );
 
+-- Category Entity  (must be created before Product or else error)
+CREATE TABLE Category (
+    CategoryID INT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL
+);
+
 -- Product Entity
 CREATE TABLE Product (
     ProductID INT PRIMARY KEY,
@@ -35,11 +41,6 @@ CREATE TABLE Image_URL (
     FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
 )
 
--- Category Entity
-CREATE TABLE Category (
-    CategoryID INT PRIMARY KEY,
-    Name VARCHAR(255) NOT NULL
-);
 
 -- Review Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Review (

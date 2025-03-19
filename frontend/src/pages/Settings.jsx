@@ -33,15 +33,18 @@ const Settings = () => {
         }
 
         // Make API call to fetch user data
-        const response = await fetch("http://localhost:3030/find_user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: storedUser.email,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:3030/api/user/find_user",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: storedUser.email,
+            }),
+          }
+        );
 
         const data = await response.json();
         console.log(data);
@@ -67,7 +70,7 @@ const Settings = () => {
       } catch (error) {
         console.error("Error fetching user data:", error);
         setError(
-          error.message || "An error occurred while loading your profile",
+          error.message || "An error occurred while loading your profile"
         );
       } finally {
         setIsLoading(false);
@@ -153,7 +156,7 @@ const Settings = () => {
   const handleDeleteAccount = async () => {
     if (
       window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone.",
+        "Are you sure you want to delete your account? This action cannot be undone."
       )
     ) {
       try {
@@ -166,7 +169,7 @@ const Settings = () => {
         }
 
         // Make API call to delete the account
-        const response = await fetch("http://localhost:3030/delete", {
+        const response = await fetch("http://localhost:3030/api/user/delete", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

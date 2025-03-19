@@ -10,7 +10,9 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:3030/get_product");
+        const response = await fetch(
+          "http://localhost:3030/api/product/get_product"
+        );
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
@@ -27,7 +29,7 @@ const Home = () => {
               seller: "Unknown", // Modify if seller info is available
               datePosted: "Just now",
               isFavorite: false,
-            })),
+            }))
           );
         } else {
           throw new Error(data.message || "Error fetching products");
@@ -48,8 +50,8 @@ const Home = () => {
       prevListings.map((listing) =>
         listing.id === id
           ? { ...listing, isFavorite: !listing.isFavorite }
-          : listing,
-      ),
+          : listing
+      )
     );
   };
 
