@@ -17,58 +17,39 @@ exports.sendVerificationCode = async (req, res) => {
     );
 
     // Check if email already exists in verification table
-    db.execute(
+    const [results, fields] = await db.execute(
       "SELECT * FROM AuthVerification WHERE Email = ?",
-      [email],
-      async (err, results) => {
-        if (err) {
-          console.error("Database error:", err);
-          return res.status(500).json({ error: "Database error" });
-        }
-
-        if (results.length > 0) {
-          // Update existing record
-          db.execute(
-            `UPDATE AuthVerification SET VerificationCode = ?, Authenticated = FALSE, Date = CURRENT_TIMESTAMP
-            WHERE Email = ?`,
-            [verificationCode, email],
-            async (err) => {
-              if (err) {
-                console.error("Database error:", err);
-                return res.status(500).json({ error: "Database error" });
-              }
-
-              // Send email and respond
-              await sendVerificationEmail(email, verificationCode);
-              res.json({ success: true, message: "Verification code sent" });
-            }
-          );
-        } else {
-          // Insert new record
-          db.execute(
-            "INSERT INTO AuthVerification (Email, VerificationCode, Authenticated) VALUES (?, ?, FALSE)",
-            [email, verificationCode],
-            async (err) => {
-              if (err) {
-                console.error("Database error:", err);
-                return res.status(500).json({ error: "Database error" });
-              }
-
-              // Send email and respond
-              await sendVerificationEmail(email, verificationCode);
-              res.json({ success: true, message: "Verification code sent" });
-            }
-          );
-        }
-      }
+      [email]
     );
+
+    if (results.length > 0) {
+      // Update existing record
+      const [result] = await db.execute(
+        `UPDATE AuthVerification SET VerificationCode = ?, Authenticated = FALSE, Date = CURRENT_TIMESTAMP
+         WHERE Email = ?`,
+        [verificationCode, email]
+      );
+
+      // Send email and respond
+      await sendVerificationEmail(email, verificationCode);
+      res.json({ success: true, message: "Verification code sent" });
+    } else {
+      // Insert new record
+      const [result] = await db.execute(
+        "INSERT INTO AuthVerification (Email, VerificationCode, Authenticated) VALUES (?, ?, FALSE)",
+        [email, verificationCode]
+      );
+      // Send email and respond
+      await sendVerificationEmail(email, verificationCode);
+      res.json({ success: true, message: "Verification code sent" });
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-exports.verifyCode = (req, res) => {
+exports.verifyCode = async (req, res) => {
   const { email, code } = req.body;
 
   if (!email || !code) {
@@ -77,119 +58,93 @@ exports.verifyCode = (req, res) => {
 
   console.log(`Attempting to verify code for ${email}: ${code}`);
 
-  // Check verification code
-  db.execute(
-    "SELECT * FROM AuthVerification WHERE Email = ? AND VerificationCode = ? AND Authenticated = 0 AND Date > DATE_SUB(NOW(), INTERVAL 15 MINUTE)",
-    [email, code],
-    (err, results) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: "Database error" });
-      }
-
-      if (results.length === 0) {
-        console.log(`Invalid or expired verification code for email ${email}`);
-        return res
-          .status(400)
-          .json({ error: "Invalid or expired verification code" });
-      }
-
-      const userId = results[0].UserID;
-
-      // Mark as authenticated
-      db.execute(
-        "UPDATE AuthVerification SET Authenticated = TRUE WHERE Email = ?",
-        [email],
-        (err) => {
-          if (err) {
-            console.error("Database error:", err);
-            return res.status(500).json({ error: "Database error" });
-          }
-
-          console.log(`Email ${email} successfully verified`);
-
-          res.json({
-            success: true,
-            message: "Verification successful",
-            userId,
-          });
-        }
-      );
+  try {
+    // Check verification code
+    const [results, fields] = await db.execute(
+      "SELECT * FROM AuthVerification WHERE Email = ? AND VerificationCode = ? AND Authenticated = 0 AND Date > DATE_SUB(NOW(), INTERVAL 15 MINUTE)",
+      [email, code]
+    );
+    if (results.length === 0) {
+      console.log(`Invalid or expired verification code for email ${email}`);
+      return res
+        .status(400)
+        .json({ error: "Invalid or expired verification code" });
     }
-  );
+
+    const userId = results[0].UserID;
+
+    // Mark as authenticated
+    const [result] = await db.execute(
+      "UPDATE AuthVerification SET Authenticated = TRUE WHERE Email = ?",
+      [email]
+    );
+    res.json({
+      success: true,
+      message: "Verification successful",
+      userId,
+    });
+  } catch (error) {
+    console.log("Error: ", error);
+    res.status(500).json({ error: "Database error!" });
+  }
 };
 
-exports.completeSignUp = (req, res) => {
+exports.completeSignUp = async (req, res) => {
   const data = req.body;
 
-  db.execute(
-    `SELECT * FROM AuthVerification WHERE Email = '${data.email}' AND Authenticated = 1;`,
-    (err, results) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: "Database error" });
-      }
-      if (results.length === 0) {
-        return res.status(400).json({ error: "Email not verified" });
-      }
+  try {
+    const [results, fields] = await db.execute(
+      `SELECT * FROM AuthVerification WHERE Email = ? AND Authenticated = 1;`,
+      [data.email]
+    );
 
-      // Create the user
-      db.execute(
-        `INSERT INTO User (Name, Email, UCID, Password, Phone, Address)
-          VALUES ('${data.name}', '${data.email}', '${data.UCID}', '${data.password}', '${data.phone}', '${data.address}')`,
-        (err, result) => {
-          if (err) {
-            console.error("Error creating user:", err);
-            return res.status(500).json({ error: "Could not create user" });
-          }
-
-          // Insert role using the user's ID
-          db.execute(
-            `INSERT INTO UserRole (UserID, Client, Admin)
-              VALUES (LAST_INSERT_ID(), ${data.client || true}, ${
-              data.admin || false
-            })`,
-            (roleErr) => {
-              if (roleErr) {
-                console.error("Error creating role:", roleErr);
-                return res.status(500).json({ error: "Could not create role" });
-              }
-
-              // Delete verification record
-              db.execute(
-                `DELETE FROM AuthVerification WHERE Email = '${data.email}'`,
-                (deleteErr) => {
-                  if (deleteErr) {
-                    console.error("Error deleting verification:", deleteErr);
-                  }
-                  res.json({
-                    success: true,
-                    message: "User registration completed successfully",
-                    name: data.name,
-                    email: data.email,
-                    UCID: data.UCID,
-                  });
-                }
-              );
-            }
-          );
-        }
-      );
+    if (results.length === 0) {
+      return res.status(400).json({ error: "Email not verified" });
     }
-  );
+
+    // Create the user
+    const [createResult] = await db.execute(
+      `INSERT INTO User (Name, Email, UCID, Password, Phone, Address)
+          VALUES ('${data.name}', '${data.email}', '${data.UCID}', '${data.password}', '${data.phone}', '${data.address}')`
+    );
+
+    // Insert role using the user's ID
+    const [insertResult] = await db.execute(
+      `INSERT INTO UserRole (UserID, Client, Admin)
+                VALUES (LAST_INSERT_ID(), ${data.client || true}, ${
+        data.admin || false
+      })`
+    );
+
+    // Delete verification record
+    const [deleteResult] = await db.execute(
+      `DELETE FROM AuthVerification WHERE Email = '${data.email}'`
+    );
+
+    res.json({
+      success: true,
+      message: "User registration completed successfully",
+      name: data.name,
+      email: data.email,
+      UCID: data.UCID,
+    });
+  } catch (error) {
+    console.log("Error: ", error);
+    res.status(500).json({ error: "Database error!" });
+  }
 };
 
-exports.getAllUser = (req, res) => {
-  db.execute("SELECT * FROM User;", (err, data) => {
-    if (err) {
-      console.error("Errors: ", err);
-      return res.status(500).json({ error: "\nCould not fetch users!" });
-    }
-    res.json({ Users: data });
-  });
+exports.getAllUser = async (req, res) => {
+  try {
+    const [users, fields] = await db.execute("SELECT * FROM User;");
+    res.json({ Users: users });
+  } catch (error) {
+    console.error("Errors: ", error);
+    return res.status(500).json({ error: "\nCould not fetch users!" });
+  }
 };
 
-exports.findUserByEmail = (req, res) => {
+exports.findUserByEmail = async (req, res) => {
   const { email } = req.body;
 
   // Input validation
@@ -200,16 +155,10 @@ exports.findUserByEmail = (req, res) => {
     });
   }
 
-  // Query to find user with matching email and password
-  const query = "SELECT * FROM User WHERE email = ?";
-  db.execute(query, [email], (err, data) => {
-    if (err) {
-      console.error("Error finding user:", err);
-      return res.status(500).json({
-        found: false,
-        error: "Database error occurred",
-      });
-    }
+  try {
+    // Query to find user with matching email and password
+    const query = "SELECT * FROM User WHERE email = ?";
+    const [data, fields] = await db.execute(query, [email]);
 
     // Check if user was found
     if (data && data.length > 0) {
@@ -235,10 +184,16 @@ exports.findUserByEmail = (req, res) => {
         error: "Invalid email or password",
       });
     }
-  });
+  } catch (error) {
+    console.error("Error finding user:", error);
+    return res.status(500).json({
+      found: false,
+      error: "Database error occurred",
+    });
+  }
 };
 
-exports.updateUser = (req, res) => {
+exports.updateUser = async (req, res) => {
   const { userId, ...updateData } = req.body;
 
   if (!userId) {
@@ -264,48 +219,45 @@ exports.updateUser = (req, res) => {
   // Add userId to values array
   values.push(userId);
 
-  const query = `UPDATE User SET ${updateFields.join(", ")} WHERE UserID = ?`;
-
-  db.execute(query, values, (err, result) => {
-    if (err) {
-      console.error("Error updating user:", err);
-      return res.status(500).json({ error: "Could not update user" });
-    }
-
-    if (result.affectedRows === 0) {
+  try {
+    const query = `UPDATE User SET ${updateFields.join(", ")} WHERE UserID = ?`;
+    const [updateResult] = await db.execute(query, values);
+    if (updateResult.affectedRows === 0) {
       return res.status(404).json({ error: "User not found" });
     }
-
     res.json({ success: true, message: "User updated successfully" });
-  });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({ error: "Could not update user" });
+  }
 };
 
-exports.deleteUser = (req, res) => {
+exports.deleteUser = async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" });
   }
 
-  // Delete from UserRole first (assuming foreign key constraint)
-  db.execute("DELETE FROM UserRole WHERE UserID = ?", [userId], (err) => {
-    if (err) {
-      console.error("Error deleting user role:", err);
-      return res.status(500).json({ error: "Could not delete user role" });
-    }
+  try {
+    // Delete from UserRole first (assuming foreign key constraint)
+    const [result1] = await db.execute(
+      "DELETE FROM UserRole WHERE UserID = ?",
+      [userId]
+    );
 
     // Then delete from User table
-    db.execute("DELETE FROM User WHERE UserID = ?", [userId], (err, result) => {
-      if (err) {
-        console.error("Error deleting user:", err);
-        return res.status(500).json({ error: "Could not delete user" });
-      }
+    const [result2] = await db.execute("DELETE FROM User WHERE UserID = ?", [
+      userId,
+    ]);
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "User not found" });
-      }
+    if (result2.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-      res.json({ success: true, message: "User deleted successfully" });
-    });
-  });
+    res.json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error: ", error);
+    return res.status(500).json({ error: "Could not delete user!" });
+  }
 };

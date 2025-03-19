@@ -1,42 +1,42 @@
 const db = require("../utils/database");
 
-exports.addToFavorite = (req, res) => {
+exports.addToFavorite = async (req, res) => {
   const { userID, productsID } = req.body;
 
-  // Use parameterized query to prevent SQL injection
-  db.execute(
-    "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
-    [userID, productsID],
-    (err, result) => {
-      if (err) {
-        console.error("Error adding favorite product:", err);
-        return res.json({ error: "Could not add favorite product" });
-      }
-      res.json({
-        success: true,
-        message: "Product added to favorites successfully",
-      });
-    }
-  );
+  try {
+    // Use parameterized query to prevent SQL injection
+    const [result] = await db.execute(
+      "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
+      [userID, productsID]
+    );
+
+    res.json({
+      success: true,
+      message: "Product added to favorites successfully",
+    });
+  } catch (error) {
+    console.error("Error adding favorite product:", error);
+    return res.json({ error: "Could not add favorite product" });
+  }
 };
 
 //Get all products
-exports.getAllProducts = (req, res) => {
-  const query = "SELECT * FROM Product";
-  db.execute(query, (err, data) => {
-    if (err) {
-      console.error("Error finding user:", err);
-      return res.status(500).json({
-        found: false,
-        error: "Database error occurred",
-      });
-    }
+exports.getAllProducts = async (req, res) => {
+  try {
+    const [data, fields] = await db.execute("SELECT * FROM Product");
+
     res.json({
       success: true,
       message: "Product added to favorites successfully",
       data,
     });
-  });
+  } catch (error) {
+    console.error("Error finding user:", error);
+    return res.status(500).json({
+      found: false,
+      error: "Database error occurred",
+    });
+  }
 };
 
 // db_con.query(
