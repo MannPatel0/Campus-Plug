@@ -23,13 +23,17 @@ CREATE TABLE Product (
     Name VARCHAR(255) NOT NULL,
     Price DECIMAL(10, 2) NOT NULL,
     StockQuantity INT,
-    ImageURL VARCHAR(255),
     UserID INT,
     Description TEXT,
     CategoryID INT NOT NULL,
     FOREIGN KEY (UserID) REFERENCES User (UserID),
     FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID)
 );
+
+CREATE TABLE Image_URL (
+    URL VARCHAR(255),
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
+)
 
 -- Category Entity
 CREATE TABLE Category (
