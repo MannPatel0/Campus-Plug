@@ -1,38 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Tag, Book, Laptop, Sofa, Utensils, Gift, Heart } from "lucide-react";
 
 const Home = () => {
   const navigate = useNavigate();
-  // Same categories
-  const categories = [
-    { id: 1, name: "Textbooks", icon: <Book className="h-5 w-5" /> },
-    { id: 2, name: "Electronics", icon: <Laptop className="h-5 w-5" /> },
-    { id: 3, name: "Furniture", icon: <Sofa className="h-5 w-5" /> },
-    { id: 4, name: "Kitchen", icon: <Utensils className="h-5 w-5" /> },
-    { id: 5, name: "Other", icon: <Gift className="h-5 w-5" /> },
-  ];
+  const [listings, setListings] = useState([]);
+  const [error, setError] = useState(null);
 
-  // Same listings data
-  const [listings, setListings] = useState([
-    {
-      id: 0,
-      title: "Dell XPS 16 Laptop",
-      price: 850,
-      category: "Electronics",
-      image: "image1.avif",
-      condition: "Good",
-      seller: "Michael T.",
-      datePosted: "5d ago",
-      isFavorite: true,
-    },
-  ]);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:3030/get_product");
+        if (!response.ok) throw new Error("Failed to fetch products");
+
+        const data = await response.json();
+
+        if (data.success) {
+          setListings(
+            data.data.map((product) => ({
+              id: product.ProductID,
+              title: product.Name,
+              price: product.Price,
+              category: product.CategoryID,
+              image: product.ImageURL,
+              condition: "New", // Modify based on actual data
+              seller: "Unknown", // Modify if seller info is available
+              datePosted: "Just now",
+              isFavorite: false,
+            })),
+          );
+        } else {
+          throw new Error(data.message || "Error fetching products");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setError(error.message);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Toggle favorite status
   const toggleFavorite = (id, e) => {
     e.preventDefault(); // Prevent navigation when clicking the heart icon
-    setListings(
-      listings.map((listing) =>
+    setListings((prevListings) =>
+      prevListings.map((listing) =>
         listing.id === id
           ? { ...listing, isFavorite: !listing.isFavorite }
           : listing,

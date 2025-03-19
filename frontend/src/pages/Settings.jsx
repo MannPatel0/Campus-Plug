@@ -189,7 +189,8 @@ const Settings = () => {
         }
       } catch (error) {
         console.error("Error deleting account:", error);
-        alert("Failed to delete account: " + error.message);
+
+        alert("Cannot delete account, Please logout and retry:");
       }
     }
   };

@@ -213,11 +213,6 @@ app.post("/complete-signup", (req, res) => {
                 return res.status(500).json({ error: "Could not create role" });
               }
 
-              db_con.query(
-                `SELECT * FROM User WHERE Email='${data.Email}'`,
-                (err, results) => {},
-              );
-
               // Delete verification record
               db_con.query(
                 `DELETE FROM AuthVerification WHERE Email = '${data.email}'`,
@@ -228,7 +223,6 @@ app.post("/complete-signup", (req, res) => {
                   res.json({
                     success: true,
                     message: "User registration completed successfully",
-                    userID: results.UserID,
                     name: data.name,
                     email: data.email,
                     UCID: data.UCID,
@@ -320,7 +314,7 @@ app.post("/find_user", (req, res) => {
   });
 });
 
-//TODO: Update A uses Data:
+//Update A uses Data:
 app.post("/update", (req, res) => {
   const { userId, ...updateData } = req.body;
 
@@ -328,7 +322,7 @@ app.post("/update", (req, res) => {
     return res.status(400).json({ error: "User ID is required" });
   }
 
-  // Create query dynamically based on provided fields
+  //query dynamically based on provided fields
   const updateFields = [];
   const values = [];
 
@@ -397,6 +391,74 @@ app.post("/delete", (req, res) => {
     );
   });
 });
+
+app.post("/add_fav_product", (req, res) => {
+  const { userID, productsID } = req.body;
+
+  // Use parameterized query to prevent SQL injection
+  db_con.query(
+    "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
+    [userID, productsID],
+    (err, result) => {
+      if (err) {
+        console.error("Error adding favorite product:", err);
+        return res.json({ error: "Could not add favorite product" });
+      }
+      res.json({
+        success: true,
+        message: "Product added to favorites successfully",
+      });
+    },
+  );
+});
+
+app.get("/get_product", (req, res) => {
+  const query = "SELECT * FROM Product";
+  db_con.query(query, (err, data) => {
+    if (err) {
+      console.error("Error finding user:", err);
+      return res.status(500).json({
+        found: false,
+        error: "Database error occurred",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Product added to favorites successfully",
+      data,
+    });
+  });
+});
+
+// db_con.query(
+//   "SELECT ProductID FROM product WHERE ProductID = ?",
+//   [productID],
+//   (err, results) => {
+//     if (err) {
+//       console.error("Error checking product:", err);
+//       return res.json({ error: "Database error" });
+//     }
+
+//     if (results.length === 0) {
+//       return res.json({ error: "Product does not exist" });
+//     }
+//   },
+// );
+
+// db_con.query(
+//   "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
+//   [userID, productID],
+//   (err, result) => {
+//     if (err) {
+//       console.error("Error adding favorite product:", err);
+//       return res.json({ error: "Could not add favorite product" });
+//     }
+//     res.json({
+//       success: true,
+//       message: "Product added to favorites successfully",
+//     });
+//   },
+// );
 
 app.listen(3030, () => {
   console.log(`Running Backend on http://localhost:3030/`);

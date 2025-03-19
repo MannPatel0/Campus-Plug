@@ -12,6 +12,7 @@ import Selling from "./pages/Selling";
 import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
+import ItemForm from "./pages/MyListings";
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -161,11 +162,11 @@ function App() {
       }
 
       const result = await response.json();
+      console.log(result);
 
       if (result.success) {
         // Create user object from API response
         const newUser = {
-          ID: result.userID,
           name: result.name || userData.name,
           email: result.email || userData.email,
           UCID: result.UCID || userData.ucid,
@@ -640,7 +641,27 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          {/* Add new selling routes */}
+          <Route
+            path="/selling/create"
+            element={
+              <ProtectedRoute>
+                <div className="container mx-auto px-4 py-6">
+                  <ItemForm />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/selling/edit/:id"
+            element={
+              <ProtectedRoute>
+                <div className="container mx-auto px-4 py-6">
+                  <ItemForm />
+                </div>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/transactions"
             element={

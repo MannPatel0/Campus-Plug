@@ -32,7 +32,10 @@ CREATE TABLE Product (
 );
 
 -- Category Entity
-CREATE TABLE Category (CategoryID INT PRIMARY KEY, Name VARCHAR(255));
+CREATE TABLE Category (
+    CategoryID INT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL
+);
 
 -- Review Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Review (
@@ -81,7 +84,7 @@ CREATE TABLE History (
 
 -- Favorites Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Favorites (
-    FavoriteID INT PRIMARY KEY,
+    FavoriteID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     ProductID INT,
     FOREIGN KEY (UserID) REFERENCES User (UserID),
