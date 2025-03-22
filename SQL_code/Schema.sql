@@ -1,7 +1,8 @@
 -- MySql Version 9.2.0
 CREATE DATABASE Marketplace;
 
-Use Marketplace
+USE Marketplace;
+
 -- User Entity
 CREATE TABLE User (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
@@ -21,7 +22,7 @@ CREATE TABLE UserRole (
     FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE
 );
 
--- Category Entity  (must be created before Product or else error)
+-- Category Entity (must be created before Product or else error)
 CREATE TABLE Category (
     CategoryID INT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL
@@ -41,11 +42,14 @@ CREATE TABLE Product (
     FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID)
 );
 
+-- Fixed Image_URL table
 CREATE TABLE Image_URL (
     URL VARCHAR(255),
+    ProductID INT,
     FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
-)
--- Review Entity (Many-to-One with User, Many-to-One with Product)
+);
+
+-- Fixed Review Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Review (
     ReviewID INT PRIMARY KEY,
     UserID INT,
@@ -108,7 +112,7 @@ CREATE TABLE Product_Category (
     FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID)
 );
 
--- Login Authentication table, Store the userID,and a emailed code of user who have not authenticated,
+-- Login Authentication table
 CREATE TABLE AuthVerification (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(100) UNIQUE NOT NULL,
@@ -174,12 +178,6 @@ SET
 WHERE
     UserID = 1;
 
--- Delete User (DELETE)
-DELETE FROM User
-WHERE
-    UserID = 1;
-
--- Note: Cascade will delete related UserRole record
 -- PRODUCT CRUD OPERATIONS
 -- Create Product (INSERT)
 INSERT INTO
@@ -203,12 +201,41 @@ VALUES
         1
     );
 
--- Add product images
+-- Add product images with the placeholder URL
 INSERT INTO
     Image_URL (URL, ProductID)
 VALUES
-    ('https://example.com/images/smartphone1.jpg', 1),
-    ('https://example.com/images/smartphone2.jpg', 1);
+    ('https://picsum.photos/id/237/200/300', 1),
+    ('https://picsum.photos/id/237/200/300', 1);
+
+-- Create another product for recommendations
+INSERT INTO
+    Product (
+        ProductID,
+        Name,
+        Price,
+        StockQuantity,
+        UserID,
+        Description,
+        CategoryID
+    )
+VALUES
+    (
+        2,
+        'Tablet',
+        799.99,
+        30,
+        1,
+        'High-performance tablet',
+        1
+    );
+
+-- Add placeholder images for the second product
+INSERT INTO
+    Image_URL (URL, ProductID)
+VALUES
+    ('https://picsum.photos/id/237/200/300', 2),
+    ('https://picsum.photos/id/237/200/300', 2);
 
 -- Read Product (SELECT)
 SELECT
@@ -234,12 +261,7 @@ SET
 WHERE
     ProductID = 1;
 
--- Delete Product (DELETE)
-DELETE FROM Product
-WHERE
-    ProductID = 1;
-
--- CATEGORY CRUD OPERATIONS (Admin only for delete)
+-- CATEGORY CRUD OPERATIONS
 -- Create Category (INSERT)
 INSERT INTO
     Category (CategoryID, Name)
@@ -261,13 +283,7 @@ SET
 WHERE
     CategoryID = 6;
 
--- Delete Category (DELETE) - Admin only
-DELETE FROM Category
-WHERE
-    CategoryID = 6;
-
--- REVIEW OPERATIONS (Create only as specified)
--- Create Review (INSERT)
+-- REVIEW OPERATIONS
 INSERT INTO
     Review (ReviewID, UserID, ProductID, Comment, Rating)
 VALUES
@@ -279,15 +295,13 @@ VALUES
         5
     );
 
--- TRANSACTION OPERATIONS (Create only as specified)
--- Create Transaction (INSERT)
+-- TRANSACTION OPERATIONS
 INSERT INTO
     Transaction (TransactionID, UserID, ProductID, PaymentStatus)
 VALUES
     (1, 1, 1, 'Completed');
 
--- HISTORY CRUD OPERATIONS
--- Create History (INSERT)
+-- HISTORY OPERATIONS
 INSERT INTO
     History (HistoryID, UserID, ProductID)
 VALUES
@@ -305,13 +319,7 @@ WHERE
 ORDER BY
     h.Date DESC;
 
--- Delete History (DELETE)
-DELETE FROM History
-WHERE
-    HistoryID = 1;
-
--- FAVORITES CRUD OPERATIONS
--- Create Favorite (INSERT)
+-- FAVORITES OPERATIONS
 INSERT INTO
     Favorites (UserID, ProductID)
 VALUES
@@ -328,13 +336,7 @@ FROM
 WHERE
     f.UserID = 1;
 
--- Delete Favorite (DELETE)
-DELETE FROM Favorites
-WHERE
-    FavoriteID = 1;
-
--- RECOMMENDATION SYSTEM OPERATIONS
--- Create Recommendation (INSERT)
+-- RECOMMENDATION OPERATIONS
 INSERT INTO
     Recommendation (RecommendationID_PK, UserID, RecommendedProductID)
 VALUES
@@ -352,18 +354,6 @@ FROM
 WHERE
     r.UserID = 1;
 
--- Update Recommendation (UPDATE)
-UPDATE Recommendation
-SET
-    RecommendedProductID = 3
-WHERE
-    RecommendationID_PK = 1;
-
--- Delete Recommendation (DELETE)
-DELETE FROM Recommendation
-WHERE
-    RecommendationID_PK = 1;
-
 -- Authentication Operations
 -- Create verification code
 INSERT INTO
@@ -379,7 +369,6 @@ WHERE
     Email = 'new_user@example.com'
     AND VerificationCode = '123456';
 
--- Complex Queries for Reports and Analysis
 -- Get top-selling products
 SELECT
     p.ProductID,
