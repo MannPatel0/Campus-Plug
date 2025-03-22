@@ -36,6 +36,7 @@ CREATE TABLE Product (
     StockQuantity INT,
     UserID INT,
     Description TEXT,
+    Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     CategoryID INT NOT NULL,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES User (UserID),
