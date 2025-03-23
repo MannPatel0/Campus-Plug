@@ -22,4 +22,8 @@
 ```
 
 ### Database
+1. To Create the DB use the command bellow
+```Bash
+    python3 ./SQL_code/init-db.py
+```
 - MySql Version 9.2.0
