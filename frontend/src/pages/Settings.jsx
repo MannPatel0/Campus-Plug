@@ -43,7 +43,7 @@ const Settings = () => {
             body: JSON.stringify({
               email: storedUser.email,
             }),
-          }
+          },
         );
 
         const data = await response.json();
@@ -53,7 +53,7 @@ const Settings = () => {
           // Update state with fetched data
           setUserData((prevData) => ({
             ...prevData,
-            userId: data.userId || storedUser.id || "", // Try both sources
+            userId: storedUser.ID, // Try both sources
             name: data.name || storedUser.name || "",
             email: data.email || storedUser.email || "",
             UCID: data.UCID || storedUser.UCID || "",
@@ -70,7 +70,7 @@ const Settings = () => {
       } catch (error) {
         console.error("Error fetching user data:", error);
         setError(
-          error.message || "An error occurred while loading your profile"
+          error.message || "An error occurred while loading your profile",
         );
       } finally {
         setIsLoading(false);
@@ -88,27 +88,39 @@ const Settings = () => {
     }));
   };
 
-  const handleProfileUpdate = async (e) => {
-    e.preventDefault();
+  const handleUpdateProfile = async () => {
     try {
-      // TODO: Implement the actual update API call
-      console.log("Profile updated:", userData);
+      // Ensure userId is present
+      if (!userData.userId) {
+        throw new Error("User ID is missing. Unable to update profile.");
+      }
 
-      // Update localStorage with new user data
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const updatedUser = {
-        ...storedUser,
-        name: userData.name,
-        phone: userData.phone,
-        UCID: userData.UCID,
-        address: userData.address,
-      };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setIsLoading(true);
+      setError(null);
 
+      const response = await fetch("http://localhost:3030/api/user/update", {
+        method: "POST", // or "PUT" if your backend supports it
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to update profile");
+      }
+
+      console.log("Profile updated successfully:", result);
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Failed to update profile: " + error.message);
+      setError(
+        error.message || "An error occurred while updating your profile.",
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -156,7 +168,7 @@ const Settings = () => {
   const handleDeleteAccount = async () => {
     if (
       window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone."
+        "Are you sure you want to delete your account? This action cannot be undone.",
       )
     ) {
       try {
@@ -232,7 +244,7 @@ const Settings = () => {
         </div>
 
         <div className="p-4">
-          <form onSubmit={handleProfileUpdate}>
+          <form onSubmit={handleUpdateProfile}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label
