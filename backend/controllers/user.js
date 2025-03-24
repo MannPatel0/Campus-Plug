@@ -13,13 +13,13 @@ exports.sendVerificationCode = async (req, res) => {
     // Generate a random 6-digit code
     const verificationCode = crypto.randomInt(100000, 999999).toString();
     console.log(
-      `Generated verification code for ${email}: ${verificationCode}`
+      `Generated verification code for ${email}: ${verificationCode}`,
     );
 
     // Check if email already exists in verification table
     const [results, fields] = await db.execute(
       "SELECT * FROM AuthVerification WHERE Email = ?",
-      [email]
+      [email],
     );
 
     if (results.length > 0) {
@@ -27,7 +27,7 @@ exports.sendVerificationCode = async (req, res) => {
       const [result] = await db.execute(
         `UPDATE AuthVerification SET VerificationCode = ?, Authenticated = FALSE, Date = CURRENT_TIMESTAMP
          WHERE Email = ?`,
-        [verificationCode, email]
+        [verificationCode, email],
       );
 
       // Send email and respond
@@ -37,7 +37,7 @@ exports.sendVerificationCode = async (req, res) => {
       // Insert new record
       const [result] = await db.execute(
         "INSERT INTO AuthVerification (Email, VerificationCode, Authenticated) VALUES (?, ?, FALSE)",
-        [email, verificationCode]
+        [email, verificationCode],
       );
       // Send email and respond
       await sendVerificationEmail(email, verificationCode);
@@ -62,7 +62,7 @@ exports.verifyCode = async (req, res) => {
     // Check verification code
     const [results, fields] = await db.execute(
       "SELECT * FROM AuthVerification WHERE Email = ? AND VerificationCode = ? AND Authenticated = 0 AND Date > DATE_SUB(NOW(), INTERVAL 15 MINUTE)",
-      [email, code]
+      [email, code],
     );
     if (results.length === 0) {
       console.log(`Invalid or expired verification code for email ${email}`);
@@ -76,7 +76,7 @@ exports.verifyCode = async (req, res) => {
     // Mark as authenticated
     const [result] = await db.execute(
       "UPDATE AuthVerification SET Authenticated = TRUE WHERE Email = ?",
-      [email]
+      [email],
     );
     res.json({
       success: true,
@@ -95,7 +95,7 @@ exports.completeSignUp = async (req, res) => {
   try {
     const [results, fields] = await db.execute(
       `SELECT * FROM AuthVerification WHERE Email = ? AND Authenticated = 1;`,
-      [data.email]
+      [data.email],
     );
 
     if (results.length === 0) {
@@ -105,20 +105,20 @@ exports.completeSignUp = async (req, res) => {
     // Create the user
     const [createResult] = await db.execute(
       `INSERT INTO User (Name, Email, UCID, Password, Phone, Address)
-          VALUES ('${data.name}', '${data.email}', '${data.UCID}', '${data.password}', '${data.phone}', '${data.address}')`
+          VALUES ('${data.name}', '${data.email}', '${data.UCID}', '${data.password}', '${data.phone}', '${data.address}')`,
     );
 
     // Insert role using the user's ID
     const [insertResult] = await db.execute(
       `INSERT INTO UserRole (UserID, Client, Admin)
                 VALUES (LAST_INSERT_ID(), ${data.client || true}, ${
-        data.admin || false
-      })`
+                  data.admin || false
+                })`,
     );
 
     // Delete verification record
     const [deleteResult] = await db.execute(
-      `DELETE FROM AuthVerification WHERE Email = '${data.email}'`
+      `DELETE FROM AuthVerification WHERE Email = '${data.email}'`,
     );
 
     res.json({
@@ -194,37 +194,47 @@ exports.findUserByEmail = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  const { userId, ...updateData } = req.body;
+  try {
+    const userId = req.body?.userId;
+    const name = req.body?.name;
+    const email = req.body?.email;
+    const phone = req.body?.phone;
+    const UCID = req.body?.UCID;
+    const address = req.body?.address;
 
-  if (!userId) {
-    return res.status(400).json({ error: "User ID is required" });
-  }
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
 
-  //query dynamically based on provided fields
-  const updateFields = [];
-  const values = [];
+    // Build updateData manually
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (UCID) updateData.UCID = UCID;
+    if (address) updateData.address = address;
 
-  Object.entries(updateData).forEach(([key, value]) => {
-    // Only include fields that are actually in the User table
-    if (["Name", "Email", "Password", "Phone", "UCID"].includes(key)) {
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    const updateFields = [];
+    const values = [];
+
+    Object.entries(updateData).forEach(([key, value]) => {
       updateFields.push(`${key} = ?`);
       values.push(value);
-    }
-  });
+    });
 
-  if (updateFields.length === 0) {
-    return res.status(400).json({ error: "No valid fields to update" });
-  }
+    values.push(userId);
 
-  // Add userId to values array
-  values.push(userId);
-
-  try {
-    const query = `UPDATE User SET ${updateFields.join(", ")} WHERE UserID = ?`;
+    const query = `UPDATE User SET ${updateFields.join(", ")} WHERE userId = ?`;
     const [updateResult] = await db.execute(query, values);
+
     if (updateResult.affectedRows === 0) {
       return res.status(404).json({ error: "User not found" });
     }
+
     res.json({ success: true, message: "User updated successfully" });
   } catch (error) {
     console.error("Error updating user:", error);
@@ -243,7 +253,7 @@ exports.deleteUser = async (req, res) => {
     // Delete from UserRole first (assuming foreign key constraint)
     const [result1] = await db.execute(
       "DELETE FROM UserRole WHERE UserID = ?",
-      [userId]
+      [userId],
     );
 
     // Then delete from User table
