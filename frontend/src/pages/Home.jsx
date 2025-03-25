@@ -21,14 +21,14 @@ const Home = () => {
           setListings(
             data.data.map((product) => ({
               id: product.ProductID,
-              title: product.Name,
+              title: product.ProductName, // Use the alias from SQL
               price: product.Price,
-              category: product.CategoryID,
-              image: product.URL,
+              category: product.Category, // Ensure this gets the category name
+              image: product.ProductImage, // Use the alias for image URL
               condition: "New", // Modify based on actual data
-              seller: product.UserID, // Modify if seller info is available
-              datePosted: "Just now",
-              isFavorite: false,
+              seller: product.SellerName, // Fetch seller name properly
+              datePosted: product.DateUploaded, // Use the actual date
+              isFavorite: false, // Default state
             })),
           );
         } else {

@@ -24,9 +24,19 @@ exports.addToFavorite = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const [data, fields] = await db.execute(`
-      SELECT p.*, i.URL
-      FROM Product p
-      LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+      SELECT
+          P.ProductID,
+          P.Name AS ProductName,
+          P.Price,
+          P.Date AS DateUploaded,
+          U.Name AS SellerName,
+          I.URL AS ProductImage,
+          C.Name AS Category
+      FROM Product P
+      LEFT JOIN
+          (SELECT ProductID, URL FROM Image_URL LIMIT 1) I ON P.ProductID = I.ProductID
+      JOIN User U ON P.UserID = U.UserID
+      JOIN Category C ON P.CategoryID = C.CategoryID;
     `);
 
     res.json({
@@ -43,10 +53,10 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// Get a single product by ID along with image URLs
 exports.getProductById = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
+  console.log("Received Product ID:", id);
+
   try {
     const [data] = await db.execute(
       `
@@ -58,18 +68,30 @@ exports.getProductById = async (req, res) => {
       [id],
     );
 
+    // Log raw data for debugging
+    console.log("Raw Database Result:", data);
+
     if (data.length === 0) {
+      console.log("No product found with ID:", id);
       return res.status(404).json({
         success: false,
         message: "Product not found",
       });
     }
 
-    // Assuming that `data` contains product information and the image URLs
+    // Collect all image URLs
+    const images = data
+      .map((row) => row.image_url)
+      .filter((url) => url !== null);
+
+    // Create product object with all details from first row and collected images
     const product = {
-      ...data[0], // First product found in the query
-      images: data.map((image) => image.image_url), // Collect all image URLs into an array
+      ...data[0], // Base product details
+      images: images, // Collected image URLs
     };
+
+    // Log processed product for debugging
+    console.log("Processed Product:", product);
 
     res.json({
       success: true,
@@ -77,10 +99,11 @@ exports.getProductById = async (req, res) => {
       data: product,
     });
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Full Error Details:", error);
     return res.status(500).json({
       success: false,
-      error: "Database error occurred",
+      message: "Database error occurred",
+      error: error.message,
     });
   }
 };

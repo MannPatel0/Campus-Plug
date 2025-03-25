@@ -5,6 +5,8 @@ import { Heart, ArrowLeft, Tag, User, Calendar } from "lucide-react";
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [message, setMessage] = useState("");
@@ -14,19 +16,28 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3030/api/product/get_productID/${id}`,
-        );
-        if (!response.ok) throw new Error("Failed to fetch product");
+        setLoading(true);
+        const response = await fetch(`http://localhost:3030/api/product/${id}`);
 
-        const data = await response.json();
-        if (data.success) {
-          setProduct(data.data); // Update the state with product details
+        if (!response.ok) {
+          throw new Error("Failed to fetch product");
+        }
+
+        const result = await response.json();
+        console.log(result);
+
+        if (result.success) {
+          setProduct(result.data);
+          setError(null);
         } else {
-          throw new Error(data.message || "Error fetching product");
+          throw new Error(result.message || "Error fetching product");
         }
       } catch (error) {
         console.error("Error fetching product:", error);
+        setError(error.message);
+        setProduct(null);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -34,14 +45,35 @@ const ProductDetail = () => {
   }, [id]);
 
   // Handle favorite toggle
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const toggleFavorite = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3030/api/product/add_to_favorite",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: 1, // Replace with actual user ID
+            productsID: id,
+          }),
+        },
+      );
+
+      const result = await response.json();
+      if (result.success) {
+        setIsFavorite(!isFavorite);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
   };
 
   // Handle message submission
   const handleSendMessage = (e) => {
     e.preventDefault();
-    // Handle message logic here (send to seller)
+    // TODO: Implement actual message sending logic
     console.log("Message sent:", message);
     setMessage("");
     setShowContactForm(false);
@@ -50,23 +82,53 @@ const ProductDetail = () => {
 
   // Image navigation
   const nextImage = () => {
-    setCurrentImage((prev) =>
-      prev === product.images.length - 1 ? 0 : prev + 1,
-    );
+    if (product && product.images) {
+      setCurrentImage((prev) =>
+        prev === product.images.length - 1 ? 0 : prev + 1,
+      );
+    }
   };
 
   const prevImage = () => {
-    setCurrentImage((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1,
-    );
+    if (product && product.images) {
+      setCurrentImage((prev) =>
+        prev === 0 ? product.images.length - 1 : prev - 1,
+      );
+    }
   };
 
   const selectImage = (index) => {
     setCurrentImage(index);
   };
 
-  if (!product) return <div>Loading...</div>; // Handle loading state
+  // Render loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-green-500"></div>
+      </div>
+    );
+  }
 
+  // Render error state
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl text-red-500 mb-4">Error Loading Product</h2>
+          <p className="text-gray-600">{error}</p>
+          <Link
+            to="/"
+            className="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            Back to Listings
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Render product details
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-6">
@@ -82,15 +144,21 @@ const ProductDetail = () => {
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-3/5">
           <div className="bg-white border border-gray-200 mb-4 relative">
-            <img
-              src={product.images[currentImage]}
-              alt={product.title}
-              className="w-full h-auto object-contain cursor-pointer"
-              onClick={nextImage}
-            />
+            {product.images && product.images.length > 0 ? (
+              <img
+                src={product.images[currentImage]}
+                alt={product.Name}
+                className="w-full h-auto object-contain cursor-pointer"
+                onClick={nextImage}
+              />
+            ) : (
+              <div className="w-full h-96 flex items-center justify-center bg-gray-200 text-gray-500">
+                No Image Available
+              </div>
+            )}
           </div>
 
-          {product.images.length > 1 && (
+          {product.images && product.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
               {product.images.map((image, index) => (
                 <div
@@ -100,7 +168,7 @@ const ProductDetail = () => {
                 >
                   <img
                     src={image}
-                    alt={`${product.title} - view ${index + 1}`}
+                    alt={`${product.Name} - view ${index + 1}`}
                     className="w-full h-auto object-cover"
                   />
                 </div>
@@ -113,7 +181,7 @@ const ProductDetail = () => {
           <div className="bg-white border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-2xl font-bold text-gray-800">
-                {product.title}
+                {product.Name}
               </h1>
               <button
                 onClick={toggleFavorite}
@@ -126,12 +194,12 @@ const ProductDetail = () => {
             </div>
 
             <div className="text-2xl font-bold text-green-600 mb-4">
-              ${product.price}
+              ${product.Price}
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-2 mb-6 text-sm">
               <div className="flex items-center text-gray-600">
                 <Tag className="h-4 w-4 mr-1" />
-                <span>{product.category}</span>
+                <span>{product.Category}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <span className="font-medium">Condition:</span>
@@ -139,12 +207,12 @@ const ProductDetail = () => {
               </div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-4 w-4 mr-1" />
-                <span>Posted on {product.datePosted}</span>
+                <span>Posted on {product.Date}</span>
               </div>
             </div>
 
             <div className="bg-gray-50 p-4 mb-6 border border-gray-200">
-              <p className="text-gray-700">{product.shortDescription}</p>
+              <p className="text-gray-700">{product.Description}</p>
             </div>
 
             <button
@@ -213,31 +281,24 @@ const ProductDetail = () => {
             <div className="pt-4 border-t border-gray-200">
               <div className="flex items-center mb-3">
                 <div className="mr-3">
-                  {product.seller.avatar ? (
-                    <img
-                      src={product.seller.avatar}
-                      alt="Seller"
-                      className="h-12 w-12 rounded-full"
-                    />
-                  ) : (
-                    <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="h-6 w-6 text-gray-600" />
-                    </div>
-                  )}
+                  <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                    <User className="h-6 w-6 text-gray-600" />
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-800">
-                    {product.seller.name}
+                    {product.UserID || "Unknown Seller"}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Member since {product.seller.memberSince}
+                    Member since{" "}
+                    {product.seller ? product.seller.memberSince : "N/A"}
                   </p>
                 </div>
               </div>
               <div className="text-sm text-gray-600">
                 <div>
                   <span className="font-medium">Rating:</span>{" "}
-                  {product.seller.rating}/5
+                  {product.seller ? `${product.seller.rating}/5` : "N/A"}
                 </div>
               </div>
             </div>
@@ -245,12 +306,12 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Description</h2>
         <div className="bg-white border border-gray-200 p-6">
-          <div className="text-gray-700">{product.description}</div>
+          <div className="text-gray-700">{product.Description}</div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
