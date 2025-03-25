@@ -5,7 +5,6 @@ const pool = mysql.createPool({
   host: "localhost",
   user: "root",
   database: "marketplace",
-  //password: "12345678",
 });
 
 //Export a promise for promise-based query

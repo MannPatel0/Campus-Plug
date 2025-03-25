@@ -11,7 +11,7 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3030/api/product/get_product"
+          "http://localhost:3030/api/product/get_product",
         );
         if (!response.ok) throw new Error("Failed to fetch products");
 
@@ -24,12 +24,12 @@ const Home = () => {
               title: product.Name,
               price: product.Price,
               category: product.CategoryID,
-              image: product.ImageURL,
+              image: product.URL,
               condition: "New", // Modify based on actual data
-              seller: "Unknown", // Modify if seller info is available
+              seller: product.UserID, // Modify if seller info is available
               datePosted: "Just now",
               isFavorite: false,
-            }))
+            })),
           );
         } else {
           throw new Error(data.message || "Error fetching products");
@@ -50,8 +50,8 @@ const Home = () => {
       prevListings.map((listing) =>
         listing.id === id
           ? { ...listing, isFavorite: !listing.isFavorite }
-          : listing
-      )
+          : listing,
+      ),
     );
   };
 

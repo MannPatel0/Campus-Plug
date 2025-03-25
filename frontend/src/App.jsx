@@ -70,7 +70,7 @@ function App() {
             email: userData.email,
             // Add any other required fields
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -119,7 +119,7 @@ function App() {
             email: tempUserData.email,
             code: code,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -163,7 +163,7 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(userData),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -222,11 +222,12 @@ function App() {
       setError("Email and password are required");
       setIsLoading(false);
       return;
-    } else if (!formValues.email.endsWith("@ucalgary.ca")) {
-      setError("Please use your UCalgary email address (@ucalgary.ca)");
-      setIsLoading(false);
-      return;
     }
+    // else if (!formValues.email.endsWith("@ucalgary.ca")) {
+    //   setError("Please use your UCalgary email address (@ucalgary.ca)");
+    //   setIsLoading(false);
+    //   return;
+    // }
     try {
       if (isSignUp) {
         // Handle Sign Up with verification
@@ -265,7 +266,7 @@ function App() {
               email: formValues.email,
               password: formValues.password,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -509,8 +510,8 @@ function App() {
                     {isLoading
                       ? "Please wait..."
                       : isSignUp
-                      ? "Create Account"
-                      : "Sign In"}
+                        ? "Create Account"
+                        : "Sign In"}
                   </button>
                 </div>
               </form>
