@@ -39,7 +39,6 @@ const Home = () => {
         setError(error.message);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -112,65 +111,186 @@ const Home = () => {
       </div> */}
 
       {/* Recent Listings */}
-      <div>
+      <div className="relative py-4">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Recent Listings
+          Recommendation
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {listings.map((listing) => (
-            <Link
-              key={listing.id}
-              to={`/product/${listing.id}`}
-              className="bg-white border border-gray-200 hover:shadow-md transition-shadow"
-            >
-              <div className="relative">
-                <img
-                  src={listing.image}
-                  alt={listing.title}
-                  className="w-full h-48 object-cover"
-                />
-                <button
-                  onClick={(e) => toggleFavorite(listing.id, e)}
-                  className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-sm"
-                >
-                  <Heart
-                    className={`h-5 w-5 ${
-                      listing.isFavorite
-                        ? "text-red-500 fill-red-500"
-                        : "text-gray-400"
-                    }`}
-                  />
-                </button>
-              </div>
 
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
+        <div className="relative">
+          {/* Left Button - Overlaid on products */}
+          <button
+            onClick={() =>
+              document
+                .getElementById("RecomContainer")
+                .scrollBy({ left: -400, behavior: "smooth" })
+            }
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
+          >
+            ◀
+          </button>
+
+          {/* Scrollable Listings Container */}
+          <div
+            id="RecomContainer"
+            className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0"
+          >
+            {listings.map((listing) => (
+              <Link
+                key={listing.id}
+                to={`/product/${listing.id}`}
+                className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
+              >
+                <div className="relative">
+                  <img
+                    src={listing.image}
+                    alt={listing.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <button
+                    onClick={(e) => toggleFavorite(listing.id, e)}
+                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm"
+                  >
+                    <Heart
+                      className={`h-6 w-6 ${
+                        listing.isFavorite
+                          ? "text-red-500 fill-red-500"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="p-4">
                   <h3 className="text-lg font-medium text-gray-800 leading-tight">
                     {listing.title}
                   </h3>
-                  <span className="font-semibold text-green-600">
+                  <span className="font-semibold text-green-600 block mt-1">
                     ${listing.price}
                   </span>
+
+                  <div className="flex items-center text-sm text-gray-500 mt-2">
+                    <Tag className="h-4 w-4 mr-1" />
+                    <span>{listing.category}</span>
+                    <span className="mx-2">•</span>
+                    <span>{listing.condition}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-3">
+                    <span className="text-xs text-gray-500">
+                      {listing.datePosted}
+                    </span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {listing.seller}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Right Button - Overlaid on products */}
+          <button
+            onClick={() =>
+              document
+                .getElementById("RecomContainer")
+                .scrollBy({ left: 400, behavior: "smooth" })
+            }
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
+          >
+            ▶
+          </button>
+        </div>
+      </div>
+
+      {/* Recent Listings */}
+      <div className="relative py-4">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Recent Listings
+        </h2>
+
+        <div className="relative">
+          {/* Left Button - Overlaid on products */}
+          <button
+            onClick={() =>
+              document
+                .getElementById("listingsContainer")
+                .scrollBy({ left: -400, behavior: "smooth" })
+            }
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
+          >
+            ◀
+          </button>
+
+          {/* Scrollable Listings Container */}
+          <div
+            id="listingsContainer"
+            className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0"
+          >
+            {listings.map((listing) => (
+              <Link
+                key={listing.id}
+                to={`/product/${listing.id}`}
+                className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
+              >
+                <div className="relative">
+                  <img
+                    src={listing.image}
+                    alt={listing.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <button
+                    onClick={(e) => toggleFavorite(listing.id, e)}
+                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm"
+                  >
+                    <Heart
+                      className={`h-6 w-6 ${
+                        listing.isFavorite
+                          ? "text-red-500 fill-red-500"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </button>
                 </div>
 
-                <div className="flex items-center text-sm text-gray-500 mb-3">
-                  <Tag className="h-4 w-4 mr-1" />
-                  <span>{listing.category}</span>
-                  <span className="mx-2">•</span>
-                  <span>{listing.condition}</span>
-                </div>
+                <div className="p-4">
+                  <h3 className="text-lg font-medium text-gray-800 leading-tight">
+                    {listing.title}
+                  </h3>
+                  <span className="font-semibold text-green-600 block mt-1">
+                    ${listing.price}
+                  </span>
 
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <span className="text-xs text-gray-500">
-                    {listing.datePosted}
-                  </span>
-                  <span className="text-sm font-medium text-gray-700">
-                    {listing.seller}
-                  </span>
+                  <div className="flex items-center text-sm text-gray-500 mt-2">
+                    <Tag className="h-4 w-4 mr-1" />
+                    <span>{listing.category}</span>
+                    <span className="mx-2">•</span>
+                    <span>{listing.condition}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-3">
+                    <span className="text-xs text-gray-500">
+                      {listing.datePosted}
+                    </span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {listing.seller}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right Button - Overlaid on products */}
+          <button
+            onClick={() =>
+              document
+                .getElementById("listingsContainer")
+                .scrollBy({ left: 400, behavior: "smooth" })
+            }
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
+          >
+            ▶
+          </button>
         </div>
       </div>
     </div>

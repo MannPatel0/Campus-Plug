@@ -5,6 +5,7 @@ const db = require("./utils/database");
 
 const userRouter = require("./routes/user");
 const productRouter = require("./routes/product");
+const searchRouter = require("./routes/search");
 const { generateEmailTransporter } = require("./utils/mail");
 const {
   cleanupExpiredCodes,
@@ -34,6 +35,7 @@ checkDatabaseConnection(db);
 //Routes
 app.use("/api/user", userRouter); //prefix with /api/user
 app.use("/api/product", productRouter); //prefix with /api/product
+app.use("/api/search_products", searchRouter); //prefix with /api/product
 
 // Set up a scheduler to run cleanup every hour
 setInterval(cleanupExpiredCodes, 60 * 60 * 1000);

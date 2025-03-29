@@ -13,6 +13,7 @@ import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
 import ItemForm from "./pages/MyListings";
+import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -631,6 +632,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProductDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <div className="container mx-auto px-4 py-6">
+                  <SearchPage />
+                </div>
               </ProtectedRoute>
             }
           />

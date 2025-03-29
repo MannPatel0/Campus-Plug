@@ -33,12 +33,12 @@ exports.getAllProducts = async (req, res) => {
           I.URL AS ProductImage,
           C.Name AS Category
       FROM Product P
-      LEFT JOIN
-          (SELECT ProductID, URL FROM Image_URL LIMIT 1) I ON P.ProductID = I.ProductID
+      JOIN Image_URL I ON p.ProductID = i.ProductID
       JOIN User U ON P.UserID = U.UserID
       JOIN Category C ON P.CategoryID = C.CategoryID;
     `);
 
+    console.log(data);
     res.json({
       success: true,
       message: "Products fetched successfully",

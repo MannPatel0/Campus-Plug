@@ -133,11 +133,11 @@ const ProductDetail = () => {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-6">
         <Link
-          to="/"
+          to="/search"
           className="flex items-center text-green-600 hover:text-green-700"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          <span>Back to listings</span>
+          <span>Back</span>
         </Link>
       </div>
 
