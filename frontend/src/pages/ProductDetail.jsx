@@ -1,129 +1,166 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  Heart,
-  ArrowLeft,
-  Tag,
-  User,
-  Calendar,
-  Share,
-  Flag,
-} from "lucide-react";
+import { Heart, ArrowLeft, Tag, User, Calendar } from "lucide-react";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [message, setMessage] = useState("");
   const [currentImage, setCurrentImage] = useState(0);
 
-  // Sample data for demonstration
-  const product = [
-    {
-      id: 0,
-      title: "Dell XPS 13 Laptop - 2023 Model",
-      price: 850,
-      shortDescription:
-        "Dell XPS 13 laptop in excellent condition. Intel Core i7, 16GB RAM, 512GB SSD. Includes charger and original box.",
-      description:
-        "Selling my Dell XPS 13 laptop. Only 6 months old and in excellent condition. Intel Core i7 processor, 16GB RAM, 512GB SSD. Battery life is still excellent (around 10 hours of regular use). Comes with original charger and box. Selling because I'm upgrading to a MacBook for design work.\n\nSpecs:\n- Intel Core i7 11th Gen\n- 16GB RAM\n- 512GB NVMe SSD\n- 13.4\" FHD+ Display (1920x1200)\n- Windows 11 Pro\n- Backlit Keyboard\n- Thunderbolt 4 ports",
-      condition: "Like New",
-      category:
-        "Electronics, Electronics, Electronics,  Electronics , Electronics , Electronics,  Electronicss",
-      datePosted: "2023-03-02",
-      images: [
-        "/image1.avif",
-        "/image2.avif",
-        "/image3.avif",
-        "/image3.avif",
-        "/image3.avif",
-      ],
-      seller: {
-        name: "Michael T.",
-        rating: 4.8,
-        memberSince: "January 2022",
-        avatar: "/Profile.jpg",
-      },
-    },
-  ];
+  // Fetch product details
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:3030/api/product/${id}`);
 
-  console.log(product[id]);
+        if (!response.ok) {
+          throw new Error("Failed to fetch product");
+        }
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+        const result = await response.json();
+        console.log(result);
+
+        if (result.success) {
+          setProduct(result.data);
+          setError(null);
+        } else {
+          throw new Error(result.message || "Error fetching product");
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setError(error.message);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  // Handle favorite toggle
+  const toggleFavorite = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3030/api/product/add_to_favorite",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: 1, // Replace with actual user ID
+            productsID: id,
+          }),
+        },
+      );
+
+      const result = await response.json();
+      if (result.success) {
+        setIsFavorite(!isFavorite);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
   };
 
+  // Handle message submission
   const handleSendMessage = (e) => {
     e.preventDefault();
-    // TODO: this would send the message to the seller
+    // TODO: Implement actual message sending logic
     console.log("Message sent:", message);
     setMessage("");
     setShowContactForm(false);
-    // Show confirmation or success message
     alert("Message sent to seller!");
   };
 
-  // Function to split description into paragraphs
-  const formatDescription = (text) => {
-    return text.split("\n\n").map((paragraph, index) => (
-      <p key={index} className="mb-4">
-        {paragraph.split("\n").map((line, i) => (
-          <span key={i}>
-            {line}
-            {i < paragraph.split("\n").length - 1 && <br />}
-          </span>
-        ))}
-      </p>
-    ));
-  };
-
-  // image navigation
+  // Image navigation
   const nextImage = () => {
-    setCurrentImage((prev) =>
-      prev === product.images.length - 1 ? 0 : prev + 1,
-    );
+    if (product && product.images) {
+      setCurrentImage((prev) =>
+        prev === product.images.length - 1 ? 0 : prev + 1,
+      );
+    }
   };
 
   const prevImage = () => {
-    setCurrentImage((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1,
-    );
+    if (product && product.images) {
+      setCurrentImage((prev) =>
+        prev === 0 ? product.images.length - 1 : prev - 1,
+      );
+    }
   };
 
   const selectImage = (index) => {
     setCurrentImage(index);
   };
 
+  // Render loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-green-500"></div>
+      </div>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl text-red-500 mb-4">Error Loading Product</h2>
+          <p className="text-gray-600">{error}</p>
+          <Link
+            to="/"
+            className="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            Back to Listings
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Render product details
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Breadcrumb & Back Link */}
       <div className="mb-6">
         <Link
-          to="/"
+          to="/search"
           className="flex items-center text-green-600 hover:text-green-700"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          <span>Back to listings</span>
+          <span>Back</span>
         </Link>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Left Column - Images */}
         <div className="md:w-3/5">
-          {/* Main Image */}
           <div className="bg-white border border-gray-200 mb-4 relative">
-            <img
-              src={product[id].images[currentImage]}
-              alt={product[id].title}
-              className="w-full h-auto object-contain cursor-pointer"
-              onClick={nextImage}
-            />
+            {product.images && product.images.length > 0 ? (
+              <img
+                src={product.images[currentImage]}
+                alt={product.Name}
+                className="w-full h-auto object-contain cursor-pointer"
+                onClick={nextImage}
+              />
+            ) : (
+              <div className="w-full h-96 flex items-center justify-center bg-gray-200 text-gray-500">
+                No Image Available
+              </div>
+            )}
           </div>
 
-          {/* Thumbnail Images */}
-          {product[id].images.length > 1 && (
+          {product.images && product.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {product[id].images.map((image, index) => (
+              {product.images.map((image, index) => (
                 <div
                   key={index}
                   className={`bg-white border ${currentImage === index ? "border-green-500" : "border-gray-200"} min-w-[100px] cursor-pointer`}
@@ -131,7 +168,7 @@ const ProductDetail = () => {
                 >
                   <img
                     src={image}
-                    alt={`${product[id].title} - view ${index + 1}`}
+                    alt={`${product.Name} - view ${index + 1}`}
                     className="w-full h-auto object-cover"
                   />
                 </div>
@@ -140,13 +177,11 @@ const ProductDetail = () => {
           )}
         </div>
 
-        {/* Right Column - Details */}
         <div className="md:w-2/5">
-          {/* Product Info Card */}
           <div className="bg-white border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-2xl font-bold text-gray-800">
-                {product[id].title}
+                {product.Name}
               </h1>
               <button
                 onClick={toggleFavorite}
@@ -159,30 +194,27 @@ const ProductDetail = () => {
             </div>
 
             <div className="text-2xl font-bold text-green-600 mb-4">
-              ${product[id].price}
+              ${product.Price}
             </div>
-
             <div className="flex flex-wrap gap-x-4 gap-y-2 mb-6 text-sm">
               <div className="flex items-center text-gray-600">
                 <Tag className="h-4 w-4 mr-1" />
-                <span>{product[id].category}</span>
+                <span>{product.Category}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <span className="font-medium">Condition:</span>
-                <span className="ml-1">{product[id].condition}</span>
+                <span className="ml-1">{product.condition}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-4 w-4 mr-1" />
-                <span>Posted on {product[id].datePosted}</span>
+                <span>Posted on {product.Date}</span>
               </div>
             </div>
 
-            {/* Short Description */}
             <div className="bg-gray-50 p-4 mb-6 border border-gray-200">
-              <p className="text-gray-700">{product[id].shortDescription}</p>
+              <p className="text-gray-700">{product.Description}</p>
             </div>
 
-            {/* Contact Button */}
             <button
               onClick={() => setShowContactForm(!showContactForm)}
               className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 mb-3"
@@ -190,7 +222,6 @@ const ProductDetail = () => {
               Contact Seller
             </button>
 
-            {/* TODO:Contact Form */}
             {showContactForm && (
               <div className="border border-gray-200 p-4 mb-4">
                 <h3 className="font-medium text-gray-800 mb-2">
@@ -204,8 +235,8 @@ const ProductDetail = () => {
                     <input
                       type="email"
                       id="email"
-                      value={product[id].User.email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
                       className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
                       required
                     />
@@ -217,8 +248,6 @@ const ProductDetail = () => {
                     <input
                       type="tel"
                       id="phone"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
                       className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
                       required
                     />
@@ -233,8 +262,8 @@ const ProductDetail = () => {
                     <input
                       type="text"
                       id="contactMessage"
-                      value={contactMessage}
-                      onChange={(e) => setContactMessage(e.target.value)}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
                       placeholder="Hi, is this item still available?"
                       className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
                     />
@@ -249,35 +278,27 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Seller Info */}
             <div className="pt-4 border-t border-gray-200">
               <div className="flex items-center mb-3">
                 <div className="mr-3">
-                  {product[id].seller.avatar ? (
-                    <img
-                      src={product[id].seller.avatar}
-                      alt="Seller"
-                      className="h-12 w-12 rounded-full"
-                    />
-                  ) : (
-                    <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="h-6 w-6 text-gray-600" />
-                    </div>
-                  )}
+                  <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                    <User className="h-6 w-6 text-gray-600" />
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-800">
-                    {product[id].seller.name}
+                    {product.UserID || "Unknown Seller"}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Member since {product[id].seller.memberSince}
+                    Member since{" "}
+                    {product.seller ? product.seller.memberSince : "N/A"}
                   </p>
                 </div>
               </div>
               <div className="text-sm text-gray-600">
                 <div>
                   <span className="font-medium">Rating:</span>{" "}
-                  {product[id].seller.rating}/5
+                  {product.seller ? `${product.seller.rating}/5` : "N/A"}
                 </div>
               </div>
             </div>
@@ -285,15 +306,12 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Description Section */}
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Description</h2>
         <div className="bg-white border border-gray-200 p-6">
-          <div className="text-gray-700">
-            {formatDescription(product[id].description)}
-          </div>
+          <div className="text-gray-700">{product.Description}</div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -13,6 +13,8 @@ import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
 import ItemForm from "./pages/MyListings";
+import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
+import axios from "axios";
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -29,6 +31,8 @@ function App() {
   const [showImage, setShowImage] = useState(true);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [userId, setUserId] = useState(null);
 
   // New verification states
   const [verificationStep, setVerificationStep] = useState("initial"); // 'initial', 'code-sent', 'verifying'
@@ -70,7 +74,7 @@ function App() {
             email: userData.email,
             // Add any other required fields
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -119,7 +123,7 @@ function App() {
             email: tempUserData.email,
             code: code,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -163,7 +167,7 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(userData),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -188,6 +192,9 @@ function App() {
         // Save to localStorage to persist across refreshes
         sessionStorage.setItem("isAuthenticated", "true");
         sessionStorage.setItem("user", JSON.stringify(newUser));
+
+        // After successful signup, send session data to server
+        sendSessionDataToServer(); // Call it after signup
 
         // Reset verification steps
         setVerificationStep("initial");
@@ -222,11 +229,12 @@ function App() {
       setError("Email and password are required");
       setIsLoading(false);
       return;
-    } else if (!formValues.email.endsWith("@ucalgary.ca")) {
-      setError("Please use your UCalgary email address (@ucalgary.ca)");
-      setIsLoading(false);
-      return;
     }
+    // else if (!formValues.email.endsWith("@ucalgary.ca")) {
+    //   setError("Please use your UCalgary email address (@ucalgary.ca)");
+    //   setIsLoading(false);
+    //   return;
+    // }
     try {
       if (isSignUp) {
         // Handle Sign Up with verification
@@ -265,7 +273,7 @@ function App() {
               email: formValues.email,
               password: formValues.password,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -290,6 +298,9 @@ function App() {
           // Save to localStorage to persist across refreshes
           sessionStorage.setItem("isAuthenticated", "true");
           sessionStorage.setItem("user", JSON.stringify(userObj));
+
+          // After successful signup, send session data to server
+          sendSessionDataToServer(); // Call it after signup
 
           sessionStorage.getItem("user");
 
@@ -353,6 +364,48 @@ function App() {
   const handleBackToSignup = () => {
     setVerificationStep("initial");
     setError("");
+  };
+
+  const sendSessionDataToServer = async () => {
+    try {
+      // Retrieve data from sessionStorage
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      const isAuthenticated =
+        sessionStorage.getItem("isAuthenticated") === "true";
+
+      if (!user || !isAuthenticated) {
+        console.log("User is not authenticated");
+        return;
+      }
+
+      // Prepare the data to send
+      const requestData = {
+        userId: user.ID, // or user.ID depending on your user structure
+        email: user.email,
+        isAuthenticated,
+      };
+
+      console.log("Sending user data to the server:", requestData);
+
+      // Send data to Python server (replace with your actual server URL)
+      const response = await fetch("http://localhost:5000/api/user/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      // Check the response
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Server response:", result);
+      } else {
+        console.error("Failed to send session data to the server");
+      }
+    } catch (error) {
+      console.error("Error sending session data:", error);
+    }
   };
 
   // Login component
@@ -509,8 +562,8 @@ function App() {
                     {isLoading
                       ? "Please wait..."
                       : isSignUp
-                      ? "Create Account"
-                      : "Sign In"}
+                        ? "Create Account"
+                        : "Sign In"}
                   </button>
                 </div>
               </form>
@@ -630,6 +683,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProductDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <div className="container mx-auto px-4 py-6">
+                  <SearchPage />
+                </div>
               </ProtectedRoute>
             }
           />

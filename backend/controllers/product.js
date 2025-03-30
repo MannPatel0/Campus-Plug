@@ -7,7 +7,7 @@ exports.addToFavorite = async (req, res) => {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
       "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
-      [userID, productsID]
+      [userID, productsID],
     );
 
     res.json({
@@ -20,21 +20,90 @@ exports.addToFavorite = async (req, res) => {
   }
 };
 
-//Get all products
+// Get all products along with their image URLs
 exports.getAllProducts = async (req, res) => {
   try {
-    const [data, fields] = await db.execute("SELECT * FROM Product");
+    const [data, fields] = await db.execute(`
+      SELECT
+          P.ProductID,
+          P.Name AS ProductName,
+          P.Price,
+          P.Date AS DateUploaded,
+          U.Name AS SellerName,
+          I.URL AS ProductImage,
+          C.Name AS Category
+      FROM Product P
+      JOIN Image_URL I ON p.ProductID = i.ProductID
+      JOIN User U ON P.UserID = U.UserID
+      JOIN Category C ON P.CategoryID = C.CategoryID;
+    `);
 
+    console.log(data);
     res.json({
       success: true,
-      message: "Product added to favorites successfully",
+      message: "Products fetched successfully",
       data,
     });
   } catch (error) {
-    console.error("Error finding user:", error);
+    console.error("Error finding products:", error);
     return res.status(500).json({
       found: false,
       error: "Database error occurred",
+    });
+  }
+};
+
+exports.getProductById = async (req, res) => {
+  const { id } = req.params;
+  console.log("Received Product ID:", id);
+
+  try {
+    const [data] = await db.execute(
+      `
+      SELECT p.*, i.URL AS image_url
+      FROM Product p
+      LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+      WHERE p.ProductID = ?
+    `,
+      [id],
+    );
+
+    // Log raw data for debugging
+    console.log("Raw Database Result:", data);
+
+    if (data.length === 0) {
+      console.log("No product found with ID:", id);
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // Collect all image URLs
+    const images = data
+      .map((row) => row.image_url)
+      .filter((url) => url !== null);
+
+    // Create product object with all details from first row and collected images
+    const product = {
+      ...data[0], // Base product details
+      images: images, // Collected image URLs
+    };
+
+    // Log processed product for debugging
+    console.log("Processed Product:", product);
+
+    res.json({
+      success: true,
+      message: "Product fetched successfully",
+      data: product,
+    });
+  } catch (error) {
+    console.error("Full Error Details:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Database error occurred",
+      error: error.message,
     });
   }
 };

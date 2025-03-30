@@ -4,8 +4,7 @@ const mysql = require("mysql2");
 const pool = mysql.createPool({
   host: "localhost",
   user: "root",
-  database: "marketplace",
-  password: "12345678",
+  database: "Marketplace",
 });
 
 //Export a promise for promise-based query
