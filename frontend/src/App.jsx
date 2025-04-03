@@ -298,10 +298,7 @@ function App() {
           // Save to localStorage to persist across refreshes
           sessionStorage.setItem("isAuthenticated", "true");
           sessionStorage.setItem("user", JSON.stringify(userObj));
-
-          // After successful signup, send session data to server
           sendSessionDataToServer(); // Call it after signup
-
           sessionStorage.getItem("user");
 
           console.log("Login successful for:", userData.email);
@@ -388,7 +385,7 @@ function App() {
       console.log("Sending user data to the server:", requestData);
 
       // Send data to Python server (replace with your actual server URL)
-      const response = await fetch("http://localhost:5000/api/user/session", {
+      const response = await fetch("http://0.0.0.0:5000/api/user/session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
