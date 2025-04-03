@@ -1,5 +1,4 @@
 -- Inserting sample data into the Marketplace database
--- Clear existing data (if needed)
 SET
     FOREIGN_KEY_CHECKS = 0;
 
@@ -59,33 +58,6 @@ VALUES
         'hashedpassword2',
         '555-234-5678',
         '456 Oak Ave, Calgary, AB'
-    ),
-    (
-        3,
-        'Michael Brown',
-        'michael.b@example.com',
-        'U345678',
-        'hashedpassword3',
-        '555-345-6789',
-        '789 Pine Rd, Calgary, AB'
-    ),
-    (
-        4,
-        'Sarah Wilson',
-        'sarah.w@example.com',
-        'U456789',
-        'hashedpassword4',
-        '555-456-7890',
-        '101 Elm Blvd, Calgary, AB'
-    ),
-    (
-        5,
-        'David Taylor',
-        'david.t@example.com',
-        'U567890',
-        'hashedpassword5',
-        '555-567-8901',
-        '202 Maple Dr, Calgary, AB'
     );
 
 -- Insert User Roles
@@ -93,10 +65,7 @@ INSERT INTO
     UserRole (UserID, Client, Admin)
 VALUES
     (1, TRUE, TRUE),
-    (2, TRUE, FALSE),
-    (3, TRUE, FALSE),
-    (4, TRUE, FALSE),
-    (5, TRUE, FALSE);
+    (2, TRUE, FALSE);
 
 -- Insert Categories
 INSERT INTO
@@ -161,7 +130,7 @@ VALUES
         'HP Laptop',
         699.99,
         1,
-        2,
+        1,
         '2023 HP Pavilion, 16GB RAM, 512GB SSD',
         2,
         '2024-10-10 14:30:00'
@@ -171,7 +140,7 @@ VALUES
         'Dorm Desk',
         120.00,
         1,
-        3,
+        2,
         'Sturdy desk perfect for studying, minor scratches',
         3,
         '2024-10-12 09:15:00'
@@ -181,7 +150,7 @@ VALUES
         'University Hoodie',
         35.00,
         3,
-        1,
+        2,
         'Size L, university logo, worn twice',
         4,
         '2024-10-14 16:45:00'
@@ -191,7 +160,7 @@ VALUES
         'Basketball',
         25.50,
         1,
-        4,
+        2,
         'Slightly used indoor basketball',
         5,
         '2024-10-11 11:20:00'
@@ -201,7 +170,7 @@ VALUES
         'Acoustic Guitar',
         175.00,
         1,
-        2,
+        1,
         'Beginner acoustic guitar with case',
         6,
         '2024-10-09 13:10:00'
@@ -211,7 +180,7 @@ VALUES
         'Physics Textbook',
         65.00,
         2,
-        5,
+        2,
         'University Physics 14th Edition, good condition',
         1,
         '2024-10-08 10:30:00'
@@ -221,7 +190,7 @@ VALUES
         'Mini Fridge',
         85.00,
         1,
-        3,
+        1,
         'Small dorm fridge, works perfectly',
         8,
         '2024-10-13 15:00:00'
@@ -231,7 +200,7 @@ VALUES
         'PlayStation 5 Controller',
         55.00,
         1,
-        4,
+        2,
         'Extra controller, barely used',
         9,
         '2024-10-07 17:20:00'
@@ -241,7 +210,7 @@ VALUES
         'Mountain Bike',
         350.00,
         1,
-        5,
+        1,
         'Trek mountain bike, great condition, new tires',
         10,
         '2024-10-06 14:00:00'
@@ -271,7 +240,7 @@ VALUES
         'Graphing Calculator',
         75.00,
         1,
-        3,
+        1,
         'TI-84 Plus, perfect working condition',
         12,
         '2024-10-03 11:15:00'
@@ -281,7 +250,7 @@ VALUES
         'Yoga Mat',
         20.00,
         1,
-        4,
+        2,
         'Thick yoga mat, barely used',
         13,
         '2024-10-02 16:00:00'
@@ -291,7 +260,7 @@ VALUES
         'Winter Jacket',
         120.00,
         1,
-        5,
+        1,
         'Columbia winter jacket, size XL, very warm',
         26,
         '2024-10-01 10:20:00'
@@ -301,7 +270,7 @@ VALUES
         'Computer Science Textbook',
         70.00,
         1,
-        1,
+        2,
         'Introduction to Algorithms, like new',
         1,
         '2024-09-30 14:30:00'
@@ -321,7 +290,7 @@ VALUES
         'Scientific Calculator',
         25.00,
         1,
-        3,
+        1,
         'Casio scientific calculator',
         12,
         '2024-09-28 11:30:00'
@@ -331,7 +300,7 @@ VALUES
         'Bluetooth Speaker',
         45.00,
         1,
-        4,
+        1,
         'JBL Bluetooth speaker, great sound',
         23,
         '2024-09-27 15:45:00'
@@ -341,7 +310,7 @@ VALUES
         'Backpack',
         40.00,
         1,
-        5,
+        2,
         'North Face backpack, lots of pockets',
         22,
         '2024-09-26 09:15:00'
@@ -360,7 +329,17 @@ VALUES
     ('/image1.avif', 7),
     ('/image1.avif', 8),
     ('/image1.avif', 9),
-    ('/image1.avif', 10);
+    ('/image1.avif', 10),
+    ('/image1.avif', 11),
+    ('/image1.avif', 12),
+    ('/image1.avif', 13),
+    ('/image1.avif', 14),
+    ('/image1.avif', 15),
+    ('/image1.avif', 16),
+    ('/image1.avif', 17),
+    ('/image1.avif', 18),
+    ('/image1.avif', 19),
+    ('/image1.avif', 20);
 
 -- Insert Product-Category relationships (products with multiple categories)
 INSERT INTO
@@ -420,82 +399,20 @@ VALUES
 
 -- Backpack: Backpacks & Bags, School Supplies, Dorm Essentials
 -- Insert History records
---
 INSERT INTO
-    History (HistoryID, UserID, ProductID, Date)
+    History (HistoryID, UserID, ProductID)
 VALUES
-    (1, 1, 1, '2024-10-15 11:30:00'),
-    (2, 1, 2, '2024-10-14 13:45:00'),
-    (3, 1, 5, '2024-10-13 09:20:00'),
-    (4, 1, 4, '2024-10-12 16:10:00');
-
---
-INSERT INTO
-    History (HistoryID, UserID, ProductID, Date)
-VALUES
-    (1, 2, 1, '2024-10-15 11:30:00'), -- User 2 viewed Calculus Textbook
-    (2, 3, 2, '2024-10-14 13:45:00'), -- User 3 viewed HP Laptop
-    (3, 4, 3, '2024-10-13 09:20:00'), -- User 4 viewed Dorm Desk
-    (4, 5, 4, '2024-10-12 16:10:00'), -- User 5 viewed University Hoodie
-    (5, 1, 5, '2024-10-11 14:30:00'), -- User 1 viewed Basketball
-    (6, 2, 6, '2024-10-10 10:15:00'), -- User 2 viewed Acoustic Guitar
-    (7, 3, 7, '2024-10-09 15:40:00'), -- User 3 viewed Physics Textbook
-    (8, 4, 8, '2024-10-08 11:25:00'), -- User 4 viewed Mini Fridge
-    (9, 5, 9, '2024-10-07 17:50:00'), -- User 5 viewed PS5 Controller
-    (10, 1, 10, '2024-10-06 14:15:00');
-
--- User 1 viewed Mountain Bike
--- Insert Reviews
-INSERT INTO
-    Review (
-        ReviewID,
-        UserID,
-        ProductID,
-        Comment,
-        Rating,
-        Date
-    )
-VALUES
-    (
-        1,
-        2,
-        1,
-        'Great condition, exactly as described!',
-        5,
-        '2024-10-16 09:30:00'
-    ),
-    (
-        2,
-        3,
-        2,
-        'Works well, but had a small scratch not mentioned in the listing.',
-        4,
-        '2024-10-15 14:20:00'
-    ),
-    (
-        3,
-        4,
-        6,
-        'Perfect for beginners, sounds great!',
-        5,
-        '2024-10-14 11:10:00'
-    ),
-    (
-        4,
-        5,
-        8,
-        'Keeps my drinks cold, but a bit noisy at night.',
-        3,
-        '2024-10-13 16:45:00'
-    ),
-    (
-        5,
-        1,
-        10,
-        'Excellent bike, well maintained!',
-        5,
-        '2024-10-12 13:25:00'
-    );
+    (1, 1, 1),
+    (2, 1, 3),
+    (3, 1, 5),
+    (4, 1, 7),
+    (5, 1, 9),
+    (6, 1, 11),
+    (7, 2, 2),
+    (8, 2, 4),
+    (9, 2, 5),
+    (10, 1, 15),
+    (11, 1, 18);
 
 -- Insert Favorites
 INSERT INTO
@@ -505,9 +422,9 @@ VALUES
     (1, 7), -- User 1 likes Physics Textbook
     (2, 3), -- User 2 likes Dorm Desk
     (2, 10), -- User 2 likes Mountain Bike
-    (3, 6), -- User 3 likes Acoustic Guitar
-    (4, 5), -- User 4 likes Basketball
-    (5, 8);
+    (1, 6), -- User 3 likes Acoustic Guitar
+    (1, 5), -- User 4 likes Basketball
+    (2, 8);
 
 -- User 5 likes Mini Fridge
 -- Insert Transactions
@@ -520,242 +437,8 @@ INSERT INTO
         PaymentStatus
     )
 VALUES
-    (1, 2, 1, '2024-10-16 10:30:00', 'Completed'),
-    (2, 3, 6, '2024-10-15 15:45:00', 'Completed'),
-    (3, 4, 8, '2024-10-14 12:20:00', 'Pending'),
-    (4, 5, 10, '2024-10-13 17:10:00', 'Completed'),
-    (5, 1, 4, '2024-10-12 14:30:00', 'Completed');
-
--- Insert Recommendations
-INSERT INTO
-    Recommendation (RecommendationID_PK, UserID, RecommendedProductID)
-VALUES
-    (1, 1, 7), -- Recommend Physics Textbook to User 1
-    (2, 1, 13), -- Recommend Graphing Calculator to User 1
-    (3, 2, 3), -- Recommend Dorm Desk to User 2
-    (4, 2, 17), -- Recommend Desk Lamp to User 2
-    (5, 3, 16), -- Recommend CS Textbook to User 3
-    (6, 4, 14), -- Recommend Yoga Mat to User 4
-    (7, 5, 15);
-
-INSERT INTO
-    Recommendation (RecommendationID_PK, UserID, RecommendedProductID)
-VALUES
-    (12, 1, 19),
-    (13, 1, 9),
-    (14, 1, 11),
-    (15, 1, 16),
-    -- Insert Authentication records
-INSERT INTO
-    AuthVerification (Email, VerificationCode, Authenticated, Date)
-VALUES
-    (
-        'john.doe@example.com',
-        '123456',
-        TRUE,
-        '2024-10-01 09:00:00'
-    ),
-    (
-        'jane.smith@example.com',
-        '234567',
-        TRUE,
-        '2024-10-02 10:15:00'
-    ),
-    (
-        'michael.b@example.com',
-        '345678',
-        TRUE,
-        '2024-10-03 11:30:00'
-    ),
-    (
-        'sarah.w@example.com',
-        '456789',
-        TRUE,
-        '2024-10-04 12:45:00'
-    ),
-    (
-        'david.t@example.com',
-        '567890',
-        TRUE,
-        '2024-10-05 14:00:00'
-    );
-
-INSERT INTO
-    Product (
-        ProductID,
-        Name,
-        Description,
-        Price,
-        StockQuantity,
-        CategoryID
-    )
-VALUES
-    (
-        101,
-        'Smart Coffee Maker',
-        'Wi-Fi enabled coffee machine with scheduling feature',
-        129.99,
-        50,
-        11
-    ),
-    (
-        102,
-        'Ergonomic Office Chair',
-        'Adjustable mesh chair with lumbar support',
-        199.99,
-        35,
-        12
-    ),
-    (
-        103,
-        'Wireless Mechanical Keyboard',
-        'RGB-backlit wireless keyboard with mechanical switches',
-        89.99,
-        60,
-        13
-    ),
-    (
-        104,
-        'Portable Solar Charger',
-        'Foldable solar power bank with USB-C support',
-        59.99,
-        40,
-        14
-    ),
-    (
-        105,
-        'Noise-Canceling Headphones',
-        'Over-ear Bluetooth headphones with ANC',
-        179.99,
-        25,
-        15
-    ),
-    (
-        106,
-        'Smart Water Bottle',
-        'Tracks water intake and glows as a hydration reminder',
-        39.99,
-        75,
-        11
-    ),
-    (
-        107,
-        'Compact Air Purifier',
-        'HEPA filter air purifier for small rooms',
-        149.99,
-        30,
-        16
-    ),
-    (
-        108,
-        'Smart LED Desk Lamp',
-        'Adjustable LED lamp with voice control',
-        69.99,
-        45,
-        12
-    ),
-    (
-        109,
-        '4K Streaming Device',
-        'HDMI streaming stick with voice remote',
-        49.99,
-        80,
-        17
-    ),
-    (
-        110,
-        'Smart Plant Monitor',
-        'Bluetooth-enabled sensor for plant health tracking',
-        34.99,
-        55,
-        18
-    ),
-    (
-        111,
-        'Wireless Charging Pad',
-        'Fast-charging pad for Qi-compatible devices',
-        29.99,
-        90,
-        13
-    ),
-    (
-        112,
-        'Mini Projector',
-        'Portable projector with built-in speakers',
-        129.99,
-        20,
-        14
-    ),
-    (
-        113,
-        'Foldable Bluetooth Keyboard',
-        'Ultra-thin keyboard for travel use',
-        39.99,
-        70,
-        19
-    ),
-    (
-        114,
-        'Smart Alarm Clock',
-        'AI-powered alarm clock with sunrise simulation',
-        79.99,
-        40,
-        15
-    ),
-    (
-        115,
-        'Touchscreen Toaster',
-        'Customizable toaster with a digital display',
-        99.99,
-        30,
-        11
-    ),
-    (
-        116,
-        'Cordless Vacuum Cleaner',
-        'Lightweight handheld vacuum with strong suction',
-        159.99,
-        25,
-        16
-    ),
-    (
-        117,
-        'Smart Bike Lock',
-        'Fingerprint and app-controlled bike security lock',
-        89.99,
-        35,
-        20
-    ),
-    (
-        118,
-        'Bluetooth Sleep Headband',
-        'Comfortable sleep headband with built-in speakers',
-        49.99,
-        60,
-        18
-    ),
-    (
-        119,
-        'Retro Game Console',
-        'Plug-and-play console with 500+ classic games',
-        79.99,
-        50,
-        17
-    ),
-    (
-        120,
-        'Automatic Pet Feeder',
-        'App-controlled food dispenser for pets',
-        99.99,
-        40,
-        20
-    );
-
-SELECT
-    p.*,
-    i.URL AS image_url
-FROM
-    Product p
-    LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
-WHERE
-    p.ProductID = 1
+    (1, 1, 1, '2024-10-16 10:30:00', 'Completed'),
+    (2, 1, 6, '2024-10-15 15:45:00', 'Completed'),
+    (3, 1, 8, '2024-10-14 12:20:00', 'Pending'),
+    (4, 2, 10, '2024-10-13 17:10:00', 'Completed'),
+    (5, 2, 4, '2024-10-12 14:30:00', 'Completed');
