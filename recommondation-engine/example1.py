@@ -1,7 +1,6 @@
 # pip install mysql.connector
 
 import mysql.connector
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import logging
@@ -108,6 +107,3 @@ def get_recommendations(user_id, top_n=40):
     except Exception as e:
         logging.error(f"Recommendation error for user {user_id}: {str(e)}")
         # return get_popular_products(top_n)  # Fallback to popular products
-
-
-get_recommendations(1)
