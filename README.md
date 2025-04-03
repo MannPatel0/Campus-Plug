@@ -24,6 +24,6 @@
 ### Database
 1. To Create the DB use the command bellow
 ```Bash
-    python3 ./mysql-code/init-db.py
+    mysql -u root mysql < mysql-code/Schema.sql
 ```
 - MySql Version 9.2.0
