@@ -61,7 +61,7 @@ CREATE TABLE Review (
     ),
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
+    FOREIGN KEY (ProductID) REFERENCES Pprint(item[0])roduct (ProductID)
 );
 
 -- Transaction Entity (Many-to-One with User, Many-to-One with Product)
@@ -77,16 +77,17 @@ CREATE TABLE Transaction (
 
 -- Recommendation Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Recommendation (
-    RecommendationID_PK INT PRIMARY KEY,
+    RecommendationID_PK INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     RecommendedProductID INT,
+    Date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES User (UserID),
     FOREIGN KEY (RecommendedProductID) REFERENCES Product (ProductID)
 );
 
 -- History Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE History (
-    HistoryID INT PRIMARY KEY,
+    HistoryID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     ProductID INT,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,

@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from example1 import get_recommendations
+from app import get_recommendations
+from app import history_upload
+
 import time
 
 
@@ -18,8 +20,7 @@ def handle_session_data():
         if not user_id or not email or is_authenticated is None:
             return jsonify({'error': 'Invalid data'}), 400
 
-        print(get_recommendations(user_id))
-        time.sleep(2)
+        get_recommendations(user_id)
 
         print(f"Received session data: User ID: {user_id}, Email: {email}, Authenticated: {is_authenticated}")
         return jsonify({'message': 'Session data received successfully'})

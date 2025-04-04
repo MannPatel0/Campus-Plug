@@ -1,11 +1,59 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Tag, Book, Laptop, Sofa, Utensils, Gift, Heart } from "lucide-react";
+import { Tag, Heart } from "lucide-react";
 
 const Home = () => {
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchrecomProducts = async () => {
+      // Get the user's data from localStorage
+      const storedUser = JSON.parse(sessionStorage.getItem("user"));
+      console.log(storedUser);
+      try {
+        const response = await fetch(
+          "http://localhost:3030/api/engine/recommended",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: storedUser.ID,
+            }),
+          },
+        );
+        if (!response.ok) throw new Error("Failed to fetch products");
+
+        const data = await response.json();
+        console.log(data);
+        if (data.success) {
+          setRecommended(
+            data.data.map((product) => ({
+              id: product.ProductID,
+              title: product.ProductName, // Use the alias from SQL
+              price: product.Price,
+              category: product.Category, // Ensure this gets the category name
+              image: product.ProductImage, // Use the alias for image URL
+              condition: "New", // Modify based on actual data
+              seller: product.SellerName, // Fetch seller name properly
+              datePosted: product.DateUploaded, // Use the actual date
+              isFavorite: false, // Default state
+            })),
+          );
+        } else {
+          throw new Error(data.message || "Error fetching products");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setError(error.message);
+      }
+    };
+    fetchrecomProducts();
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -134,25 +182,25 @@ const Home = () => {
             id="RecomContainer"
             className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0"
           >
-            {listings.map((listing) => (
+            {recommended.map((recommended) => (
               <Link
-                key={listing.id}
-                to={`/product/${listing.id}`}
+                key={recommended.id}
+                to={`/product/${recommended.id}`}
                 className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
               >
                 <div className="relative">
                   <img
-                    src={listing.image}
-                    alt={listing.title}
+                    src={recommended.image}
+                    alt={recommended.title}
                     className="w-full h-48 object-cover"
                   />
                   <button
-                    onClick={(e) => toggleFavorite(listing.id, e)}
+                    onClick={(e) => toggleFavorite(recommended.id, e)}
                     className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm"
                   >
                     <Heart
                       className={`h-6 w-6 ${
-                        listing.isFavorite
+                        recommended.isFavorite
                           ? "text-red-500 fill-red-500"
                           : "text-gray-400"
                       }`}
@@ -162,25 +210,25 @@ const Home = () => {
 
                 <div className="p-4">
                   <h3 className="text-lg font-medium text-gray-800 leading-tight">
-                    {listing.title}
+                    {recommended.title}
                   </h3>
                   <span className="font-semibold text-green-600 block mt-1">
-                    ${listing.price}
+                    ${recommended.price}
                   </span>
 
                   <div className="flex items-center text-sm text-gray-500 mt-2">
                     <Tag className="h-4 w-4 mr-1" />
-                    <span>{listing.category}</span>
+                    <span>{recommended.category}</span>
                     <span className="mx-2">•</span>
-                    <span>{listing.condition}</span>
+                    <span>{recommended.condition}</span>
                   </div>
 
                   <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-3">
                     <span className="text-xs text-gray-500">
-                      {listing.datePosted}
+                      {recommended.datePosted}
                     </span>
                     <span className="text-sm font-medium text-gray-700">
-                      {listing.seller}
+                      {recommended.seller}
                     </span>
                   </div>
                 </div>

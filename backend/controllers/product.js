@@ -33,7 +33,7 @@ exports.getAllProducts = async (req, res) => {
           I.URL AS ProductImage,
           C.Name AS Category
       FROM Product P
-      JOIN Image_URL I ON p.ProductID = i.ProductID
+      JOIN Image_URL I ON P.ProductID = I.ProductID
       JOIN User U ON P.UserID = U.UserID
       JOIN Category C ON P.CategoryID = C.CategoryID;
     `);
@@ -60,9 +60,10 @@ exports.getProductById = async (req, res) => {
   try {
     const [data] = await db.execute(
       `
-      SELECT p.*, i.URL AS image_url
+      SELECT p.*,U.Name AS SellerName, i.URL AS image_url
       FROM Product p
       LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+      JOIN User U ON p.UserID = U.UserID
       WHERE p.ProductID = ?
     `,
       [id],

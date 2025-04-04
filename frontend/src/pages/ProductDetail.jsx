@@ -201,10 +201,7 @@ const ProductDetail = () => {
                 <Tag className="h-4 w-4 mr-1" />
                 <span>{product.Category}</span>
               </div>
-              <div className="flex items-center text-gray-600">
-                <span className="font-medium">Condition:</span>
-                <span className="ml-1">{product.condition}</span>
-              </div>
+
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-4 w-4 mr-1" />
                 <span>Posted on {product.Date}</span>
@@ -287,11 +284,10 @@ const ProductDetail = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-800">
-                    {product.UserID || "Unknown Seller"}
+                    {product.SellerName || "Unknown Seller"}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Member since{" "}
-                    {product.seller ? product.seller.memberSince : "N/A"}
+                    Member since {product.SellerName}
                   </p>
                 </div>
               </div>
