@@ -24,18 +24,31 @@ exports.addToFavorite = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const [data, fields] = await db.execute(`
+      WITH RankedImages AS (
+          SELECT
+              P.ProductID,
+              P.Name AS ProductName,
+              P.Price,
+              P.Date AS DateUploaded,
+              U.Name AS SellerName,
+              I.URL AS ProductImage,
+              C.Name AS Category,
+              ROW_NUMBER() OVER (PARTITION BY P.ProductID ORDER BY I.URL) AS RowNum
+          FROM Product P
+          JOIN Image_URL I ON P.ProductID = I.ProductID
+          JOIN User U ON P.UserID = U.UserID
+          JOIN Category C ON P.CategoryID = C.CategoryID
+      )
       SELECT
-          P.ProductID,
-          P.Name AS ProductName,
-          P.Price,
-          P.Date AS DateUploaded,
-          U.Name AS SellerName,
-          I.URL AS ProductImage,
-          C.Name AS Category
-      FROM Product P
-      JOIN Image_URL I ON P.ProductID = I.ProductID
-      JOIN User U ON P.UserID = U.UserID
-      JOIN Category C ON P.CategoryID = C.CategoryID;
+          ProductID,
+          ProductName,
+          Price,
+          DateUploaded,
+          SellerName,
+          ProductImage,
+          Category
+      FROM RankedImages
+      WHERE RowNum = 1;
     `);
 
     console.log(data);

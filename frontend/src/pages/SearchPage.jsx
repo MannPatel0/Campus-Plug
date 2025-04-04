@@ -96,12 +96,13 @@ const SearchPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row gap-6">
+        {/* Filter sidebar */}
         <div
           className={`
           fixed inset-0 z-50 bg-white transform transition-transform duration-300
           ${isFilterOpen ? "translate-x-0" : "translate-x-full"}
           md:translate-x-0 md:relative md:block md:w-72
-          overflow-y-auto shadow-lg rounded-lg
+          overflow-y-auto shadow-md
         `}
         >
           <div className="md:hidden flex justify-between items-center p-4 border-b">
@@ -110,9 +111,8 @@ const SearchPage = () => {
               <X className="text-gray-600" />
             </button>
           </div>
-
           <div className="p-4 space-y-4">
-            <div className="bg-gray-50 rounded-lg p-3">
+            <div className="bg-gray-50 p-3">
               <h3 className="font-semibold text-gray-700 mb-3">Price Range</h3>
               <div className="space-y-2">
                 <div className="flex space-x-2">
@@ -126,7 +126,7 @@ const SearchPage = () => {
                         min: Number(e.target.value),
                       }))
                     }
-                    className="w-full p-2 border rounded text-gray-700"
+                    className="w-full p-2 border text-gray-700"
                   />
                   <input
                     type="number"
@@ -138,7 +138,7 @@ const SearchPage = () => {
                         max: Number(e.target.value),
                       }))
                     }
-                    className="w-full p-2 border rounded text-gray-700"
+                    className="w-full p-2 border text-gray-700"
                   />
                 </div>
               </div>
@@ -146,13 +146,13 @@ const SearchPage = () => {
             <div className="flex space-x-2">
               <button
                 onClick={applyFilters}
-                className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition-colors"
+                className="w-full bg-green-500 text-white p-3 hover:bg-green-600 transition-colors"
               >
                 Apply Filters
               </button>
               <button
                 onClick={resetFilters}
-                className="w-full bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition-colors"
+                className="w-full bg-gray-200 text-gray-700 p-3 hover:bg-gray-300 transition-colors"
               >
                 Reset
               </button>
@@ -160,6 +160,7 @@ const SearchPage = () => {
           </div>
         </div>
 
+        {/* Main content */}
         <div className="flex-1 mt-4 md:mt-0">
           <h2 className="text-2xl font-bold text-gray-800">
             {filteredProducts.length} Results
@@ -170,18 +171,17 @@ const SearchPage = () => {
               </span>
             )}
           </h2>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             {filteredProducts.map((listing) => (
               <Link
                 key={listing.id}
                 to={`/product/${listing.id}`}
-                className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow block"
+                className="bg-white border border-gray-200 hover:shadow-md transition-shadow block"
               >
                 <img
                   src={listing.image}
                   alt={listing.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
+                  className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
                   <h3 className="text-lg font-medium text-gray-800">

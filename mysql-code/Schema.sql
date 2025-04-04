@@ -51,7 +51,7 @@ CREATE TABLE Image_URL (
 
 -- Fixed Review Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Review (
-    ReviewID INT PRIMARY KEY,
+    ReviewID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     ProductID INT,
     Comment TEXT,
@@ -61,7 +61,7 @@ CREATE TABLE Review (
     ),
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (ProductID) REFERENCES Pprint(item[0])roduct (ProductID)
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
 );
 
 -- Transaction Entity (Many-to-One with User, Many-to-One with Product)
@@ -270,16 +270,16 @@ CREATE TABLE AuthVerification (
 -- -- WHERE
 -- --     CategoryID = 6;
 -- -- -- REVIEW OPERATIONS
--- -- INSERT INTO
--- --     Review (ReviewID, UserID, ProductID, Comment, Rating)
--- -- VALUES
--- --     (
--- --         1,
--- --         1,
--- --         1,
--- --         'Great product, very satisfied with the purchase!',
--- --         5
--- --     );
+-- INSERT INTO
+--     Review (ReviewID, UserID, ProductID, Comment, Rating)
+-- VALUES
+--     (
+--         1,
+--         1,
+--         1,
+--         'Great product, very satisfied with the purchase!',
+--         5
+--     );
 -- -- -- TRANSACTION OPERATIONS
 -- -- INSERT INTO
 -- --     Transaction (TransactionID, UserID, ProductID, PaymentStatus)

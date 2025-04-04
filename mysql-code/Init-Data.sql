@@ -321,6 +321,9 @@ INSERT INTO
     Image_URL (URL, ProductID)
 VALUES
     ('/image1.avif', 1),
+    ('/image2.avif', 1),
+    ('/image3.avif', 1),
+    ('/image8.jpg', 1),
     ('/image1.avif', 2),
     ('/image1.avif', 3),
     ('/image1.avif', 4),
@@ -442,3 +445,14 @@ VALUES
     (3, 1, 8, '2024-10-14 12:20:00', 'Pending'),
     (4, 2, 10, '2024-10-13 17:10:00', 'Completed'),
     (5, 2, 4, '2024-10-12 14:30:00', 'Completed');
+
+INSERT INTO
+    Review (UserID, ProductID, Comment, Rating, Date)
+VALUES
+    (
+        1,
+        1,
+        'This is a great fake product! Totally recommend it.',
+        5,
+        NOW ()
+    );
