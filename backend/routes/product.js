@@ -1,7 +1,8 @@
 // routes/product.js
 const express = require("express");
 const {
-  addToFavorite,
+  addFavorite,
+  getFavorites,
   getAllProducts,
   getProductById,
 } = require("../controllers/product");
@@ -13,8 +14,10 @@ router.use((req, res, next) => {
   next();
 });
 
-router.post("/add_fav_product", addToFavorite);
-router.get("/get_product", getAllProducts);
+router.post("/addFavorite", addFavorite);
+router.post("/getFavorites", getFavorites);
+
+router.get("/getProduct", getAllProducts);
 router.get("/:id", getProductById); // Simplified route
 
 module.exports = router;

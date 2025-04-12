@@ -108,6 +108,10 @@ def get_user_history(user_id):
     return final
 
 
+def delete_user_recommendations(userId):
+    pass
+
+
 def get_recommendations(user_id, top_n=10):
     try:
         # Get all products and user history with their category vectors

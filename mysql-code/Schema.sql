@@ -101,7 +101,8 @@ CREATE TABLE Favorites (
     UserID INT,
     ProductID INT,
     FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID),
+    UNIQUE (UserID, ProductID) -- Prevents duplicate favorites
 );
 
 -- Product-Category Junction Table (Many-to-Many)

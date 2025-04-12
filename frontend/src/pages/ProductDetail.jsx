@@ -1,6 +1,15 @@
-import { useState, useEffect, setErrors } from "react";
-import { useParams, Link, isSession } from "react-router-dom";
-import { Heart, ArrowLeft, Tag, User, Calendar, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  Heart,
+  ArrowLeft,
+  Tag,
+  User,
+  Calendar,
+  Star,
+  Phone,
+  Mail,
+} from "lucide-react";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -8,16 +17,19 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState({
     product: true,
     reviews: true,
+    submitting: false,
   });
   const [error, setError] = useState({
     product: null,
     reviews: null,
+    submit: null,
   });
   const [isFavorite, setIsFavorite] = useState(false);
-  const [contactForm, showContactForm, setShowContactForm] = useState(false);
+  const [showContactOptions, setShowContactOptions] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   const [reviewForm, setReviewForm] = useState({
     rating: 3,
@@ -42,39 +54,70 @@ const ProductDetail = () => {
     }));
   };
 
-  const handleSubmitReview = async () => {
-    try {
-      // Ensure userId is present
-      if (!userData.userId) {
-        throw new Error("User ID is missing. Unable to update profile.");
-      }
+  const handleSubmitReview = async (e) => {
+    e.preventDefault(); // Prevent form default behavior
 
-      setIsLoading(true);
-      setError(null);
+    try {
+      setLoading((prev) => ({ ...prev, submitting: true }));
+      setError((prev) => ({ ...prev, submit: null }));
+
+      const reviewData = {
+        productId: id,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment,
+        userId: storedUser.ID,
+      };
 
       const response = await fetch(`http://localhost:3030/api/review/add`, {
-        method: "POST", // or "PUT" if your backend supports it
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reviewData),
       });
 
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to update profile");
+      // Check if API returned an error message even with 200 status
+      if (!result.success) {
+        throw new Error(result.message || "Failed to submit review");
       }
 
-      console.log("Profile updated successfully:", result);
-      alert("Profile updated successfully!");
+      alert("Review submitted successfully!");
+
+      setReviewForm({
+        rating: 3,
+        comment: "",
+        name: "",
+      });
+      setShowReviewForm(false);
+
+      try {
+        setLoading((prev) => ({ ...prev, reviews: true }));
+        const reviewsResponse = await fetch(
+          `http://localhost:3030/api/review/${id}`,
+        );
+        const reviewsResult = await reviewsResponse.json();
+
+        if (reviewsResult.success) {
+          setReviews(reviewsResult.data || []);
+          setError((prev) => ({ ...prev, reviews: null }));
+        } else {
+          throw new Error(reviewsResult.message || "Error fetching reviews");
+        }
+      } catch (reviewsError) {
+        console.error("Error fetching reviews:", reviewsError);
+        setError((prev) => ({ ...prev, reviews: reviewsError.message }));
+      } finally {
+        setLoading((prev) => ({ ...prev, reviews: false }));
+      }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      setError(
-        error.message || "An error occurred while updating your profile.",
-      );
+      console.error("Error submitting review:", error);
+      alert(`Error: ${error.message}`);
+      setError((prev) => ({
+        ...prev,
+        submit: error.message,
+      }));
     } finally {
-      setIsLoading(false);
+      setLoading((prev) => ({ ...prev, submitting: false }));
     }
   };
 
@@ -169,48 +212,6 @@ const ProductDetail = () => {
     } catch (error) {
       console.error("Error toggling favorite:", error);
       alert(`Failed to add to favorites: ${error.message}`);
-    }
-  };
-
-  // Handle form input changes
-  const handleContactInputChange = (e) => {
-    const { id, value } = e.target;
-    setContactForm((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  // Handle message submission with improved validation
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-
-    // Basic validation
-    if (!contactForm.email || !contactForm.phone) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(contactForm.email)) {
-      alert("Please enter a valid email address");
-      return;
-    }
-
-    // TODO: Implement actual message sending logic
-    try {
-      // Mock API call
-      console.log("Message sent:", contactForm);
-      setContactForm({
-        email: "",
-        phone: "",
-        message: "Hi, is this item still available?",
-      });
-      setShowContactForm(false);
-      alert("Message sent to seller!");
-    } catch (error) {
-      alert(`Failed to send message: ${error.message}`);
     }
   };
 
@@ -417,12 +418,38 @@ const ProductDetail = () => {
               </p>
             </div>
 
-            {/* <button
-              onClick={() => setShowContactForm(!showContactForm)}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 mb-3"
-            >
-              Contact Seller
-            </button> */}
+            <div className="relative">
+              <button
+                onClick={() => setShowContactOptions(!showContactOptions)}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 mb-3"
+              >
+                Contact Seller
+              </button>
+
+              {showContactOptions && (
+                <div className="absolute z-10 w-full bg-white border border-gray-200 shadow-md">
+                  {product.SellerPhone && (
+                    <a
+                      href={`tel:${product.SellerPhone}`}
+                      className="flex items-center gap-2 p-3 hover:bg-gray-50 border-b border-gray-100"
+                    >
+                      <Phone className="h-5 w-5 text-green-500" />
+                      <span>Call Seller</span>
+                    </a>
+                  )}
+
+                  {product.SellerEmail && (
+                    <a
+                      href={`mailto:${product.SellerEmail}`}
+                      className="flex items-center gap-2 p-3 hover:bg-gray-50"
+                    >
+                      <Mail className="h-5 w-5 text-green-500" />
+                      <span>Email Seller</span>
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div className="pt-4 border-t border-gray-200">
               {/* Seller Info */}
@@ -441,29 +468,6 @@ const ProductDetail = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Contact Options */}
-              {showContactForm && (
-                <div className="mt-4 border border-gray-200 p-4">
-                  <h3 className="font-medium text-gray-800 mb-2">
-                    Contact Seller
-                  </h3>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <a
-                      href={`tel:${contactForm.phone}`}
-                      className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 text-center "
-                    >
-                      Call Seller
-                    </a>
-                    <a
-                      href={`mailto:${contactForm.email}`}
-                      className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 text-center "
-                    >
-                      Email Seller
-                    </a>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -495,7 +499,7 @@ const ProductDetail = () => {
                 >
                   <div className="flex justify-between mb-2">
                     <div className="font-medium text-gray-800">
-                      {review.ReviewerName || "Anonymous"}
+                      {review.ReviewerName}
                     </div>
                     <div className="text-sm text-gray-500">
                       {review.ReviewDate
@@ -546,20 +550,6 @@ const ProductDetail = () => {
               </div>
 
               <form onSubmit={handleSubmitReview}>
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-gray-700 mb-1">
-                    Your Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={reviewForm.name}
-                    onChange={handleReviewInputChange}
-                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-500"
-                    required
-                  />
-                </div>
-
                 <div className="mb-4">
                   <label className="block text-gray-700 mb-1">
                     Rating <span className="text-red-500">*</span>
@@ -612,8 +602,9 @@ const ProductDetail = () => {
                   <button
                     type="submit"
                     className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                    disabled={loading.submitting}
                   >
-                    Submit Review
+                    {loading.submitting ? "Submitting..." : "Submit Review"}
                   </button>
                 </div>
               </form>

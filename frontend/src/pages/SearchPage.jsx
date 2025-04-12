@@ -27,7 +27,7 @@ const SearchPage = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:3030/api/search_products/search`,
+        `http://localhost:3030/api/search/getProduct`,
         {
           params: { name: query },
         },

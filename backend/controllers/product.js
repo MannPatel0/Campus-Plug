@@ -1,12 +1,12 @@
 const db = require("../utils/database");
 
-exports.addToFavorite = async (req, res) => {
+exports.addFavorite = async (req, res) => {
   const { userID, productsID } = req.body;
 
   try {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
-      "INSERT INTO Favorites (UserID, ProductID) VALUES unique(?, ?)",
+      "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
       [userID, productsID],
     );
 
@@ -14,10 +14,38 @@ exports.addToFavorite = async (req, res) => {
       success: true,
       message: "Product added to favorites successfully",
     });
-    console.log(result);
   } catch (error) {
     console.error("Error adding favorite product:", error);
     return res.json({ error: "Could not add favorite product" });
+  }
+};
+
+exports.getFavorites = async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    const [favorites] = await db.execute(
+      `
+      SELECT
+        p.*,
+        u.Name AS SellerName,
+        i.URL AS image_url
+      FROM Favorites f
+      JOIN Product p ON f.ProductID = p.ProductID
+      JOIN User u ON p.UserID = u.UserID
+      LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+      WHERE f.UserID = ?
+      `,
+      [userID],
+    );
+
+    res.json({
+      success: true,
+      favorites: favorites,
+    });
+  } catch (error) {
+    console.error("Error retrieving favorites:", error);
+    res.status(500).json({ error: "Could not retrieve favorite products" });
   }
 };
 
@@ -52,7 +80,6 @@ exports.getAllProducts = async (req, res) => {
       WHERE RowNum = 1;
     `);
 
-    console.log(data);
     res.json({
       success: true,
       message: "Products fetched successfully",
@@ -74,7 +101,7 @@ exports.getProductById = async (req, res) => {
   try {
     const [data] = await db.execute(
       `
-      SELECT p.*,U.Name AS SellerName, i.URL AS image_url
+      SELECT p.*,U.Name AS SellerName,U.Email as SellerEmail,U.Phone as SellerPhone, i.URL AS image_url
       FROM Product p
       LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
       JOIN User U ON p.UserID = U.UserID

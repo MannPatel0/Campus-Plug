@@ -37,7 +37,6 @@ exports.HistoryByUserId = async (req, res) => {
       [id],
     );
 
-    console.log(data);
     res.json({
       success: true,
       message: "Products fetched successfully",

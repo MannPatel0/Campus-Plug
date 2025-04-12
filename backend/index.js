@@ -39,9 +39,9 @@ checkDatabaseConnection(db);
 //Routes
 app.use("/api/user", userRouter); //prefix with /api/user
 app.use("/api/product", productRouter); //prefix with /api/product
-app.use("/api/search_products", searchRouter); //prefix with /api/product
-app.use("/api/Engine", recommendedRouter); //prefix with /api/
-app.use("/api/get", history); //prefix with /api/
+app.use("/api/search", searchRouter); //prefix with /api/product
+app.use("/api/engine", recommendedRouter); //prefix with /api/
+app.use("/api/history", history); //prefix with /api/
 app.use("/api/review", review); //prefix with /api/
 
 // Set up a scheduler to run cleanup every hour

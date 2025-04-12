@@ -11,9 +11,8 @@ const Home = () => {
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   const handleLinkClick = async (id) => {
-    // Example: append to localStorage or call analytics
     const response = await fetch(
-      "http://localhost:3030/api/product/add_fav_product",
+      "http://localhost:3030/api/product/addFavorites",
       {
         method: "POST",
         headers: {
@@ -31,6 +30,16 @@ const Home = () => {
     console.log(response);
     console.log(`Add Product -> History: ${id}`);
   };
+
+  function reloadPage() {
+    var doctTimestamp = new Date(performance.timing.domLoading).getTime();
+    var now = Date.now();
+    var tenSec = 10 * 1000;
+    if (now > doctTimestamp + tenSec) {
+      location.reload();
+    }
+  }
+  reloadPage();
 
   useEffect(() => {
     const fetchrecomProducts = async () => {
@@ -76,13 +85,15 @@ const Home = () => {
       }
     };
     fetchrecomProducts();
+    //reloadPage();
   }, []);
+  reloadPage();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3030/api/product/get_product",
+          "http://localhost:3030/api/product/getProduct",
         );
         if (!response.ok) throw new Error("Failed to fetch products");
 
@@ -118,15 +129,18 @@ const Home = () => {
       const storedUser = JSON.parse(sessionStorage.getItem("user"));
       console.log(storedUser);
       try {
-        const response = await fetch("http://localhost:3030/api/get/history", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          "http://localhost:3030/api/history/getHistory",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: storedUser.ID,
+            }),
           },
-          body: JSON.stringify({
-            id: storedUser.ID,
-          }),
-        });
+        );
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();

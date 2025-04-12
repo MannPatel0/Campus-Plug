@@ -6,8 +6,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from app import get_recommendations
 
-#import time
-
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
