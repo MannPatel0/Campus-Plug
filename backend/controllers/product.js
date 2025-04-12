@@ -14,6 +14,7 @@ exports.addToFavorite = async (req, res) => {
       success: true,
       message: "Product added to favorites successfully",
     });
+    console.log(result);
   } catch (error) {
     console.error("Error adding favorite product:", error);
     return res.json({ error: "Could not add favorite product" });

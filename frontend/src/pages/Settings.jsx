@@ -415,6 +415,60 @@ const Settings = () => {
         </div>
       </div>
 
+      {/* Privacy Section */}
+      <div className="bg-white border border-gray-200 mb-6">
+        <div className="border-b border-gray-200 p-4">
+          <div className="flex items-center">
+            <Shield className="h-5 w-5 text-gray-500 mr-2" />
+            <h2 className="text-lg font-medium text-gray-800">Privacy</h2>
+          </div>
+        </div>
+
+        <div className="p-4">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+              <div className="flex items-start">
+                <Search className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-gray-800">Search History</h3>
+                  <p className="text-sm text-gray-500">
+                    Delete all your search history on StudentMarket
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => handleDeleteHistory("search")}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 flex items-center"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
+              </button>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="flex items-start">
+                <History className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-gray-800">
+                    Browsing History
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Delete all your browsing history on StudentMarket
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => handleDeleteHistory("browsing")}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 flex items-center"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Delete Account (Danger Zone) */}
       <div className="bg-white border border-red-200 mb-6">
         <div className="border-b border-red-200 p-4 bg-red-50">

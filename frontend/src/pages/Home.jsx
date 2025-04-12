@@ -8,6 +8,29 @@ const Home = () => {
   const [recommended, setRecommended] = useState([]);
   const [history, sethistory] = useState([]);
   const [error, setError] = useState(null);
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
+
+  const handleLinkClick = async (id) => {
+    // Example: append to localStorage or call analytics
+    const response = await fetch(
+      "http://localhost:3030/api/product/add_fav_product",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: storedUser.ID,
+          productsID: id,
+        }),
+      },
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch products");
+
+    console.log(response);
+    console.log(`Add Product -> History: ${id}`);
+  };
 
   useEffect(() => {
     const fetchrecomProducts = async () => {
@@ -298,6 +321,7 @@ const Home = () => {
               <Link
                 key={listing.id}
                 to={`/product/${listing.id}`}
+                onClick={() => handleLinkClick(listing.id)}
                 className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
               >
                 <div className="relative">

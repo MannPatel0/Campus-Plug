@@ -14,7 +14,7 @@ const ProductDetail = () => {
     reviews: null,
   });
   const [isFavorite, setIsFavorite] = useState(false);
-  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactForm, showContactForm, setShowContactForm] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -417,81 +417,15 @@ const ProductDetail = () => {
               </p>
             </div>
 
-            <button
+            {/* <button
               onClick={() => setShowContactForm(!showContactForm)}
               className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 mb-3"
             >
               Contact Seller
-            </button>
-
-            {showContactForm && (
-              <div className="border border-gray-200 p-4 mb-4">
-                <h3 className="font-medium text-gray-800 mb-2">
-                  Contact Seller
-                </h3>
-                <form onSubmit={handleSendMessage}>
-                  <div className="mb-3">
-                    <label htmlFor="email" className="block text-gray-700 mb-1">
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={contactForm.email}
-                      onChange={handleContactInputChange}
-                      className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="phone" className="block text-gray-700 mb-1">
-                      Phone Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      value={contactForm.phone}
-                      onChange={handleContactInputChange}
-                      className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label
-                      htmlFor="message"
-                      className="block text-gray-700 mb-1"
-                    >
-                      Message
-                    </label>
-                    <textarea
-                      id="message"
-                      value={contactForm.message}
-                      onChange={handleContactInputChange}
-                      placeholder="Hi, is this item still available?"
-                      className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
-                      rows="3"
-                    />
-                  </div>
-                  <div className="flex justify-between">
-                    <button
-                      type="submit"
-                      className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
-                    >
-                      Send Contact Info
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowContactForm(false)}
-                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
+            </button> */}
 
             <div className="pt-4 border-t border-gray-200">
+              {/* Seller Info */}
               <div className="flex items-center mb-3">
                 <div className="mr-3">
                   <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
@@ -507,19 +441,29 @@ const ProductDetail = () => {
                   </p>
                 </div>
               </div>
-              <div className="text-sm text-gray-600">
-                <div>
-                  <span className="font-medium">Rating:</span>{" "}
-                  {product.seller?.rating ? (
-                    <div className="flex items-center">
-                      {renderStars(product.seller.rating)}
-                      <span className="ml-1">{product.seller.rating}/5</span>
-                    </div>
-                  ) : (
-                    "N/A"
-                  )}
+
+              {/* Contact Options */}
+              {showContactForm && (
+                <div className="mt-4 border border-gray-200 p-4">
+                  <h3 className="font-medium text-gray-800 mb-2">
+                    Contact Seller
+                  </h3>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a
+                      href={`tel:${contactForm.phone}`}
+                      className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 text-center "
+                    >
+                      Call Seller
+                    </a>
+                    <a
+                      href={`mailto:${contactForm.email}`}
+                      className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 text-center "
+                    >
+                      Email Seller
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

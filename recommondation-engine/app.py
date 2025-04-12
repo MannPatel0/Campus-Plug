@@ -1,4 +1,6 @@
 # pip install mysql.connector
+#
+
 
 import mysql.connector
 from sklearn.metrics.pairwise import cosine_similarity
@@ -15,6 +17,28 @@ def database():
     )
     return db_connection
 
+def get_popular_products():
+    pass
+
+
+def delete_user_recommendation(userID, Array):
+    db_con = database()
+    cursor = db_con.cursor()
+
+    try:
+        for item in Array:
+            #Product ID starts form index 1
+            item_value = item + 1
+            print(item_value)
+            # Use parameterized queries to prevent SQL injection
+            cursor.execute(f"INTO Recommendation (UserID, RecommendedProductID) VALUES ({userID}, {item_value});")
+
+        db_con.commit()
+
+        #results = cursor.fetchall()
+        #print(results)
+    except:
+        pass
 
 def get_all_products():
 
@@ -89,9 +113,9 @@ def get_recommendations(user_id, top_n=10):
         # Get all products and user history with their category vectors
         all_products = get_all_products()
         user_history = get_user_history(user_id)
-        # if not user_history:
-        #     # Cold start: return popular products
-        #     return get_popular_products(top_n)
+        if not user_history:
+            #Cold start: return popular products
+            return get_popular_products(top_n)
         # Calculate similarity between all products and user history
         user_profile = np.mean(user_history, axis=0)  # Average user preferences
         similarities = cosine_similarity([user_profile], all_products)
@@ -128,8 +152,8 @@ def history_upload(userID, anrr):
         db_con.commit()
 
         # If you need results, you'd typically fetch them after a SELECT query
-        # results = cursor.fetchall()
-        # print(results)
+        #results = cursor.fetchall()
+        #print(results)
 
     except Exception as e:
         print(f"Error: {e}")
