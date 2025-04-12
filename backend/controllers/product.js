@@ -6,7 +6,7 @@ exports.addToFavorite = async (req, res) => {
   try {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
-      "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
+      "INSERT INTO Favorites (UserID, ProductID) VALUES unique(?, ?)",
       [userID, productsID],
     );
 
