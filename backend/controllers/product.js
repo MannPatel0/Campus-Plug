@@ -1,13 +1,13 @@
 const db = require("../utils/database");
 
 exports.addFavorite = async (req, res) => {
-  const { userID, productsID } = req.body;
-
+  const { userID, productID } = req.body;
+  console.log(userID);
   try {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
-      "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
-      [userID, productsID],
+      `INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)`,
+      [userID, productID],
     );
 
     res.json({
