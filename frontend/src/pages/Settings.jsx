@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Lock, Trash2, History, Search, Shield } from "lucide-react";
+import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
 const Settings = () => {
   const [userData, setUserData] = useState({
@@ -16,6 +17,8 @@ const Settings = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -88,6 +91,25 @@ const Settings = () => {
     }));
   };
 
+  const removeHistory = async () => {
+    const response = await fetch(
+      "http://localhost:3030/api/history/delHistory",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: storedUser.ID,
+        }),
+      },
+    );
+
+    if (response.ok) {
+      setShowAlert(true);
+    }
+  };
+
   const handleUpdateProfile = async () => {
     try {
       // Ensure userId is present
@@ -157,12 +179,6 @@ const Settings = () => {
       console.error("Error updating password:", error);
       alert("Failed to update password: " + error.message);
     }
-  };
-
-  const handleDeleteHistory = (type) => {
-    // TODO: Delete the specified history
-    console.log(`Deleting ${type} history`);
-    alert(`${type} history deleted successfully!`);
   };
 
   const handleDeleteAccount = async () => {
@@ -416,6 +432,12 @@ const Settings = () => {
       </div>
 
       {/* Privacy Section */}
+      {showAlert && (
+        <FloatingAlert
+          message="Product removed from History!"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       <div className="bg-white border border-gray-200 mb-6">
         <div className="border-b border-gray-200 p-4">
           <div className="flex items-center">
@@ -432,33 +454,12 @@ const Settings = () => {
                 <div>
                   <h3 className="font-medium text-gray-800">Search History</h3>
                   <p className="text-sm text-gray-500">
-                    Delete all your search history on StudentMarket
+                    Delete all your history on Market
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => handleDeleteHistory("search")}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 flex items-center"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </button>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div className="flex items-start">
-                <History className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-gray-800">
-                    Browsing History
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Delete all your browsing history on StudentMarket
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleDeleteHistory("browsing")}
+                onClick={() => removeHistory()}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 flex items-center"
               >
                 <Trash2 className="h-4 w-4 mr-1" />

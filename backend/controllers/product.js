@@ -20,6 +20,26 @@ exports.addFavorite = async (req, res) => {
   }
 };
 
+exports.removeFavorite = async (req, res) => {
+  const { userID, productID } = req.body;
+  console.log(userID);
+  try {
+    // Use parameterized query to prevent SQL injection
+    const [result] = await db.execute(
+      `DELETE FROM Favorites WHERE UserID = ? AND ProductID = ?`,
+      [userID, productID],
+    );
+
+    res.json({
+      success: true,
+      message: "Product removed from favorites successfully",
+    });
+  } catch (error) {
+    console.error("Error removing favorite product:", error);
+    return res.json({ error: "Could not remove favorite product" });
+  }
+};
+
 exports.getFavorites = async (req, res) => {
   const { userID } = req.body;
 

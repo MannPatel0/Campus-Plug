@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Tag, Heart } from "lucide-react";
+import { Tag } from "lucide-react";
+
+import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
 const Home = () => {
   const navigate = useNavigate();
@@ -9,10 +11,11 @@ const Home = () => {
   const [history, sethistory] = useState([]);
   const [error, setError] = useState(null);
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
+  const [showAlert, setShowAlert] = useState(false);
 
-  const handleLinkClick = async (id) => {
+  const toggleFavorite = async (id) => {
     const response = await fetch(
-      "http://localhost:3030/api/product/addFavorites",
+      "http://localhost:3030/api/product/addFavorite",
       {
         method: "POST",
         headers: {
@@ -20,15 +23,32 @@ const Home = () => {
         },
         body: JSON.stringify({
           userID: storedUser.ID,
-          productsID: id,
+          productID: id,
         }),
       },
     );
-
-    if (!response.ok) throw new Error("Failed to fetch products");
-
+    const data = await response.json();
+    if (data.success) {
+      setShowAlert(true);
+    }
     console.log(response);
     console.log(`Add Product -> History: ${id}`);
+  };
+
+  const addHistory = async (id) => {
+    const response = await fetch(
+      "http://localhost:3030/api/history/addHistory",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: storedUser.ID,
+          productID: id,
+        }),
+      },
+    );
   };
 
   function reloadPage() {
@@ -44,7 +64,6 @@ const Home = () => {
   useEffect(() => {
     const fetchrecomProducts = async () => {
       // Get the user's data from localStorage
-      const storedUser = JSON.parse(sessionStorage.getItem("user"));
       console.log(storedUser);
       try {
         const response = await fetch(
@@ -126,7 +145,6 @@ const Home = () => {
   useEffect(() => {
     const fetchrecomProducts = async () => {
       // Get the user's data from localStorage
-      const storedUser = JSON.parse(sessionStorage.getItem("user"));
       console.log(storedUser);
       try {
         const response = await fetch(
@@ -155,7 +173,6 @@ const Home = () => {
               image: product.ProductImage, // Use the alias for image URL
               seller: product.SellerName, // Fetch seller name properly
               datePosted: product.DateUploaded, // Use the actual date
-              isFavorite: false, // Default state
             })),
           );
         } else {
@@ -168,18 +185,6 @@ const Home = () => {
     };
     fetchrecomProducts();
   }, []);
-
-  // Toggle favorite status
-  const toggleFavorite = (id, e) => {
-    e.preventDefault(); // Prevent navigation when clicking the heart icon
-    setListings((prevListings) =>
-      prevListings.map((listing) =>
-        listing.id === id
-          ? { ...listing, isFavorite: !listing.isFavorite }
-          : listing,
-      ),
-    );
-  };
 
   const handleSelling = () => {
     navigate("/selling");
@@ -218,6 +223,12 @@ const Home = () => {
       </div>
 
       {/* Recent Listings */}
+      {showAlert && (
+        <FloatingAlert
+          message="Product added to favorites!"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       <div className="relative py-4">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
           Recommendation
@@ -245,6 +256,7 @@ const Home = () => {
               <Link
                 key={recommended.id}
                 to={`/product/${recommended.id}`}
+                onClick={() => addHistory(recommended.id)}
                 className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
               >
                 <div className="relative">
@@ -254,16 +266,14 @@ const Home = () => {
                     className="w-full h-48 object-cover"
                   />
                   <button
-                    onClick={(e) => toggleFavorite(recommended.id, e)}
-                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      toggleFavorite(recommended.id);
+                    }}
+                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition"
                   >
-                    <Heart
-                      className={`h-6 w-6 ${
-                        recommended.isFavorite
-                          ? "text-red-500 fill-red-500"
-                          : "text-gray-400"
-                      }`}
-                    />
+                    <span className="text-xl font-bold text-gray-600">+</span>
                   </button>
                 </div>
 
@@ -308,6 +318,12 @@ const Home = () => {
       </div>
 
       {/* Recent Listings */}
+      {showAlert && (
+        <FloatingAlert
+          message="Product added to favorites!"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       <div className="relative py-4">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
           Recent Listings
@@ -335,26 +351,24 @@ const Home = () => {
               <Link
                 key={listing.id}
                 to={`/product/${listing.id}`}
-                onClick={() => handleLinkClick(listing.id)}
                 className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
               >
                 <div className="relative">
                   <img
                     src={listing.image}
                     alt={listing.title}
+                    onClick={() => addHistory(listing.id)}
                     className="w-full h-48 object-cover"
                   />
                   <button
-                    onClick={(e) => toggleFavorite(listing.id, e)}
-                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      toggleFavorite(listing.id);
+                    }}
+                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition"
                   >
-                    <Heart
-                      className={`h-6 w-6 ${
-                        listing.isFavorite
-                          ? "text-red-500 fill-red-500"
-                          : "text-gray-400"
-                      }`}
-                    />
+                    <span className="text-xl font-bold text-gray-600">+</span>
                   </button>
                 </div>
 
@@ -399,6 +413,12 @@ const Home = () => {
       </div>
 
       {/* Recent Listings */}
+      {showAlert && (
+        <FloatingAlert
+          message="Product added to favorites!"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       <div className="relative py-4">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">History</h2>
 
@@ -433,16 +453,14 @@ const Home = () => {
                     className="w-full h-48 object-cover"
                   />
                   <button
-                    onClick={(e) => toggleFavorite(history.id, e)}
-                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      toggleFavorite(history.id);
+                    }}
+                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition"
                   >
-                    <Heart
-                      className={`h-6 w-6 ${
-                        history.isFavorite
-                          ? "text-red-500 fill-red-500"
-                          : "text-gray-400"
-                      }`}
-                    />
+                    <span className="text-xl font-bold text-gray-600">+</span>
                   </button>
                 </div>
 

@@ -7,6 +7,7 @@ const Favorites = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState("dateAdded");
   const [filterCategory, setFilterCategory] = useState("All");
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   const mapCategory = (id) => {
     const categories = {
@@ -20,10 +21,41 @@ const Favorites = () => {
     return categories[id] || "Other";
   };
 
+  function reloadPage() {
+    var doctTimestamp = new Date(performance.timing.domLoading).getTime();
+    var now = Date.now();
+    if (now > doctTimestamp) {
+      location.reload();
+    }
+  }
+
+  const removeFromFavorites = async (itemID) => {
+    const response = await fetch(
+      "http://localhost:3030/api/product/delFavorite",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: storedUser.ID,
+          productID: itemID,
+        }),
+      },
+    );
+    const data = await response.json();
+    if (data.success) {
+      reloadPage();
+    }
+
+    if (!response.ok) throw new Error("Failed to fetch products");
+    console.log(response);
+    console.log(`Add Product -> History: ${itemID}`);
+  };
+
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        const user = JSON.parse(sessionStorage.getItem("user"));
         const response = await fetch(
           "http://localhost:3030/api/product/getFavorites",
           {
@@ -31,13 +63,11 @@ const Favorites = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userID: user.ID }),
+            body: JSON.stringify({ userID: storedUser.ID }),
           },
         );
 
         const data = await response.json();
-        console.log(user.ID);
-        console.log(data);
 
         const favoritesData = data.favorites;
 
@@ -73,11 +103,6 @@ const Favorites = () => {
     const diffInMs = today - postedDate;
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
     return `${diffInDays}d ago`;
-  };
-
-  const removeFromFavorites = (id) => {
-    setFavorites(favorites.filter((item) => item.id !== id));
-    // Optional: Send DELETE request to backend here
   };
 
   const sortedFavorites = [...favorites].sort((a, b) => {

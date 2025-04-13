@@ -14,7 +14,6 @@ import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
 import ItemForm from "./pages/MyListings";
 import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
-import axios from "axios";
 
 function App() {
   // Authentication state - initialize from localStorage if available
