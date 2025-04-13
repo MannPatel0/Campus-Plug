@@ -107,19 +107,14 @@ def get_user_history(user_id):
     db_con.close()
     return final
 
-
-def delete_user_recommendations(userId):
-    pass
-
-
 def get_recommendations(user_id, top_n=10):
     try:
         # Get all products and user history with their category vectors
         all_products = get_all_products()
         user_history = get_user_history(user_id)
-        if not user_history:
-            #Cold start: return popular products
-            return get_popular_products(top_n)
+        # if not user_history:
+        #     #Cold start: return popular products
+        #     return get_popular_products(top_n)
         # Calculate similarity between all products and user history
         user_profile = np.mean(user_history, axis=0)  # Average user preferences
         similarities = cosine_similarity([user_profile], all_products)
