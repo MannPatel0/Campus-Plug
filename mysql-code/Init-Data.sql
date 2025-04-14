@@ -316,33 +316,32 @@ VALUES
         '2024-09-26 09:15:00'
     );
 
--- Insert Image URLs
 INSERT INTO
     Image_URL (URL, ProductID)
 VALUES
-    ('/image1.avif', 1),
-    ('/image2.avif', 1),
-    ('/image3.avif', 1),
-    ('/image8.jpg', 1),
-    ('/image1.avif', 2),
-    ('/image1.avif', 3),
-    ('/image1.avif', 4),
-    ('/image1.avif', 5),
-    ('/image1.avif', 6),
-    ('/image1.avif', 7),
-    ('/image1.avif', 8),
-    ('/image1.avif', 9),
-    ('/image1.avif', 10),
-    ('/image1.avif', 11),
-    ('/image1.avif', 12),
-    ('/image1.avif', 13),
-    ('/image1.avif', 14),
-    ('/image1.avif', 15),
-    ('/image1.avif', 16),
-    ('/image1.avif', 17),
-    ('/image1.avif', 18),
-    ('/image1.avif', 19),
-    ('/image1.avif', 20);
+    ('/Pictures/Dell1.jpg', 1),
+    ('/Pictures/Dell2.jpg', 1),
+    ('/Pictures/Dell3.jpg', 1),
+    ('/Pictures/HP-Laptop1.jpg', 2),
+    ('/Pictures/HP-Laptop1.jpg', 2),
+    ('/Pictures/Dorm-Desk.jpg', 3),
+    ('/Pictures/University-Hoodie.jpg', 4),
+    ('/Pictures/Basketball.jpg', 5),
+    ('/Pictures/Acoustic-Guitar.jpg', 6),
+    ('/Pictures/Physics-Textbook.jpg', 7),
+    ('/Pictures/Mini-Fridge.jpg', 8),
+    ('/Pictures/Controller.jpg', 9),
+    ('/Pictures/Mountain-Bike.jpg', 10),
+    ('/Pictures/Wireless-Mouse.jpg', 11),
+    ('/Pictures/Lab-Coat.jpg', 12),
+    ('/Pictures/Calculator.jpg', 13),
+    ('/Pictures/Yoga-Mat.jpg', 14),
+    ('/Pictures/Winter-Jacket.jpg', 15),
+    ('/Pictures/CS-Textbook.jpg', 16),
+    ('/Pictures/Desk-Lamp.jpg', 17),
+    ('/Pictures/HP-Calculator.jpg', 18),
+    ('/Pictures/Bluetooth-Speaker.jpg', 19),
+    ('/Pictures/Backpack.jpg', 20);
 
 -- Insert Product-Category relationships (products with multiple categories)
 INSERT INTO
@@ -400,7 +399,6 @@ VALUES
     (20, 17),
     (20, 24);
 
--- Backpack: Backpacks & Bags, School Supplies, Dorm Essentials
 -- Insert History records
 INSERT INTO
     History (HistoryID, UserID, ProductID)
