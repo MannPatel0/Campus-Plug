@@ -12,7 +12,6 @@ import Selling from "./pages/Selling";
 import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
-import ItemForm from "./pages/MyListings";
 import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
 
 function App() {
@@ -708,27 +707,6 @@ function App() {
               <ProtectedRoute>
                 <div className="container mx-auto px-4 py-6">
                   <Selling />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          {/* Add new selling routes */}
-          <Route
-            path="/selling/create"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <ItemForm />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/selling/edit/:id"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <ItemForm />
                 </div>
               </ProtectedRoute>
             }

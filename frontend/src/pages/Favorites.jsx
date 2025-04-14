@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Tag, Trash2, Filter, ChevronDown } from "lucide-react";
+import { Heart, Tag, Trash2 } from "lucide-react";
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);

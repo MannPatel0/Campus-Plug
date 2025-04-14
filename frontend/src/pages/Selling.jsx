@@ -1,152 +1,221 @@
-import { useState } from "react";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 import ProductForm from "../components/ProductForm";
 
 const Selling = () => {
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Green Sofa",
-      price: 299,
-      status: "Active",
-      images: [],
-    },
-    {
-      id: 2,
-      name: "Wooden Table",
-      price: 150,
-      status: "Inactive",
-      images: [],
-    },
-  ]);
+  // State to store user's products
+  const [products, setProducts] = useState([]);
+  // State to control when editing form is shown
+  const [showForm, setShowForm] = useState(false);
+  // State to store the product being edited (or empty for new product)
+  const [editingProduct, setEditingProduct] = useState({
+    name: "",
+    price: "",
+    description: "",
+    categories: [],
+    status: "Unsold",
+    images: [],
+  });
 
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [view, setView] = useState("list"); // "list" or "form"
+  // Simulate fetching products from API/database on component mount
+  useEffect(() => {
+    // This would be replaced with a real API call
+    const fetchProducts = async () => {
+      // Mock data
+      const mockProducts = [
+        {
+          id: "1",
+          name: "Vintage Camera",
+          price: "299.99",
+          description: "A beautiful vintage film camera in excellent condition",
+          categories: ["Electronics", "Art & Collectibles"],
+          status: "Unsold",
+          images: ["/public/Pictures/Dell1.jpg"],
+        },
+        {
+          id: "2",
+          name: "Leather Jacket",
+          price: "149.50",
+          description: "Genuine leather jacket, worn only a few times",
+          categories: ["Clothing"],
+          status: "Unsold",
+          images: [],
+        },
+      ];
 
-  const handleEdit = (product) => {
-    setEditingProduct({ ...product });
-    setView("form");
-  };
+      setProducts(mockProducts);
+    };
 
-  const handleAddNew = () => {
-    setEditingProduct({
-      id: null,
-      name: "",
-      price: "",
-      status: "Active",
-      images: [],
-    });
-    setView("form");
-  };
+    fetchProducts();
+  }, []);
 
-  const handleDelete = (id) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const handleSave = () => {
-    if (!editingProduct.name || !editingProduct.price) {
-      alert("Please enter a name and price.");
-      return;
-    }
-    if (editingProduct.images.length < 1) {
-      alert("Please upload at least one image.");
-      return;
-    }
-
-    if (editingProduct.id === null) {
+  // Handle creating or updating a product
+  const handleSaveProduct = () => {
+    if (editingProduct.id) {
+      // Update existing product
+      setProducts(
+        products.map((p) => (p.id === editingProduct.id ? editingProduct : p)),
+      );
+    } else {
+      // Create new product
       const newProduct = {
         ...editingProduct,
-        id: Date.now(),
+        id: Date.now().toString(), // Generate a temporary ID
       };
-      setProducts((prev) => [newProduct, ...prev]);
-    } else {
-      setProducts((prev) =>
-        prev.map((p) => (p.id === editingProduct.id ? editingProduct : p)),
-      );
+      setProducts([...products, newProduct]);
     }
 
-    setEditingProduct(null);
-    setView("list");
+    // Reset form and hide it
+    setShowForm(false);
+    setEditingProduct({
+      name: "",
+      price: "",
+      description: "",
+      categories: [],
+      status: "Unsold",
+      images: [],
+    });
   };
 
-  const handleCancel = () => {
-    setEditingProduct(null);
-    setView("list");
+  // Handle product deletion
+  const handleDeleteProduct = (productId) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      setProducts(products.filter((p) => p.id !== productId));
+    }
+  };
+
+  // Handle editing a product
+  const handleEditProduct = (product) => {
+    setEditingProduct({
+      ...product,
+      images: product.images || [], // Ensure images array exists
+    });
+    setShowForm(true);
+  };
+
+  // Handle adding a new product
+  const handleAddProduct = () => {
+    setEditingProduct({
+      name: "",
+      price: "",
+      description: "",
+      categories: [],
+      status: "Unsold",
+      images: [],
+    });
+    setShowForm(true);
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      {view === "list" && (
-        <>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">My Listings</h2>
-            <button
-              onClick={handleAddNew}
-              className="bg-green-500 text-white px-4 py-2 hover:bg-green-600 transition-all"
-            >
-              <Plus className="inline-block mr-2" size={18} /> Add New Product
-            </button>
-          </div>
+    <div className="container mx-auto p-4 max-w-6xl">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">My Listings</h1>
+        {!showForm && (
+          <button
+            onClick={handleAddProduct}
+            className="bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700"
+          >
+            + Add New Product
+          </button>
+        )}
+      </div>
 
-          <ul className="space-y-4">
-            {products.map((product) => (
-              <li
-                key={product.id}
-                className="border border-gray-300 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center"
-              >
-                <div className="flex items-start sm:items-center space-x-4 w-full sm:w-auto">
-                  <div className="h-20 w-20 bg-gray-100 flex items-center justify-center border border-gray-200 shrink-0">
-                    {product.images.length > 0 ? (
-                      <img
-                        src={URL.createObjectURL(product.images[0])}
-                        alt="Product"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-sm">No Image</span>
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">{product.name}</p>
-                    <p className="text-sm text-gray-600">${product.price}</p>
-                    <p
-                      className={`text-xs mt-1 ${
-                        product.status === "Active"
-                          ? "text-green-600"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {product.status}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex space-x-2 mt-4 sm:mt-0">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="text-red-500 hover:underline"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {view === "form" && (
+      {showForm ? (
         <ProductForm
           editingProduct={editingProduct}
           setEditingProduct={setEditingProduct}
-          onSave={handleSave}
-          onCancel={handleCancel}
+          onSave={handleSaveProduct}
+          onCancel={() => setShowForm(false)}
         />
+      ) : (
+        <>
+          {products.length === 0 ? (
+            <div className="text-center py-10 bg-gray-50">
+              <p className="text-gray-500 mb-4">
+                You don't have any listings yet
+              </p>
+              <button
+                onClick={handleAddProduct}
+                className="bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700"
+              >
+                Create Your First Listing
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="h-48 bg-gray-200 flex items-center justify-center">
+                    {product.images && product.images.length > 0 ? (
+                      <img
+                        src={product.images[0] || ""}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-gray-400">No image</div>
+                    )}
+                  </div>
+
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {product.name}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 text-xs ${
+                          product.status === "Sold"
+                            ? "bg-gray-200 text-gray-700"
+                            : "bg-emerald-100 text-emerald-800"
+                        }`}
+                      >
+                        {product.status}
+                      </span>
+                    </div>
+
+                    <p className="text-emerald-600 font-bold mt-1">
+                      ${product.price}
+                    </p>
+
+                    {product.categories && product.categories.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {product.categories.map((category) => (
+                          <span
+                            key={category}
+                            className="text-xs bg-gray-100 text-gray-600 px-2 py-1 "
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">
+                      {product.description}
+                    </p>
+
+                    <div className="mt-4 flex justify-end gap-2">
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => handleEditProduct(product)}
+                        className="text-emerald-600 hover:text-emerald-800 font-medium"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

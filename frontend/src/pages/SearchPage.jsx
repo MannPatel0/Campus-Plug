@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Filter, Grid, Heart, Tag, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import axios from "axios";
 
