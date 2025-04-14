@@ -1,5 +1,11 @@
+
+
+
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from app import get_recommendations
+
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -14,6 +20,8 @@ def handle_session_data():
 
         if not user_id or not email or is_authenticated is None:
             return jsonify({'error': 'Invalid data'}), 400
+
+        get_recommendations(user_id)
 
         print(f"Received session data: User ID: {user_id}, Email: {email}, Authenticated: {is_authenticated}")
         return jsonify({'message': 'Session data received successfully'})

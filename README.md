@@ -1,29 +1,34 @@
 ### Some ground rules
-1. Add both node_modules from Slient and Server to your `gitignore` file
-2. Make a brach with the following naming conventionp, refix it with your name `name-some branch name`.
+1. Add both node_modules from Slient and Server to your ```gitignore``` file
+2. Make a brach with the following naming conventionp, refix it with your name ```Your-Name Branch-Name```.
+---
 
-### `frontend`
-- Use React Js and vite as the node manger
+### Frontend
+1. `cd frontend` into the dir and then type command
 ```Bash
+    #Install the needed lib with the command bellow
     npm install
-```
-2. **Start The Server**, `cd frontend` into the dir and then type command
-```Bash
+    #Start The Server
     npm run dev
 ```
-### `backend`
-1. Install the needed lib with the command bellow
+---
+
+### Backend
+1. `cd backend` into the dir and then type command
 ```Bash
+    #Install the needed lib with the command bellow
     npm install
-```
-2. **Start The Server**, `cd backend` into the dir and then type command
-```Bash
+    #Start The Server
     npm run dev
 ```
+---
 
 ### Database
-1. To Create the DB use the command bellow
+1. MySql Version 9.2.0
+2. To Create the DataBase use the command bellow:
 ```Bash
-    python3 ./mysql-code/init-db.py
+    1. mysql -u root
+    2. use Marketplace;
+    3. \. PathToYour/Schema.sql
+    3. \. PathToYour/Init-Data.sql
 ```
-- MySql Version 9.2.0

@@ -1,13 +1,13 @@
 const db = require("../utils/database");
 
-exports.addToFavorite = async (req, res) => {
-  const { userID, productsID } = req.body;
-
+exports.addFavorite = async (req, res) => {
+  const { userID, productID } = req.body;
+  console.log(userID);
   try {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
-      "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
-      [userID, productsID],
+      `INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)`,
+      [userID, productID],
     );
 
     res.json({
@@ -20,25 +20,86 @@ exports.addToFavorite = async (req, res) => {
   }
 };
 
+exports.removeFavorite = async (req, res) => {
+  const { userID, productID } = req.body;
+  console.log(userID);
+  try {
+    // Use parameterized query to prevent SQL injection
+    const [result] = await db.execute(
+      `DELETE FROM Favorites WHERE UserID = ? AND ProductID = ?`,
+      [userID, productID],
+    );
+
+    res.json({
+      success: true,
+      message: "Product removed from favorites successfully",
+    });
+  } catch (error) {
+    console.error("Error removing favorite product:", error);
+    return res.json({ error: "Could not remove favorite product" });
+  }
+};
+
+exports.getFavorites = async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    const [favorites] = await db.execute(
+      `
+      SELECT
+        p.*,
+        u.Name AS SellerName,
+        i.URL AS image_url
+      FROM Favorites f
+      JOIN Product p ON f.ProductID = p.ProductID
+      JOIN User u ON p.UserID = u.UserID
+      LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+      WHERE f.UserID = ?
+      `,
+      [userID],
+    );
+
+    res.json({
+      success: true,
+      favorites: favorites,
+    });
+  } catch (error) {
+    console.error("Error retrieving favorites:", error);
+    res.status(500).json({ error: "Could not retrieve favorite products" });
+  }
+};
+
 // Get all products along with their image URLs
 exports.getAllProducts = async (req, res) => {
   try {
     const [data, fields] = await db.execute(`
+      WITH RankedImages AS (
+          SELECT
+              P.ProductID,
+              P.Name AS ProductName,
+              P.Price,
+              P.Date AS DateUploaded,
+              U.Name AS SellerName,
+              I.URL AS ProductImage,
+              C.Name AS Category,
+              ROW_NUMBER() OVER (PARTITION BY P.ProductID ORDER BY I.URL) AS RowNum
+          FROM Product P
+          JOIN Image_URL I ON P.ProductID = I.ProductID
+          JOIN User U ON P.UserID = U.UserID
+          JOIN Category C ON P.CategoryID = C.CategoryID
+      )
       SELECT
-          P.ProductID,
-          P.Name AS ProductName,
-          P.Price,
-          P.Date AS DateUploaded,
-          U.Name AS SellerName,
-          I.URL AS ProductImage,
-          C.Name AS Category
-      FROM Product P
-      JOIN Image_URL I ON p.ProductID = i.ProductID
-      JOIN User U ON P.UserID = U.UserID
-      JOIN Category C ON P.CategoryID = C.CategoryID;
+          ProductID,
+          ProductName,
+          Price,
+          DateUploaded,
+          SellerName,
+          ProductImage,
+          Category
+      FROM RankedImages
+      WHERE RowNum = 1;
     `);
 
-    console.log(data);
     res.json({
       success: true,
       message: "Products fetched successfully",
@@ -60,9 +121,10 @@ exports.getProductById = async (req, res) => {
   try {
     const [data] = await db.execute(
       `
-      SELECT p.*, i.URL AS image_url
+      SELECT p.*,U.Name AS SellerName,U.Email as SellerEmail,U.Phone as SellerPhone, i.URL AS image_url
       FROM Product p
       LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+      JOIN User U ON p.UserID = U.UserID
       WHERE p.ProductID = ?
     `,
       [id],

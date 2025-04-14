@@ -9,6 +9,6 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get("/search", searchProductsByName);
+router.get("/getProduct", searchProductsByName);
 
 module.exports = router;

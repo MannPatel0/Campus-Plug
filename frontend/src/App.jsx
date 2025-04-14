@@ -12,9 +12,7 @@ import Selling from "./pages/Selling";
 import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
-import ItemForm from "./pages/MyListings";
 import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
-import axios from "axios";
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -298,10 +296,7 @@ function App() {
           // Save to localStorage to persist across refreshes
           sessionStorage.setItem("isAuthenticated", "true");
           sessionStorage.setItem("user", JSON.stringify(userObj));
-
-          // After successful signup, send session data to server
           sendSessionDataToServer(); // Call it after signup
-
           sessionStorage.getItem("user");
 
           console.log("Login successful for:", userData.email);
@@ -388,7 +383,7 @@ function App() {
       console.log("Sending user data to the server:", requestData);
 
       // Send data to Python server (replace with your actual server URL)
-      const response = await fetch("http://localhost:5000/api/user/session", {
+      const response = await fetch("http://0.0.0.0:5000/api/user/session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -712,27 +707,6 @@ function App() {
               <ProtectedRoute>
                 <div className="container mx-auto px-4 py-6">
                   <Selling />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          {/* Add new selling routes */}
-          <Route
-            path="/selling/create"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <ItemForm />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/selling/edit/:id"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <ItemForm />
                 </div>
               </ProtectedRoute>
             }
