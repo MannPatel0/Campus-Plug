@@ -434,7 +434,7 @@ const Settings = () => {
       {/* Privacy Section */}
       {showAlert && (
         <FloatingAlert
-          message="Product removed from History!"
+          message="Removed Your History! 😉"
           onClose={() => setShowAlert(false)}
         />
       )}
@@ -450,9 +450,9 @@ const Settings = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-4 border-b border-gray-100">
               <div className="flex items-start">
-                <Search className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
+                <History className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
                 <div>
-                  <h3 className="font-medium text-gray-800">Search History</h3>
+                  <h3 className="font-medium text-gray-800"> History</h3>
                   <p className="text-sm text-gray-500">
                     Delete all your history on Market
                   </p>
