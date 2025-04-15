@@ -17,6 +17,9 @@ const SearchPage = () => {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+
+
+
   useEffect(() => {
     fetchProducts(initialSearchQuery);
   }, [initialSearchQuery]);

@@ -10,6 +10,8 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
+import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
+
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -29,7 +31,31 @@ const ProductDetail = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
+
+
+    const toggleFavorite = async (id) => {
+      const response = await fetch(
+        "http://localhost:3030/api/product/addFavorite",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: storedUser.ID,
+            productID: id,
+          }),
+        },
+      );
+      const data = await response.json();
+      if (data.success) {
+        setShowAlert(true);
+      }
+      console.log(`Add Product -> History: ${id}`);
+    };
+
 
   const [reviewForm, setReviewForm] = useState({
     rating: 3,
@@ -68,7 +94,7 @@ const ProductDetail = () => {
         userId: storedUser.ID,
       };
 
-      const response = await fetch(`http://localhost:3030/api/review/add`, {
+      const response = await fetch(`http://localhost:3030/api/review/addReview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reviewData),
@@ -182,38 +208,6 @@ const ProductDetail = () => {
     fetchReviews();
   }, [id]);
 
-  // Handle favorite toggle with error handling
-  const toggleFavorite = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:3030/api/product/add_to_favorite",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userID: 1, // Replace with actual user ID
-            productsID: id,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result.success) {
-        setIsFavorite(!isFavorite);
-      } else {
-        throw new Error(result.message || "Failed to toggle favorite");
-      }
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
-      alert(`Failed to add to favorites: ${error.message}`);
-    }
-  };
 
   // Image navigation
   const nextImage = () => {
@@ -296,6 +290,7 @@ const ProductDetail = () => {
 
   // Render product details
   return (
+
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-6">
         <Link
@@ -306,6 +301,12 @@ const ProductDetail = () => {
           <span>Back</span>
         </Link>
       </div>
+      {showAlert && (
+        <FloatingAlert
+          message="Product added to favorites!"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-3/5">
@@ -370,7 +371,6 @@ const ProductDetail = () => {
             </div>
           )}
         </div>
-
         <div className="md:w-2/5">
           <div className="bg-white border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-start mb-4">
@@ -378,7 +378,7 @@ const ProductDetail = () => {
                 {product.Name || "Unnamed Product"}
               </h1>
               <button
-                onClick={toggleFavorite}
+                onClick={() => toggleFavorite(product.ProductID)}
                 className="p-2 hover:bg-gray-100 rounded-full"
                 aria-label={
                   isFavorite ? "Remove from favorites" : "Add to favorites"

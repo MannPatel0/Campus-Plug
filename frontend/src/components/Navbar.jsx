@@ -47,8 +47,8 @@ const Navbar = ({ onLogout, userName }) => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search for books, electronics, furniture..."
-                  className="w-full p-2 pl-10 pr-4 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  placeholder="Search for anything..."
+                  className="w-full p-2 pl-10 pr-4 border border-gray-300 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />

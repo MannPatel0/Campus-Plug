@@ -34,7 +34,6 @@ const Home = () => {
     if (data.success) {
       setShowAlert(true);
     }
-    console.log(response);
     console.log(`Add Product -> History: ${id}`);
   };
 
@@ -82,7 +81,6 @@ const Home = () => {
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
-        console.log(data);
         if (data.success) {
           setRecommended(
             data.data.map((product) => ({
@@ -145,7 +143,6 @@ const Home = () => {
   useEffect(() => {
     const fetchrecomProducts = async () => {
       // Get the user's data from localStorage
-      console.log(storedUser);
       try {
         const response = await fetch(
           "http://localhost:3030/api/history/getHistory",
@@ -162,7 +159,6 @@ const Home = () => {
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
-        console.log(data);
         if (data.success) {
           sethistory(
             data.data.map((product) => ({

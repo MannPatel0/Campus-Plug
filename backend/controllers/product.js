@@ -47,14 +47,29 @@ exports.getFavorites = async (req, res) => {
     const [favorites] = await db.execute(
       `
       SELECT
-        p.*,
-        u.Name AS SellerName,
-        i.URL AS image_url
-      FROM Favorites f
-      JOIN Product p ON f.ProductID = p.ProductID
-      JOIN User u ON p.UserID = u.UserID
-      LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
-      WHERE f.UserID = ?
+      p.ProductID,
+      p.Name,
+      p.Description,
+      p.Price,
+      p.CategoryID,
+      p.UserID,
+      p.Date,
+      u.Name AS SellerName,
+      MIN(i.URL) AS image_url
+  FROM Favorites f
+  JOIN Product p ON f.ProductID = p.ProductID
+  JOIN User u ON p.UserID = u.UserID
+  LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+  WHERE f.UserID = ?
+  GROUP BY
+      p.ProductID,
+      p.Name,
+      p.Description,
+      p.Price,
+      p.CategoryID,
+      p.UserID,
+      p.Date,
+      u.Name;
       `,
       [userID],
     );
@@ -73,31 +88,25 @@ exports.getFavorites = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const [data, fields] = await db.execute(`
-      WITH RankedImages AS (
-          SELECT
-              P.ProductID,
-              P.Name AS ProductName,
-              P.Price,
-              P.Date AS DateUploaded,
-              U.Name AS SellerName,
-              I.URL AS ProductImage,
-              C.Name AS Category,
-              ROW_NUMBER() OVER (PARTITION BY P.ProductID ORDER BY I.URL) AS RowNum
-          FROM Product P
-          JOIN Image_URL I ON P.ProductID = I.ProductID
-          JOIN User U ON P.UserID = U.UserID
-          JOIN Category C ON P.CategoryID = C.CategoryID
-      )
       SELECT
-          ProductID,
-          ProductName,
-          Price,
-          DateUploaded,
-          SellerName,
-          ProductImage,
-          Category
-      FROM RankedImages
-      WHERE RowNum = 1;
+    P.ProductID,
+    P.Name AS ProductName,
+    P.Price,
+    P.Date AS DateUploaded,
+    U.Name AS SellerName,
+    MIN(I.URL) AS ProductImage,
+    C.Name AS Category
+FROM Product P
+JOIN Image_URL I ON P.ProductID = I.ProductID
+JOIN User U ON P.UserID = U.UserID
+JOIN Category C ON P.CategoryID = C.CategoryID
+GROUP BY
+    P.ProductID,
+    P.Name,
+    P.Price,
+    P.Date,
+    U.Name,
+    C.Name;
     `);
 
     res.json({
