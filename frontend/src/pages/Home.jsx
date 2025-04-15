@@ -10,8 +10,11 @@ const Home = () => {
   const [recommended, setRecommended] = useState([]);
   const [history, sethistory] = useState([]);
   const [error, setError] = useState(null);
-  const storedUser = JSON.parse(sessionStorage.getItem("user"));
   const [showAlert, setShowAlert] = useState(false);
+
+  //After user data storing the session.
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
+
 
   const toggleFavorite = async (id) => {
     const response = await fetch(
@@ -63,8 +66,6 @@ const Home = () => {
 
   useEffect(() => {
     const fetchrecomProducts = async () => {
-      // Get the user's data from localStorage
-      console.log(storedUser);
       try {
         const response = await fetch(
           "http://localhost:3030/api/engine/recommended",
@@ -95,6 +96,7 @@ const Home = () => {
               isFavorite: false, // Default state
             })),
           );
+          reloadPage();
         } else {
           throw new Error(data.message || "Error fetching products");
         }
@@ -104,9 +106,7 @@ const Home = () => {
       }
     };
     fetchrecomProducts();
-    //reloadPage();
   }, []);
-  reloadPage();
 
   useEffect(() => {
     const fetchProducts = async () => {

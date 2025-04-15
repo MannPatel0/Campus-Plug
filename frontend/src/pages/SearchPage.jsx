@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
+import { X } from "lucide-react";
 import axios from "axios";
 
 const SearchPage = () => {

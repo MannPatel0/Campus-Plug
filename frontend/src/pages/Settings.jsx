@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Lock, Trash2, History, Search, Shield } from "lucide-react";
+import { User, Lock, Trash2, History, Shield } from "lucide-react";
 import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
 const Settings = () => {
