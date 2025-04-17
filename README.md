@@ -22,6 +22,12 @@
     npm run dev
 ```
 ---
+### Recommendation system
+1. Install the dependencies
+```Bash
+  pip install mysql.connector
+```
+
 
 ### Database
 1. MySql Version 9.2.0
