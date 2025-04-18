@@ -6,20 +6,16 @@
 ### Frontend
 1. `cd frontend` into the dir and then type command
 ```Bash
-    #Install the needed lib with the command bellow
-    npm install
-    #Start The Server
-    npm run dev
+    1. npm install    #Installs the needed packages
+    2. npm run dev    #Start The Server
 ```
 ---
 
 ### Backend
 1. `cd backend` into the dir and then type command
 ```Bash
-    #Install the needed lib with the command bellow
-    npm install
-    #Start The Server
-    npm run dev
+    1. npm install    #Installs the needed packages
+    2. npm run dev    #Start The Server
 ```
 ---
 
@@ -28,7 +24,6 @@
 2. To Create the DataBase use the command bellow:
 ```Bash
     1. mysql -u root
-    2. use Marketplace;
-    3. \. PathToYour/Schema.sql
+    2. \. PathToYour/Schema.sql
     3. \. PathToYour/Init-Data.sql
 ```
