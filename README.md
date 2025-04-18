@@ -1,6 +1,6 @@
 ### Some ground rules
 1. Add both node_modules from Slient and Server to your ```gitignore``` file
-2. Make a brach with the following naming conventionp, refix it with your name ```Your-Name Branch-Name```.
+2. Make a brach with the following naming conventionp, prefix it with your name ```Your-Name Branch-Name```.
 ---
 
 ### Frontend
