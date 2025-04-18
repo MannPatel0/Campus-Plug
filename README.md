@@ -19,6 +19,13 @@
 ```
 ---
 
+### Recommendation
+1. `cd recommendation-engine` into the dir and then type command
+```Bash
+    1. python3 server.py    #Start The Server
+```
+---
+
 ### Database
 1. MySql Version 9.2.0
 2. To Create the DataBase use the command bellow:
