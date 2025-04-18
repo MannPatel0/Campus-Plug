@@ -230,7 +230,7 @@ const Settings = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
       </div>
     );
   }
@@ -274,7 +274,7 @@ const Settings = () => {
                   id="name"
                   value={userData.name}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -291,7 +291,7 @@ const Settings = () => {
                   id="email"
                   value={userData.email}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                   readOnly // Email is often used as identifier and not changeable
                 />
@@ -309,7 +309,7 @@ const Settings = () => {
                   id="phone"
                   value={userData.phone}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
@@ -325,7 +325,7 @@ const Settings = () => {
                   id="UCID"
                   value={userData.UCID}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -342,14 +342,14 @@ const Settings = () => {
                   id="address"
                   value={userData.address}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
             >
               Update Profile
             </button>
@@ -381,7 +381,7 @@ const Settings = () => {
                   id="currentPassword"
                   value={userData.currentPassword}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -398,7 +398,7 @@ const Settings = () => {
                   id="newPassword"
                   value={userData.newPassword}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -415,7 +415,7 @@ const Settings = () => {
                   id="confirmPassword"
                   value={userData.confirmPassword}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -423,7 +423,7 @@ const Settings = () => {
 
             <button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
             >
               Change Password
             </button>

@@ -146,7 +146,7 @@ const SearchPage = () => {
             <div className="flex space-x-2">
               <button
                 onClick={applyFilters}
-                className="w-full bg-green-500 text-white p-3 hover:bg-green-600 transition-colors"
+                className="w-full bg-emerald-500 text-white p-3 hover:bg-emerald-600 transition-colors"
               >
                 Apply Filters
               </button>
@@ -187,7 +187,7 @@ const SearchPage = () => {
                   <h3 className="text-lg font-medium text-gray-800">
                     {listing.title}
                   </h3>
-                  <p className="text-green-600 font-semibold">
+                  <p className="text-emerald-600 font-semibold">
                     ${Number(listing.price).toFixed(2)}
                   </p>
                 </div>

@@ -211,7 +211,7 @@ const Home = () => {
             </p>
             <button
               onClick={handleSelling}
-              className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 focus:outline-none focus:ring-2 focus:ring-green-400 transition-colors"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-6 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-colors"
             >
               Post an Item
             </button>
@@ -277,7 +277,7 @@ const Home = () => {
                     <h3 className="text-lg font-medium text-gray-800 leading-tight">
                       {recommended.title}
                     </h3>
-                    <span className="font-semibold text-green-600 block mt-1">
+                    <span className="font-semibold text-emerald-600 block mt-1">
                       ${recommended.price}
                     </span>
 
@@ -372,7 +372,7 @@ const Home = () => {
                     <h3 className="text-lg font-medium text-gray-800 leading-tight">
                       {listing.title}
                     </h3>
-                    <span className="font-semibold text-green-600 block mt-1">
+                    <span className="font-semibold text-emerald-600 block mt-1">
                       ${listing.price}
                     </span>
 
@@ -464,7 +464,7 @@ const Home = () => {
                     <h3 className="text-lg font-medium text-gray-800 leading-tight">
                       {history.title}
                     </h3>
-                    <span className="font-semibold text-green-600 block mt-1">
+                    <span className="font-semibold text-emerald-600 block mt-1">
                       ${history.price}
                     </span>
 

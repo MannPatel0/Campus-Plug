@@ -119,7 +119,7 @@ const Favorites = () => {
           </p>
           <Link
             to="/"
-            className="inline-block bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
+            className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
           >
             Browse Listings
           </Link>

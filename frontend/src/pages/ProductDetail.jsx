@@ -247,7 +247,7 @@ const ProductDetail = () => {
   if (loading.product) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin h-32 w-32 border-t-2 border-green-500"></div>
+        <div className="animate-spin h-32 w-32 border-t-2 border-emerald-500"></div>
       </div>
     );
   }
@@ -261,7 +261,7 @@ const ProductDetail = () => {
           <p className="text-gray-600">{error.product}</p>
           <Link
             to="/"
-            className="mt-4 inline-block bg-green-500 text-white px-4 py-2 hover:bg-green-600"
+            className="mt-4 inline-block bg-emerald-500 text-white px-4 py-2 hover:bg-emerald-600"
           >
             Back to Listings
           </Link>
@@ -278,7 +278,7 @@ const ProductDetail = () => {
           <h2 className="text-2xl text-red-500 mb-4">Product Not Found</h2>
           <Link
             to="/"
-            className="mt-4 inline-block bg-green-500 text-white px-4 py-2  hover:bg-green-600"
+            className="mt-4 inline-block bg-emerald-500 text-white px-4 py-2  hover:bg-emerald-600"
           >
             Back to Listings
           </Link>
@@ -293,7 +293,7 @@ const ProductDetail = () => {
       <div className="mb-6">
         <Link
           to="/search"
-          className="flex items-center text-green-600 hover:text-green-700"
+          className="flex items-center text-emerald-600 hover:text-emerald-700"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           <span>Back</span>
@@ -350,7 +350,7 @@ const ProductDetail = () => {
               {product.images.map((image, index) => (
                 <div
                   key={index}
-                  className={`bg-white border ${currentImage === index ? "border-green-500 border-2" : "border-gray-200"} min-w-[100px] cursor-pointer`}
+                  className={`bg-white border ${currentImage === index ? "border-emerald-500 border-2" : "border-gray-200"} min-w-[100px] cursor-pointer`}
                   onClick={() => selectImage(index)}
                 >
                   <img
@@ -385,7 +385,7 @@ const ProductDetail = () => {
               </button>
             </div>
 
-            <div className="text-2xl font-bold text-green-600 mb-4">
+            <div className="text-2xl font-bold text-emerald-600 mb-4">
               $
               {typeof product.Price === "number"
                 ? product.Price.toFixed(2)
@@ -416,7 +416,7 @@ const ProductDetail = () => {
             <div className="relative">
               <button
                 onClick={() => setShowContactOptions(!showContactOptions)}
-                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 mb-3"
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3 px-4 mb-3"
               >
                 Contact Seller
               </button>
@@ -428,7 +428,7 @@ const ProductDetail = () => {
                       href={`tel:${product.SellerPhone}`}
                       className="flex items-center gap-2 p-3 hover:bg-gray-50 border-b border-gray-100"
                     >
-                      <Phone className="h-5 w-5 text-green-500" />
+                      <Phone className="h-5 w-5 text-emerald-500" />
                       <span>Call Seller</span>
                     </a>
                   )}
@@ -438,7 +438,7 @@ const ProductDetail = () => {
                       href={`mailto:${product.SellerEmail}`}
                       className="flex items-center gap-2 p-3 hover:bg-gray-50"
                     >
-                      <Mail className="h-5 w-5 text-green-500" />
+                      <Mail className="h-5 w-5 text-emerald-500" />
                       <span>Email Seller</span>
                     </a>
                   )}
@@ -475,7 +475,7 @@ const ProductDetail = () => {
         <div className="bg-white border border-gray-200 p-6">
           {loading.reviews ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-t-2 border-green-500"></div>
+              <div className="animate-spin h-8 w-8 border-t-2 border-emerald-500"></div>
             </div>
           ) : error.reviews ? (
             <div className="text-red-500 mb-4">
@@ -522,7 +522,7 @@ const ProductDetail = () => {
         <div className="mt-4">
           <button
             onClick={() => setShowReviewForm(true)}
-            className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
           >
             Write a Review
           </button>
@@ -580,7 +580,7 @@ const ProductDetail = () => {
                     id="comment"
                     value={reviewForm.comment}
                     onChange={handleReviewInputChange}
-                    className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
+                    className="w-full p-3 border border-gray-300 focus:outline-none focus:border-emerald-500"
                     rows="4"
                     required
                   ></textarea>
@@ -596,7 +596,7 @@ const ProductDetail = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-green-500 text-white  hover:bg-green-600"
+                    className="px-4 py-2 bg-emerald-500 text-white  hover:bg-emerald-600"
                     disabled={loading.submitting}
                   >
                     {loading.submitting ? "Submitting..." : "Submit Review"}
