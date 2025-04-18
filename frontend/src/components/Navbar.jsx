@@ -35,7 +35,7 @@ const Navbar = ({ onLogout, userName }) => {
                 alt="Campus Plug"
                 className="h-8 px-2"
               />
-              <span className="hidden md:block [color:#009966] font-bold text-xl">
+              <span className="hidden md:block text-green-500 font-bold text-xl">
                 Campus Plug
               </span>
             </Link>
@@ -48,7 +48,7 @@ const Navbar = ({ onLogout, userName }) => {
                 <input
                   type="text"
                   placeholder="Search for anything..."
-                  className="w-full p-2 pl-10 pr-4 border border-gray-300 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  className="w-full p-2 pl-10 pr-4 border border-gray-300 focus:outline-none focus:border-[#ed7f30]-500 focus:ring-1 focus:ring-[#ed7f30]-500"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
@@ -57,7 +57,7 @@ const Navbar = ({ onLogout, userName }) => {
                 </div>
                 <button
                   type="submit"
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-green-500"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-[#ed7f30]-500"
                 >
                   Search
                 </button>
@@ -70,7 +70,7 @@ const Navbar = ({ onLogout, userName }) => {
             {/* Favorites Button */}
             <Link
               to="/favorites"
-              className="p-2 text-gray-600 hover:text-green-600"
+              className="p-2 text-gray-600 hover:text-[#ed7f30]-600"
             >
               <Heart className="h-6 w-6" />
             </Link>

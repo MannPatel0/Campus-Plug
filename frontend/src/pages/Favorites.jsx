@@ -1,33 +1,23 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Tag, Trash2 } from "lucide-react";
+import { Heart, Trash2 } from "lucide-react";
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState("dateAdded");
-  const [filterCategory, setFilterCategory] = useState("All");
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
-  const mapCategory = (id) => {
-    const categories = {
-      1: "Electronics",
-      2: "Textbooks",
-      3: "Furniture",
-      4: "Clothing",
-      5: "Kitchen",
-      6: "Other",
-    };
-    return categories[id] || "Other";
-  };
-
   function reloadPage() {
-    var doctTimestamp = new Date(performance.timing.domLoading).getTime();
-    var now = Date.now();
-    if (now > doctTimestamp) {
+    const docTimestamp = new Date(performance.timing.domLoading).getTime();
+    const now = Date.now();
+    if (now > docTimestamp) {
       location.reload();
     }
   }
+
+  const mapCategory = (id) => {
+    return id || "Other";
+  };
 
   const removeFromFavorites = async (itemID) => {
     const response = await fetch(
@@ -43,14 +33,13 @@ const Favorites = () => {
         }),
       },
     );
+
     const data = await response.json();
     if (data.success) {
       reloadPage();
     }
 
-    if (!response.ok) throw new Error("Failed to fetch products");
-    console.log(response);
-    console.log(`Add Product -> History: ${itemID}`);
+    if (!response.ok) throw new Error("Failed to remove from favorites");
   };
 
   useEffect(() => {
@@ -68,7 +57,6 @@ const Favorites = () => {
         );
 
         const data = await response.json();
-
         const favoritesData = data.favorites;
 
         if (!Array.isArray(favoritesData)) {
@@ -78,10 +66,11 @@ const Favorites = () => {
 
         const transformed = favoritesData.map((item) => ({
           id: item.ProductID,
-          title: item.Name,
+          name: item.Name,
           price: parseFloat(item.Price),
-          category: mapCategory(item.CategoryID),
+          categories: [mapCategory(item.Category)],
           image: item.image_url || "/default-image.jpg",
+          description: item.Description || "",
           seller: item.SellerName,
           datePosted: formatDatePosted(item.Date),
           dateAdded: item.Date || new Date().toISOString(),
@@ -112,19 +101,13 @@ const Favorites = () => {
     return 0;
   });
 
-  const filteredFavorites =
-    filterCategory === "All"
-      ? sortedFavorites
-      : sortedFavorites.filter((item) => item.category === filterCategory);
-
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">My Favorites</h1>
       </div>
 
-      {/* Favorites List */}
-      {filteredFavorites.length === 0 ? (
+      {sortedFavorites.length === 0 ? (
         <div className="bg-white border border-gray-200 p-8 text-center">
           <Heart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-medium text-gray-700 mb-2">
@@ -142,50 +125,62 @@ const Favorites = () => {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFavorites.map((item) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedFavorites.map((product) => (
             <div
-              key={item.id}
-              className="bg-white border border-gray-200 hover:shadow-md transition-shadow relative"
+              key={product.id}
+              className="border-2 border-gray-200 rounded overflow-hidden hover:shadow-md transition-shadow"
             >
-              <button
-                onClick={() => removeFromFavorites(item.id)}
-                className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-sm text-red-500 hover:bg-red-50"
-                title="Remove from favorites"
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
-
-              <Link to={`/product/${item.id}`}>
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-48 object-cover"
-                />
+              <Link to={`/product/${product.id}`}>
+                <div className="h-48 bg-gray-200 flex items-center justify-center">
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-gray-400">No image</div>
+                  )}
+                </div>
 
                 <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-medium text-gray-800 leading-tight">
-                      {item.title}
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {product.name}
                     </h3>
-                    <span className="font-semibold text-green-600">
-                      ${item.price}
-                    </span>
+                    <button
+                      onClick={() => removeFromFavorites(product.id)}
+                      className="text-red-500 hover:text-red-600"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
 
-                  <div className="flex items-center text-sm text-gray-500 mb-3">
-                    <Tag className="h-4 w-4 mr-1" />
-                    <span>{item.category}</span>
-                  </div>
+                  <p className="text-emerald-600 font-bold mt-1">
+                    ${product.price.toFixed(2)}
+                  </p>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <span className="text-xs text-gray-500">
-                      Listed {item.datePosted}
-                    </span>
-                    <span className="text-sm font-medium text-gray-700">
-                      {item.seller}
-                    </span>
-                  </div>
+                  {product.categories.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {product.categories.map((category) => (
+                        <span
+                          key={category}
+                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1"
+                        >
+                          {category}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="text-gray-500 text-sm mt-2 line-clamp-2">
+                    {product.description}
+                  </p>
+
+                  <p className="text-gray-400 text-xs mt-2">
+                    Posted {product.datePosted}
+                  </p>
                 </div>
               </Link>
             </div>
@@ -193,14 +188,66 @@ const Favorites = () => {
         </div>
       )}
 
-      {/* Show count if there are favorites */}
-      {filteredFavorites.length > 0 && (
+      {sortedFavorites.length > 0 && (
         <div className="mt-6 text-sm text-gray-500">
-          Showing {filteredFavorites.length}{" "}
-          {filteredFavorites.length === 1 ? "item" : "items"}
-          {filterCategory !== "All" && ` in ${filterCategory}`}
+          Showing {sortedFavorites.length}{" "}
+          {sortedFavorites.length === 1 ? "item" : "items"}
         </div>
       )}
+
+      <footer className="bg-gray-800 text-white py-6 mt-12">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <h3 className="text-lg font-semibold mb-2">Campus Marketplace</h3>
+              <p className="text-gray-400 text-sm">
+                Your trusted university trading platform
+              </p>
+            </div>
+
+            <div className="flex space-x-6">
+              <div>
+                <h4 className="font-medium mb-2">Quick Links</h4>
+                <ul className="text-sm text-gray-400">
+                  <li className="mb-1">
+                    <Link to="/" className="hover:text-white transition">
+                      Home
+                    </Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link to="/selling" className="hover:text-white transition">
+                      Sell an Item
+                    </Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link
+                      to="/favorites"
+                      className="hover:text-white transition"
+                    >
+                      My Favorites
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-medium mb-2">Contact</h4>
+                <ul className="text-sm text-gray-400">
+                  <li className="mb-1">support@campusmarket.com</li>
+                  <li className="mb-1">University of Calgary</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
+            <p>
+              © {new Date().getFullYear()} Campus Marketplace. All rights
+              reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

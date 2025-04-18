@@ -52,6 +52,11 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+
+useEffect(() => {
+  sendSessionDataToServer();
+}, []);
+
   // Send verification code
   const sendVerificationCode = async (userData) => {
     try {

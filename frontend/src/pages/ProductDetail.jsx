@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
-
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -34,28 +33,26 @@ const ProductDetail = () => {
   const [showAlert, setShowAlert] = useState(false);
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
-
-    const toggleFavorite = async (id) => {
-      const response = await fetch(
-        "http://localhost:3030/api/product/addFavorite",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userID: storedUser.ID,
-            productID: id,
-          }),
+  const toggleFavorite = async (id) => {
+    const response = await fetch(
+      "http://localhost:3030/api/product/addFavorite",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
-      const data = await response.json();
-      if (data.success) {
-        setShowAlert(true);
-      }
-      console.log(`Add Product -> History: ${id}`);
-    };
-
+        body: JSON.stringify({
+          userID: storedUser.ID,
+          productID: id,
+        }),
+      },
+    );
+    const data = await response.json();
+    if (data.success) {
+      setShowAlert(true);
+    }
+    console.log(`Add Product -> History: ${id}`);
+  };
 
   const [reviewForm, setReviewForm] = useState({
     rating: 3,
@@ -94,11 +91,14 @@ const ProductDetail = () => {
         userId: storedUser.ID,
       };
 
-      const response = await fetch(`http://localhost:3030/api/review/addReview`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reviewData),
-      });
+      const response = await fetch(
+        `http://localhost:3030/api/review/addReview`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reviewData),
+        },
+      );
 
       const result = await response.json();
 
@@ -208,7 +208,6 @@ const ProductDetail = () => {
     fetchReviews();
   }, [id]);
 
-
   // Image navigation
   const nextImage = () => {
     if (product?.images?.length > 0) {
@@ -248,7 +247,7 @@ const ProductDetail = () => {
   if (loading.product) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-green-500"></div>
+        <div className="animate-spin h-32 w-32 border-t-2 border-green-500"></div>
       </div>
     );
   }
@@ -262,7 +261,7 @@ const ProductDetail = () => {
           <p className="text-gray-600">{error.product}</p>
           <Link
             to="/"
-            className="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="mt-4 inline-block bg-green-500 text-white px-4 py-2 hover:bg-green-600"
           >
             Back to Listings
           </Link>
@@ -279,7 +278,7 @@ const ProductDetail = () => {
           <h2 className="text-2xl text-red-500 mb-4">Product Not Found</h2>
           <Link
             to="/"
-            className="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="mt-4 inline-block bg-green-500 text-white px-4 py-2  hover:bg-green-600"
           >
             Back to Listings
           </Link>
@@ -290,7 +289,6 @@ const ProductDetail = () => {
 
   // Render product details
   return (
-
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-6">
         <Link
@@ -320,8 +318,7 @@ const ProductDetail = () => {
                   onClick={nextImage}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src =
-                      "https://via.placeholder.com/400x300?text=Image+Not+Available";
+                    e.target.src = "https://via.placeholder.com/400x300";
                   }}
                 />
                 {product.images.length > 1 && (
@@ -331,11 +328,11 @@ const ProductDetail = () => {
                         e.stopPropagation();
                         prevImage();
                       }}
-                      className="bg-white/70 p-1 rounded-full"
+                      className="bg-white/70 p-1"
                     >
                       <ArrowLeft className="h-5 w-5" />
                     </button>
-                    <div className="text-sm bg-white/70 px-2 py-1 rounded">
+                    <div className="text-sm bg-white/70 px-2 py-1 ">
                       {currentImage + 1}/{product.images.length}
                     </div>
                   </div>
@@ -353,7 +350,7 @@ const ProductDetail = () => {
               {product.images.map((image, index) => (
                 <div
                   key={index}
-                  className={`bg-white border ${currentImage === index ? "border-green-500" : "border-gray-200"} min-w-[100px] cursor-pointer`}
+                  className={`bg-white border ${currentImage === index ? "border-green-500 border-2" : "border-gray-200"} min-w-[100px] cursor-pointer`}
                   onClick={() => selectImage(index)}
                 >
                   <img
@@ -379,14 +376,12 @@ const ProductDetail = () => {
               </h1>
               <button
                 onClick={() => toggleFavorite(product.ProductID)}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-gray-100"
                 aria-label={
                   isFavorite ? "Remove from favorites" : "Add to favorites"
                 }
               >
-                <Heart
-                  className={`h-6 w-6 ${isFavorite ? "text-red-500 fill-red-500" : "text-gray-400"}`}
-                />
+                <Heart className={`h-6 w-6 ext-red-500 fill-red-500`} />
               </button>
             </div>
 
@@ -455,7 +450,7 @@ const ProductDetail = () => {
               {/* Seller Info */}
               <div className="flex items-center mb-3">
                 <div className="mr-3">
-                  <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                  <div className="h-12 w-12 bg-gray-200 flex items-center justify-center">
                     <User className="h-6 w-6 text-gray-600" />
                   </div>
                 </div>
@@ -480,7 +475,7 @@ const ProductDetail = () => {
         <div className="bg-white border border-gray-200 p-6">
           {loading.reviews ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-green-500"></div>
+              <div className="animate-spin h-8 w-8 border-t-2 border-green-500"></div>
             </div>
           ) : error.reviews ? (
             <div className="text-red-500 mb-4">
@@ -527,7 +522,7 @@ const ProductDetail = () => {
         <div className="mt-4">
           <button
             onClick={() => setShowReviewForm(true)}
-            className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded"
+            className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
           >
             Write a Review
           </button>
@@ -536,7 +531,7 @@ const ProductDetail = () => {
         {/* Review Popup Form */}
         {showReviewForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="bg-white shadow-xl max-w-md w-full p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800">
                   Write a Review
@@ -585,7 +580,7 @@ const ProductDetail = () => {
                     id="comment"
                     value={reviewForm.comment}
                     onChange={handleReviewInputChange}
-                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-500"
+                    className="w-full p-3 border border-gray-300 focus:outline-none focus:border-green-500"
                     rows="4"
                     required
                   ></textarea>
@@ -595,13 +590,13 @@ const ProductDetail = () => {
                   <button
                     type="button"
                     onClick={() => setShowReviewForm(false)}
-                    className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
+                    className="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-100"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                    className="px-4 py-2 bg-green-500 text-white  hover:bg-green-600"
                     disabled={loading.submitting}
                   >
                     {loading.submitting ? "Submitting..." : "Submit Review"}
