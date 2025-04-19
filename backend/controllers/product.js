@@ -1,5 +1,37 @@
 const db = require("../utils/database");
 
+exports.addProduct = async (req, res) => {
+  const { userID, name, price, qty, description, category, images } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `INSERT INTO Product (Name, Price, StockQuantity, UserID, Description, CategoryID) VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, price, qty, userID, description, category],
+    );
+
+    const productID = result.insertId;
+    if (images && images.length > 0) {
+      const imageInsertPromises = images.map((imagePath) =>
+        db.execute(`INSERT INTO Image_URL (URL, ProductID) VALUES (?, ?)`, [
+          imagePath,
+          productID,
+        ]),
+      );
+
+      await Promise.all(imageInsertPromises); //perallel
+    }
+
+    res.json({
+      success: true,
+      message: "Product and images added successfully",
+    });
+  } catch (error) {
+    console.error("Error adding product or images:", error);
+    console.log(error);
+    return res.json({ error: "Could not add product or images" });
+  }
+};
+
 exports.addFavorite = async (req, res) => {
   const { userID, productID } = req.body;
   console.log(userID);

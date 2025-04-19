@@ -8,6 +8,7 @@ const ProductForm = ({
   onCancel,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   const categories = [
     "Electronics",
@@ -27,6 +28,92 @@ const ProductForm = ({
     "Music & Instruments",
     "Other",
   ];
+
+  // Map category names to their respective IDs
+  const categoryMapping = {
+    Electronics: 1,
+    Clothing: 2,
+    "Home & Garden": 3,
+    "Toys & Games": 4,
+    Books: 5,
+    "Sports & Outdoors": 6,
+    Automotive: 7,
+    "Beauty & Personal Care": 8,
+    "Health & Wellness": 9,
+    Jewelry: 10,
+    "Art & Collectibles": 11,
+    "Food & Beverages": 12,
+    "Office Supplies": 13,
+    "Pet Supplies": 14,
+    "Music & Instruments": 15,
+    Other: 16,
+  };
+
+  const handleSave = async () => {
+    // Check if the user has selected at least one category
+    if (!(editingProduct.categories || []).length) {
+      alert("Please select at least one category");
+      return;
+    }
+
+    try {
+      // First, upload images if there are any
+      const imagePaths = [];
+
+      // If we have files to upload, we'd handle the image upload here
+      // This is a placeholder for where you'd implement image uploads
+      // For now, we'll simulate the API expecting paths:
+      if (editingProduct.images && editingProduct.images.length > 0) {
+        // Simulating image paths for demo purposes
+        // In a real implementation, you would upload these files first
+        // and then use the returned paths
+        editingProduct.images.forEach((file, index) => {
+          const simulatedPath = `/public/uploads/${file.name}`;
+          imagePaths.push(simulatedPath);
+        });
+      }
+
+      // Get the category ID from the first selected category
+      const categoryName = (editingProduct.categories || [])[0];
+      const categoryID = categoryMapping[categoryName] || 3; // Default to 3 if not found
+
+      // Prepare payload according to API expectations
+      const payload = {
+        name: editingProduct.name || "",
+        price: parseFloat(editingProduct.price) || 0,
+        qty: 1, // Hardcoded as per your requirement
+        userID: storedUser.ID,
+        description: editingProduct.description || "",
+        category: categoryID,
+        images: imagePaths,
+      };
+
+      console.log("Sending payload:", payload);
+
+      const response = await fetch(
+        "http://localhost:3030/api/product/addProduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to add product: ${errorData}`);
+      }
+
+      const data = await response.json();
+      console.log("Product added:", data);
+      if (onSave) onSave(data);
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert(`Error saving product: ${error.message}`);
+    }
+  };
 
   const addCategory = () => {
     if (
@@ -309,7 +396,7 @@ const ProductForm = ({
             Cancel
           </button>
           <button
-            onClick={onSave}
+            onClick={handleSave}
             className="bg-emerald-600 text-white px-6 py-2 hover:bg-emerald-700 rounded-md"
           >
             {editingProduct.id ? "Update Product" : "Add Product"}
