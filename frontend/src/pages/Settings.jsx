@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { User, Lock, Trash2, History, Search, Shield } from "lucide-react";
+import { User, Lock, Trash2, History, Shield } from "lucide-react";
+import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
 const Settings = () => {
   const [userData, setUserData] = useState({
@@ -9,13 +10,13 @@ const Settings = () => {
     phone: "",
     UCID: "",
     address: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    password: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -59,10 +60,7 @@ const Settings = () => {
             UCID: data.UCID || storedUser.UCID || "",
             phone: data.phone || storedUser.phone || "",
             address: data.address || storedUser.address || "",
-            // Reset password fields
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
+            password: data.password,
           }));
         } else {
           throw new Error(data.error || "Failed to retrieve user data");
@@ -86,6 +84,25 @@ const Settings = () => {
       ...prevData,
       [id]: value,
     }));
+  };
+
+  const removeHistory = async () => {
+    const response = await fetch(
+      "http://localhost:3030/api/history/delHistory",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: storedUser.ID,
+        }),
+      },
+    );
+
+    if (response.ok) {
+      setShowAlert(true);
+    }
   };
 
   const handleUpdateProfile = async () => {
@@ -122,47 +139,6 @@ const Settings = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handlePasswordUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      // Validate passwords match
-      if (userData.newPassword !== userData.confirmPassword) {
-        alert("New passwords do not match!");
-        return;
-      }
-
-      // TODO: Implement the actual password update API call
-      console.log("Password updated");
-
-      // Update password in localStorage
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const updatedUser = {
-        ...storedUser,
-        password: userData.newPassword,
-      };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      // Reset password fields
-      setUserData((prevData) => ({
-        ...prevData,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      }));
-
-      alert("Password updated successfully!");
-    } catch (error) {
-      console.error("Error updating password:", error);
-      alert("Failed to update password: " + error.message);
-    }
-  };
-
-  const handleDeleteHistory = (type) => {
-    // TODO: Delete the specified history
-    console.log(`Deleting ${type} history`);
-    alert(`${type} history deleted successfully!`);
   };
 
   const handleDeleteAccount = async () => {
@@ -214,7 +190,7 @@ const Settings = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
       </div>
     );
   }
@@ -258,7 +234,7 @@ const Settings = () => {
                   id="name"
                   value={userData.name}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -275,7 +251,7 @@ const Settings = () => {
                   id="email"
                   value={userData.email}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                   readOnly // Email is often used as identifier and not changeable
                 />
@@ -293,7 +269,7 @@ const Settings = () => {
                   id="phone"
                   value={userData.phone}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
@@ -309,7 +285,7 @@ const Settings = () => {
                   id="UCID"
                   value={userData.UCID}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -326,14 +302,29 @@ const Settings = () => {
                   id="address"
                   value={userData.address}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  password
+                </label>
+                <input
+                  type="text"
+                  id="password"
+                  value={userData.password}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
             >
               Update Profile
             </button>
@@ -341,81 +332,13 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Security Section */}
-      <div className="bg-white border border-gray-200 mb-6">
-        <div className="border-b border-gray-200 p-4">
-          <div className="flex items-center">
-            <Lock className="h-5 w-5 text-gray-500 mr-2" />
-            <h2 className="text-lg font-medium text-gray-800">Password</h2>
-          </div>
-        </div>
-
-        <div className="p-4">
-          <form onSubmit={handlePasswordUpdate}>
-            <div className="space-y-4 mb-4">
-              <div>
-                <label
-                  htmlFor="currentPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  value={userData.currentPassword}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="newPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  value={userData.newPassword}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  value={userData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-green-500"
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4"
-            >
-              Change Password
-            </button>
-          </form>
-        </div>
-      </div>
-
       {/* Privacy Section */}
+      {showAlert && (
+        <FloatingAlert
+          message="We Removed Your History! 😉"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       <div className="bg-white border border-gray-200 mb-6">
         <div className="border-b border-gray-200 p-4">
           <div className="flex items-center">
@@ -426,39 +349,18 @@ const Settings = () => {
 
         <div className="p-4">
           <div className="space-y-4">
-            <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-              <div className="flex items-start">
-                <Search className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-gray-800">Search History</h3>
-                  <p className="text-sm text-gray-500">
-                    Delete all your search history on StudentMarket
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleDeleteHistory("search")}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 flex items-center"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </button>
-            </div>
-
             <div className="flex justify-between items-center">
               <div className="flex items-start">
                 <History className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
                 <div>
-                  <h3 className="font-medium text-gray-800">
-                    Browsing History
-                  </h3>
+                  <h3 className="font-medium text-gray-800"> History</h3>
                   <p className="text-sm text-gray-500">
-                    Delete all your browsing history on StudentMarket
+                    Delete all your history on Market
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => handleDeleteHistory("browsing")}
+                onClick={() => removeHistory()}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 flex items-center"
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -472,7 +374,7 @@ const Settings = () => {
       {/* Delete Account (Danger Zone) */}
       <div className="bg-white border border-red-200 mb-6">
         <div className="border-b border-red-200 p-4 bg-red-50">
-          <h2 className="text-lg font-medium text-red-700">Danger Zone</h2>
+          <h2 className="text-lg font-medium text-red-700">Danger Zone !!!</h2>
         </div>
 
         <div className="p-4">

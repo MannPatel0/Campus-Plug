@@ -12,7 +12,7 @@ import Selling from "./pages/Selling";
 import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
-import ItemForm from "./pages/MyListings";
+import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -29,6 +29,8 @@ function App() {
   const [showImage, setShowImage] = useState(true);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [userId, setUserId] = useState(null);
 
   // New verification states
   const [verificationStep, setVerificationStep] = useState("initial"); // 'initial', 'code-sent', 'verifying'
@@ -48,6 +50,10 @@ function App() {
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    sendSessionDataToServer();
   }, []);
 
   // Send verification code
@@ -189,6 +195,9 @@ function App() {
         sessionStorage.setItem("isAuthenticated", "true");
         sessionStorage.setItem("user", JSON.stringify(newUser));
 
+        // After successful signup, send session data to server
+        sendSessionDataToServer(); // Call it after signup
+
         // Reset verification steps
         setVerificationStep("initial");
         setTempUserData(null);
@@ -240,7 +249,7 @@ function App() {
           UCID: formValues.ucid,
           phone: formValues.phone,
           password: formValues.password, // This will be needed for the final signup
-          address: "NOT_GIVEN",
+          address: formValues.address, // Add this line
           client: 1,
           admin: 0,
         };
@@ -256,7 +265,7 @@ function App() {
 
         // Make API call to localhost:3030/find_user
         const response = await fetch(
-          "http://localhost:3030/api/user/find_user",
+          "http://localhost:3030/api/user/do_login",
           {
             method: "POST",
             headers: {
@@ -354,6 +363,48 @@ function App() {
   const handleBackToSignup = () => {
     setVerificationStep("initial");
     setError("");
+  };
+
+  const sendSessionDataToServer = async () => {
+    try {
+      // Retrieve data from sessionStorage
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      // const isAuthenticated =
+      //   sessionStorage.getItem("isAuthenticated") === "true";
+
+      if (!user || !isAuthenticated) {
+        console.log("User is not authenticated");
+        return;
+      }
+
+      // Prepare the data to send
+      const requestData = {
+        userId: user.ID, // or user.ID depending on your user structure
+        email: user.email,
+        isAuthenticated,
+      };
+
+      console.log("Sending user data to the server:", requestData);
+
+      // Send data to Python server (replace with your actual server URL)
+      const response = await fetch("http://0.0.0.0:5000/api/user/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      // Check the response
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Server response:", result);
+      } else {
+        console.error("Failed to send session data to the server");
+      }
+    } catch (error) {
+      console.error("Error sending session data:", error);
+    }
   };
 
   // Login component
@@ -474,6 +525,25 @@ function App() {
                       id="phone"
                       name="phone"
                       placeholder="+1(123)456 7890"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      required={isSignUp}
+                    />
+                  </div>
+                )}
+
+                {isSignUp && (
+                  <div>
+                    <label
+                      htmlFor="address"
+                      className="block mb-1 text-sm font-medium text-gray-800"
+                    >
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      placeholder="Your address"
                       className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                       required={isSignUp}
                     />
@@ -635,6 +705,16 @@ function App() {
             }
           />
           <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <div className="container mx-auto px-4 py-6">
+                  <SearchPage />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/settings"
             element={
               <ProtectedRoute>
@@ -650,27 +730,6 @@ function App() {
               <ProtectedRoute>
                 <div className="container mx-auto px-4 py-6">
                   <Selling />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          {/* Add new selling routes */}
-          <Route
-            path="/selling/create"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <ItemForm />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/selling/edit/:id"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <ItemForm />
                 </div>
               </ProtectedRoute>
             }

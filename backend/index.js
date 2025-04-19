@@ -1,10 +1,15 @@
 const express = require("express");
 const cors = require("cors");
-//Get the db connection
+
 const db = require("./utils/database");
 
 const userRouter = require("./routes/user");
 const productRouter = require("./routes/product");
+const searchRouter = require("./routes/search");
+const recommendedRouter = require("./routes/recommendation");
+const history = require("./routes/history");
+const review = require("./routes/review");
+
 const { generateEmailTransporter } = require("./utils/mail");
 const {
   cleanupExpiredCodes,
@@ -28,15 +33,20 @@ transporter
     console.error("Email connection failed:", error);
   });
 
-//Check database connection
 checkDatabaseConnection(db);
 
 //Routes
-app.use("/api/user", userRouter); //prefix with /api/user
-app.use("/api/product", productRouter); //prefix with /api/product
+app.use("/api/user", userRouter);
+app.use("/api/product", productRouter);
+app.use("/api/search", searchRouter);
+app.use("/api/engine", recommendedRouter);
+app.use("/api/history", history);
+app.use("/api/review", review);
+
 
 // Set up a scheduler to run cleanup every hour
-setInterval(cleanupExpiredCodes, 60 * 60 * 1000);
+clean_up_time = 30*60*1000;
+setInterval(cleanupExpiredCodes, clean_up_time);
 
 app.listen(3030, () => {
   console.log(`Running Backend on http://localhost:3030/`);

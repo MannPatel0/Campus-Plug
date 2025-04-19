@@ -1,16 +1,27 @@
+// routes/product.js
 const express = require("express");
 const {
-  addToFavorite,
+  addFavorite,
+  getFavorites,
+  removeFavorite,
   getAllProducts,
   getProductById,
+  addProduct,
 } = require("../controllers/product");
-
 const router = express.Router();
 
-router.post("/add_fav_product", addToFavorite);
+// Add detailed logging middleware
+router.use((req, res, next) => {
+  console.log(`Incoming ${req.method} request to ${req.path}`);
+  next();
+});
 
-router.get("/get_product", getAllProducts);
+router.post("/addFavorite", addFavorite);
+router.post("/getFavorites", getFavorites);
+router.post("/delFavorite", removeFavorite);
 
-router.post("/get_productID", getProductById);
+router.post("/addProduct", addProduct);
+router.get("/getProduct", getAllProducts);
+router.get("/:id", getProductById); // Simplified route
 
 module.exports = router;
