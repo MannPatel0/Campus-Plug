@@ -7,6 +7,7 @@ const {
   getAllProducts,
   getProductById,
   addProduct,
+  myProduct,
 } = require("../controllers/product");
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.post("/addFavorite", addFavorite);
 router.post("/getFavorites", getFavorites);
 router.post("/delFavorite", removeFavorite);
 
+router.post("/myProduct", myProduct);
 router.post("/addProduct", addProduct);
 router.get("/getProduct", getAllProducts);
 router.get("/:id", getProductById); // Simplified route

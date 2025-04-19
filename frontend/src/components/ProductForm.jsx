@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { X, ChevronLeft, Plus, Trash2, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, ChevronLeft, Plus, Trash2 } from "lucide-react";
 
 const ProductForm = ({
   editingProduct,
@@ -8,46 +8,42 @@ const ProductForm = ({
   onCancel,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [categoryMapping, setCategoryMapping] = useState({});
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
-  const categories = [
-    "Electronics",
-    "Clothing",
-    "Home & Garden",
-    "Toys & Games",
-    "Books",
-    "Sports & Outdoors",
-    "Automotive",
-    "Beauty & Personal Care",
-    "Health & Wellness",
-    "Jewelry",
-    "Art & Collectibles",
-    "Food & Beverages",
-    "Office Supplies",
-    "Pet Supplies",
-    "Music & Instruments",
-    "Other",
-  ];
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("http://localhost:3030/api/category");
+        if (!response.ok) throw new Error("Failed to fetch categories");
 
-  // Map category names to their respective IDs
-  const categoryMapping = {
-    Electronics: 1,
-    Clothing: 2,
-    "Home & Garden": 3,
-    "Toys & Games": 4,
-    Books: 5,
-    "Sports & Outdoors": 6,
-    Automotive: 7,
-    "Beauty & Personal Care": 8,
-    "Health & Wellness": 9,
-    Jewelry: 10,
-    "Art & Collectibles": 11,
-    "Food & Beverages": 12,
-    "Office Supplies": 13,
-    "Pet Supplies": 14,
-    "Music & Instruments": 15,
-    Other: 16,
-  };
+        const responseJson = await response.json();
+        const data = responseJson.data;
+
+        // Create an array of category names for the dropdown
+        // Transform the object into an array of category names
+        const categoryNames = [];
+        const mapping = {};
+
+        // Process the data properly to avoid rendering objects
+        Object.entries(data).forEach(([id, name]) => {
+          // Make sure each category name is a string
+          const categoryName = String(name);
+          categoryNames.push(categoryName);
+          mapping[categoryName] = parseInt(id);
+        });
+
+        setCategories(categoryNames);
+        setCategoryMapping(mapping);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSave = async () => {
     // Check if the user has selected at least one category
@@ -61,13 +57,9 @@ const ProductForm = ({
       const imagePaths = [];
 
       // If we have files to upload, we'd handle the image upload here
-      // This is a placeholder for where you'd implement image uploads
-      // For now, we'll simulate the API expecting paths:
       if (editingProduct.images && editingProduct.images.length > 0) {
         // Simulating image paths for demo purposes
-        // In a real implementation, you would upload these files first
-        // and then use the returned paths
-        editingProduct.images.forEach((file, index) => {
+        editingProduct.images.forEach((file) => {
           const simulatedPath = `/public/uploads/${file.name}`;
           imagePaths.push(simulatedPath);
         });
@@ -75,13 +67,13 @@ const ProductForm = ({
 
       // Get the category ID from the first selected category
       const categoryName = (editingProduct.categories || [])[0];
-      const categoryID = categoryMapping[categoryName] || 3; // Default to 3 if not found
+      const categoryID = categoryMapping[categoryName] || 1; // Default to 3 if not found
 
       // Prepare payload according to API expectations
       const payload = {
         name: editingProduct.name || "",
         price: parseFloat(editingProduct.price) || 0,
-        qty: 1, // Hardcoded as per your requirement
+        qty: 1,
         userID: storedUser.ID,
         description: editingProduct.description || "",
         category: categoryID,
@@ -115,6 +107,24 @@ const ProductForm = ({
     }
   };
 
+  const markAsSold = async () => {
+    // This would call an API to move the product to the transaction table
+    try {
+      // API call would go here
+      console.log("Moving product to transaction table:", editingProduct.id);
+
+      // Toggle the sold status in the UI
+      setEditingProduct((prev) => ({
+        ...prev,
+        isSold: !prev.isSold,
+      }));
+
+      // You would add your API call here to update the backend
+    } catch (error) {
+      console.error("Error marking product as sold:", error);
+    }
+  };
+
   const addCategory = () => {
     if (
       selectedCategory &&
@@ -134,13 +144,6 @@ const ProductForm = ({
       categories: (prev.categories || []).filter(
         (cat) => cat !== categoryToRemove,
       ),
-    }));
-  };
-
-  const toggleSoldStatus = () => {
-    setEditingProduct((prev) => ({
-      ...prev,
-      isSold: !prev.isSold,
     }));
   };
 
@@ -196,18 +199,8 @@ const ProductForm = ({
         {/* Sold Status */}
         <div className="md:col-span-2">
           <div className="flex items-center mt-2">
-            <input
-              type="checkbox"
-              id="soldStatus"
-              checked={editingProduct.isSold || false}
-              onChange={toggleSoldStatus}
-              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
-            />
-            <label htmlFor="soldStatus" className="ml-2 text-sm text-gray-700">
-              Mark as {editingProduct.isSold ? "Available" : "Sold"}
-            </label>
             {editingProduct.isSold && (
-              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                 Sold
               </span>
             )}
@@ -232,8 +225,8 @@ const ProductForm = ({
                 .filter(
                   (cat) => !(editingProduct.categories || []).includes(cat),
                 )
-                .map((category) => (
-                  <option key={category} value={category}>
+                .map((category, index) => (
+                  <option key={index} value={category}>
                     {category}
                   </option>
                 ))}
@@ -252,9 +245,9 @@ const ProductForm = ({
           {/* Selected Categories */}
           {(editingProduct.categories || []).length > 0 ? (
             <div className="mt-2 flex flex-wrap gap-2">
-              {(editingProduct.categories || []).map((category) => (
+              {(editingProduct.categories || []).map((category, index) => (
                 <span
-                  key={category}
+                  key={index}
                   className="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-800"
                 >
                   {category}
@@ -375,33 +368,33 @@ const ProductForm = ({
       </div>
 
       {/* Actions */}
-      <div className="mt-6 flex justify-between border-t border-gray-200 pt-4">
+      <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
         <button
-          onClick={toggleSoldStatus}
-          className={`flex items-center gap-1 px-4 py-2 rounded-md transition-colors ${
-            editingProduct.isSold
-              ? "bg-green-100 text-green-700 hover:bg-green-200"
-              : "bg-red-100 text-red-700 hover:bg-red-200"
-          }`}
+          onClick={onCancel}
+          className="bg-gray-100 text-gray-700 px-4 py-2 hover:bg-gray-200 rounded-md"
         >
-          <Check size={16} />
-          <span>Mark as {editingProduct.isSold ? "Available" : "Sold"}</span>
+          Cancel
         </button>
 
-        <div className="flex gap-3">
+        {editingProduct.id && (
           <button
-            onClick={onCancel}
-            className="bg-gray-100 text-gray-700 px-4 py-2 hover:bg-gray-200 rounded-md"
+            onClick={markAsSold}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              editingProduct.isSold
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "bg-red-600 text-white hover:bg-red-700"
+            }`}
           >
-            Cancel
+            Mark as {editingProduct.isSold ? "Available" : "Sold"}
           </button>
-          <button
-            onClick={handleSave}
-            className="bg-emerald-600 text-white px-6 py-2 hover:bg-emerald-700 rounded-md"
-          >
-            {editingProduct.id ? "Update Product" : "Add Product"}
-          </button>
-        </div>
+        )}
+
+        <button
+          onClick={handleSave}
+          className="bg-emerald-600 text-white px-6 py-2 hover:bg-emerald-700 rounded-md"
+        >
+          {editingProduct.id ? "Update Product" : "Add Product"}
+        </button>
       </div>
     </div>
   );

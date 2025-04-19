@@ -1,34 +1,22 @@
 const db = require("../utils/database");
 
 exports.addProduct = async (req, res) => {
-  const { userID, name, price, qty, description, category, images } = req.body;
-
+  const { userID, name, price, stockQty, Description } = req.body;
+  console.log(userID);
   try {
+    // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
-      `INSERT INTO Product (Name, Price, StockQuantity, UserID, Description, CategoryID) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, price, qty, userID, description, category],
+      `INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)`,
+      [userID, productID],
     );
-
-    const productID = result.insertId;
-    if (images && images.length > 0) {
-      const imageInsertPromises = images.map((imagePath) =>
-        db.execute(`INSERT INTO Image_URL (URL, ProductID) VALUES (?, ?)`, [
-          imagePath,
-          productID,
-        ]),
-      );
-
-      await Promise.all(imageInsertPromises); //perallel
-    }
 
     res.json({
       success: true,
-      message: "Product and images added successfully",
+      message: "Product added to favorites successfully",
     });
   } catch (error) {
-    console.error("Error adding product or images:", error);
-    console.log(error);
-    return res.json({ error: "Could not add product or images" });
+    console.error("Error adding favorite product:", error);
+    return res.json({ error: "Could not add favorite product" });
   }
 };
 
@@ -69,6 +57,49 @@ exports.removeFavorite = async (req, res) => {
   } catch (error) {
     console.error("Error removing favorite product:", error);
     return res.json({ error: "Could not remove favorite product" });
+  }
+};
+
+exports.myProduct = async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    const [favorites] = await db.execute(
+      `
+      SELECT
+      p.ProductID,
+      p.Name,
+      p.Description,
+      p.Price,
+      p.CategoryID,
+      p.UserID,
+      p.Date,
+      u.Name AS SellerName,
+      MIN(i.URL) AS image_url
+  FROM Product p
+  JOIN User u ON p.UserID = u.UserID
+  LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+  WHERE p.UserID = ?
+  GROUP BY
+      p.ProductID,
+      p.Name,
+      p.Description,
+      p.Price,
+      p.CategoryID,
+      p.UserID,
+      p.Date,
+      u.Name;
+      `,
+      [userID],
+    );
+
+    res.json({
+      success: true,
+      favorites: favorites,
+    });
+  } catch (error) {
+    console.error("Error retrieving favorites:", error);
+    res.status(500).json({ error: "Could not retrieve favorite products" });
   }
 };
 

@@ -30,8 +30,6 @@ function App() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [userId, setUserId] = useState(null);
-
   // New verification states
   const [verificationStep, setVerificationStep] = useState("initial"); // 'initial', 'code-sent', 'verifying'
   const [tempUserData, setTempUserData] = useState(null);
@@ -383,8 +381,6 @@ function App() {
         email: user.email,
         isAuthenticated,
       };
-
-      console.log("Sending user data to the server:", requestData);
 
       // Send data to Python server (replace with your actual server URL)
       const response = await fetch("http://0.0.0.0:5000/api/user/session", {

@@ -12,7 +12,6 @@ const Selling = () => {
     price: "",
     description: "",
     categories: [],
-    status: "Unsold",
     images: [],
   });
 
@@ -28,7 +27,6 @@ const Selling = () => {
           price: "299.99",
           description: "A beautiful vintage film camera in excellent condition",
           categories: ["Electronics", "Art & Collectibles"],
-          status: "Unsold",
           images: ["/public/Pictures/Dell1.jpg"],
         },
         {
@@ -37,7 +35,6 @@ const Selling = () => {
           price: "149.50",
           description: "Genuine leather jacket, worn only a few times",
           categories: ["Clothing"],
-          status: "Unsold",
           images: [],
         },
       ];
@@ -71,7 +68,6 @@ const Selling = () => {
       price: "",
       description: "",
       categories: [],
-      status: "Unsold",
       images: [],
     });
   };
@@ -99,7 +95,6 @@ const Selling = () => {
       price: "",
       description: "",
       categories: [],
-      status: "Unsold",
       images: [],
     });
     setShowForm(true);
@@ -164,15 +159,6 @@ const Selling = () => {
                       <h3 className="text-lg font-semibold text-gray-800">
                         {product.name}
                       </h3>
-                      <span
-                        className={`px-2 py-1 text-xs ${
-                          product.status === "Sold"
-                            ? "bg-gray-200 text-gray-700"
-                            : "bg-emerald-100 text-emerald-800"
-                        }`}
-                      >
-                        {product.status}
-                      </span>
                     </div>
 
                     <p className="text-emerald-600 font-bold mt-1">
