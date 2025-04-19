@@ -30,7 +30,7 @@ CREATE TABLE Category (
 
 -- Product Entity
 CREATE TABLE Product (
-    ProductID INT PRIMARY KEY,
+    ProductID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
     Price DECIMAL(10, 2) NOT NULL,
     StockQuantity INT,

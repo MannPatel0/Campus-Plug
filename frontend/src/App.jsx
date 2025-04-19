@@ -52,6 +52,10 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    sendSessionDataToServer();
+  }, []);
+
   // Send verification code
   const sendVerificationCode = async (userData) => {
     try {
@@ -245,7 +249,7 @@ function App() {
           UCID: formValues.ucid,
           phone: formValues.phone,
           password: formValues.password, // This will be needed for the final signup
-          address: "NOT_GIVEN",
+          address: formValues.address, // Add this line
           client: 1,
           admin: 0,
         };
@@ -261,7 +265,7 @@ function App() {
 
         // Make API call to localhost:3030/find_user
         const response = await fetch(
-          "http://localhost:3030/api/user/find_user",
+          "http://localhost:3030/api/user/do_login",
           {
             method: "POST",
             headers: {
@@ -296,7 +300,7 @@ function App() {
           // Save to localStorage to persist across refreshes
           sessionStorage.setItem("isAuthenticated", "true");
           sessionStorage.setItem("user", JSON.stringify(userObj));
-          sendSessionDataToServer(); // Call it after signup
+
           sessionStorage.getItem("user");
 
           console.log("Login successful for:", userData.email);
@@ -365,8 +369,8 @@ function App() {
     try {
       // Retrieve data from sessionStorage
       const user = JSON.parse(sessionStorage.getItem("user"));
-      const isAuthenticated =
-        sessionStorage.getItem("isAuthenticated") === "true";
+      // const isAuthenticated =
+      //   sessionStorage.getItem("isAuthenticated") === "true";
 
       if (!user || !isAuthenticated) {
         console.log("User is not authenticated");
@@ -521,6 +525,25 @@ function App() {
                       id="phone"
                       name="phone"
                       placeholder="+1(123)456 7890"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      required={isSignUp}
+                    />
+                  </div>
+                )}
+
+                {isSignUp && (
+                  <div>
+                    <label
+                      htmlFor="address"
+                      className="block mb-1 text-sm font-medium text-gray-800"
+                    >
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      placeholder="Your address"
                       className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                       required={isSignUp}
                     />

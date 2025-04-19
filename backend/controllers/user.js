@@ -134,6 +134,62 @@ exports.completeSignUp = async (req, res) => {
   }
 };
 
+exports.doLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  // Input validation
+  if (!email || !password) {
+    return res.status(400).json({
+      found: false,
+      error: "Email and password are required",
+    });
+  }
+
+  try {
+    // Query to find user with matching email
+    const query = "SELECT * FROM User WHERE email = ?";
+    const [data, fields] = await db.execute(query, [email]);
+
+    // Check if user was found
+    if (data && data.length > 0) {
+      const user = data[0];
+
+      // Verify password match
+      if (user.Password === password) {
+        // Consider using bcrypt for secure password comparison
+        // Return user data without password
+        return res.json({
+          found: true,
+          userID: user.UserID,
+          name: user.Name,
+          email: user.Email,
+          UCID: user.UCID,
+          phone: user.Phone,
+          address: user.Address,
+        });
+      } else {
+        // Password doesn't match
+        return res.json({
+          found: false,
+          error: "Invalid email or password",
+        });
+      }
+    } else {
+      // User not found
+      return res.json({
+        found: false,
+        error: "Invalid email or password",
+      });
+    }
+  } catch (error) {
+    console.error("Error logging in:", error);
+    return res.status(500).json({
+      found: false,
+      error: "Database error occurred",
+    });
+  }
+};
+
 exports.getAllUser = async (req, res) => {
   try {
     const [users, fields] = await db.execute("SELECT * FROM User;");
@@ -174,6 +230,7 @@ exports.findUserByEmail = async (req, res) => {
         UCID: user.UCID,
         phone: user.Phone,
         address: user.Address,
+        password: user.Password,
         // Include any other fields your user might have
         // Make sure the field names match exactly with your database column names
       });
@@ -201,7 +258,7 @@ exports.updateUser = async (req, res) => {
     const phone = req.body?.phone;
     const UCID = req.body?.UCID;
     const address = req.body?.address;
-
+    const password = req.body?.password;
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
     }
@@ -213,7 +270,7 @@ exports.updateUser = async (req, res) => {
     if (phone) updateData.phone = phone;
     if (UCID) updateData.UCID = UCID;
     if (address) updateData.address = address;
-
+    if (password) updateData.password = password;
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ error: "No valid fields to update" });
     }

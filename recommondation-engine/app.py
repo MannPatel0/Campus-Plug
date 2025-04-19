@@ -1,7 +1,4 @@
 # pip install mysql.connector
-#
-
-
 import mysql.connector
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np

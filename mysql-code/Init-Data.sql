@@ -452,5 +452,4 @@ VALUES
         1,
         'This is a great fake product! Totally recommend it.',
         5,
-        NOW ()
     );
