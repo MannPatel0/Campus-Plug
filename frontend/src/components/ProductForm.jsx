@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, ChevronLeft, Plus, Trash2 } from "lucide-react";
+import { X, ChevronLeft, Plus, Trash2, Check } from "lucide-react";
 
 const ProductForm = ({
   editingProduct,
@@ -50,12 +50,19 @@ const ProductForm = ({
     }));
   };
 
+  const toggleSoldStatus = () => {
+    setEditingProduct((prev) => ({
+      ...prev,
+      isSold: !prev.isSold,
+    }));
+  };
+
   return (
     <div className="bg-white border border-gray-200 shadow-md p-6">
       {/* Back Button */}
       <button
         onClick={onCancel}
-        className="mb-4 text-blue-600 hover:text-blue-800 flex items-center gap-1"
+        className="mb-4 text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
       >
         <ChevronLeft size={16} />
         <span>Back to Listings</span>
@@ -77,7 +84,7 @@ const ProductForm = ({
             onChange={(e) =>
               setEditingProduct({ ...editingProduct, name: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none"
+            className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
           />
         </div>
 
@@ -95,8 +102,29 @@ const ProductForm = ({
                 price: e.target.value,
               })
             }
-            className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none"
+            className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
           />
+        </div>
+
+        {/* Sold Status */}
+        <div className="md:col-span-2">
+          <div className="flex items-center mt-2">
+            <input
+              type="checkbox"
+              id="soldStatus"
+              checked={editingProduct.isSold || false}
+              onChange={toggleSoldStatus}
+              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
+            />
+            <label htmlFor="soldStatus" className="ml-2 text-sm text-gray-700">
+              Mark as {editingProduct.isSold ? "Available" : "Sold"}
+            </label>
+            {editingProduct.isSold && (
+              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                Sold
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Categories */}
@@ -108,7 +136,7 @@ const ProductForm = ({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none"
+              className="flex-1 px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
             >
               <option value="" disabled>
                 Select a category
@@ -127,7 +155,7 @@ const ProductForm = ({
               type="button"
               onClick={addCategory}
               disabled={!selectedCategory}
-              className="px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-2 bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
             >
               <Plus size={16} />
               <span>Add</span>
@@ -140,13 +168,13 @@ const ProductForm = ({
               {(editingProduct.categories || []).map((category) => (
                 <span
                   key={category}
-                  className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800"
+                  className="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-800"
                 >
                   {category}
                   <button
                     type="button"
                     onClick={() => removeCategory(category)}
-                    className="ml-1 text-blue-600 hover:text-blue-800"
+                    className="ml-1 text-emerald-600 hover:text-emerald-800"
                   >
                     <X size={14} />
                   </button>
@@ -158,26 +186,6 @@ const ProductForm = ({
               Please select at least one category
             </p>
           )}
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Status
-          </label>
-          <select
-            value={editingProduct.status || "Unsold"}
-            onChange={(e) =>
-              setEditingProduct({
-                ...editingProduct,
-                status: e.target.value,
-              })
-            }
-            className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="Unsold">Unsold</option>
-            <option value="Sold">Sold</option>
-          </select>
         </div>
 
         {/* Description */}
@@ -194,7 +202,7 @@ const ProductForm = ({
               })
             }
             rows="4"
-            className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none"
+            className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
             placeholder="Describe your product in detail..."
           ></textarea>
         </div>
@@ -223,7 +231,7 @@ const ProductForm = ({
             htmlFor="image-upload"
             className="block w-full p-3 border border-gray-300 bg-gray-50 text-center cursor-pointer hover:bg-gray-100"
           >
-            <span className="text-blue-600 font-medium">
+            <span className="text-emerald-600 font-medium">
               Click to upload images
             </span>
           </label>
@@ -280,19 +288,33 @@ const ProductForm = ({
       </div>
 
       {/* Actions */}
-      <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
+      <div className="mt-6 flex justify-between border-t border-gray-200 pt-4">
         <button
-          onClick={onCancel}
-          className="bg-gray-100 text-gray-700 px-4 py-2 hover:bg-gray-200"
+          onClick={toggleSoldStatus}
+          className={`flex items-center gap-1 px-4 py-2 rounded-md transition-colors ${
+            editingProduct.isSold
+              ? "bg-green-100 text-green-700 hover:bg-green-200"
+              : "bg-red-100 text-red-700 hover:bg-red-200"
+          }`}
         >
-          Cancel
+          <Check size={16} />
+          <span>Mark as {editingProduct.isSold ? "Available" : "Sold"}</span>
         </button>
-        <button
-          onClick={onSave}
-          className="bg-blue-600 text-white px-6 py-2 hover:bg-blue-700"
-        >
-          {editingProduct.id ? "Update Product" : "Add Product"}
-        </button>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="bg-gray-100 text-gray-700 px-4 py-2 hover:bg-gray-200 rounded-md"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSave}
+            className="bg-emerald-600 text-white px-6 py-2 hover:bg-emerald-700 rounded-md"
+          >
+            {editingProduct.id ? "Update Product" : "Add Product"}
+          </button>
+        </div>
       </div>
     </div>
   );

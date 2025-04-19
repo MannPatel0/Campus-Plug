@@ -7,6 +7,7 @@ const {
   findUserByEmail,
   updateUser,
   deleteUser,
+  doLogin,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -25,6 +26,9 @@ router.get("/fetch_all_users", getAllUser);
 
 //Fetch One user Data with all fields:
 router.post("/find_user", findUserByEmail);
+
+//Fetch One user Data with all fields:
+router.post("/do_login", doLogin);
 
 //Update A uses Data:
 router.post("/update", updateUser);

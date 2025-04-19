@@ -10,9 +10,7 @@ const Settings = () => {
     phone: "",
     UCID: "",
     address: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    password: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -62,10 +60,7 @@ const Settings = () => {
             UCID: data.UCID || storedUser.UCID || "",
             phone: data.phone || storedUser.phone || "",
             address: data.address || storedUser.address || "",
-            // Reset password fields
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
+            password: data.password,
           }));
         } else {
           throw new Error(data.error || "Failed to retrieve user data");
@@ -143,41 +138,6 @@ const Settings = () => {
       );
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handlePasswordUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      // Validate passwords match
-      if (userData.newPassword !== userData.confirmPassword) {
-        alert("New passwords do not match!");
-        return;
-      }
-
-      // TODO: Implement the actual password update API call
-      console.log("Password updated");
-
-      // Update password in localStorage
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const updatedUser = {
-        ...storedUser,
-        password: userData.newPassword,
-      };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      // Reset password fields
-      setUserData((prevData) => ({
-        ...prevData,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      }));
-
-      alert("Password updated successfully!");
-    } catch (error) {
-      console.error("Error updating password:", error);
-      alert("Failed to update password: " + error.message);
     }
   };
 
@@ -345,6 +305,21 @@ const Settings = () => {
                   className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                 />
               </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  password
+                </label>
+                <input
+                  type="text"
+                  id="password"
+                  value={userData.password}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
             </div>
 
             <button
@@ -357,84 +332,10 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Security Section */}
-      <div className="bg-white border border-gray-200 mb-6">
-        <div className="border-b border-gray-200 p-4">
-          <div className="flex items-center">
-            <Lock className="h-5 w-5 text-gray-500 mr-2" />
-            <h2 className="text-lg font-medium text-gray-800">Password</h2>
-          </div>
-        </div>
-
-        <div className="p-4">
-          <form onSubmit={handlePasswordUpdate}>
-            <div className="space-y-4 mb-4">
-              <div>
-                <label
-                  htmlFor="currentPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  value={userData.currentPassword}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="newPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  value={userData.newPassword}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  value={userData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
-            >
-              Change Password
-            </button>
-          </form>
-        </div>
-      </div>
-
       {/* Privacy Section */}
       {showAlert && (
         <FloatingAlert
-          message="Removed Your History! 😉"
+          message="We Removed Your History! 😉"
           onClose={() => setShowAlert(false)}
         />
       )}
@@ -448,7 +349,7 @@ const Settings = () => {
 
         <div className="p-4">
           <div className="space-y-4">
-            <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+            <div className="flex justify-between items-center">
               <div className="flex items-start">
                 <History className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
                 <div>

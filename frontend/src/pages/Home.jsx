@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Tag, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Tag,
+  ChevronLeft,
+  ChevronRight,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
 
 import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
@@ -246,7 +252,7 @@ const Home = () => {
             {/* Scrollable Listings Container */}
             <div
               id="RecomContainer"
-              className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0"
+              className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0 rounded"
             >
               {recommended.map((recommended) => (
                 <Link
@@ -267,9 +273,9 @@ const Home = () => {
                         e.preventDefault();
                         toggleFavorite(recommended.id);
                       }}
-                      className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition"
+                      className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
                     >
-                      <span className="text-xl font-bold text-gray-600">+</span>
+                      <Bookmark className="text-white w-5 h-5" />
                     </button>
                   </div>
 
@@ -362,9 +368,9 @@ const Home = () => {
                         e.preventDefault();
                         toggleFavorite(listing.id);
                       }}
-                      className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition"
+                      className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
                     >
-                      <span className="text-xl font-bold text-gray-600">+</span>
+                      <Bookmark className="text-white w-5 h-5" />
                     </button>
                   </div>
 
@@ -454,9 +460,9 @@ const Home = () => {
                         e.preventDefault();
                         toggleFavorite(history.id);
                       }}
-                      className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition"
+                      className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
                     >
-                      <span className="text-xl font-bold text-gray-600">+</span>
+                      <Bookmark className="text-white w-5 h-5" />
                     </button>
                   </div>
 

@@ -129,7 +129,7 @@ const Favorites = () => {
           {sortedFavorites.map((product) => (
             <div
               key={product.id}
-              className="border-2 border-gray-200 rounded overflow-hidden hover:shadow-md transition-shadow"
+              className="border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
             >
               <Link to={`/product/${product.id}`}>
                 <div className="h-48 bg-gray-200 flex items-center justify-center">
@@ -150,10 +150,14 @@ const Favorites = () => {
                       {product.name}
                     </h3>
                     <button
-                      onClick={() => removeFromFavorites(product.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        removeFromFavorites(product.id);
+                      }}
                       className="text-red-500 hover:text-red-600"
                     >
-                      <Trash2 size={18} />
+                      <Trash2 size={24} />
                     </button>
                   </div>
 
