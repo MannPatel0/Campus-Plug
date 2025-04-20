@@ -4,7 +4,6 @@ exports.getAllCategory = async (req, res) => {
   try {
     const [data, fields] = await db.execute(`SELECT * FROM Category`);
 
-    // Format as { ID: "", ID: "" }
     const formattedData = {};
     data.forEach((row) => {
       formattedData[row.CategoryID] = row.Name;

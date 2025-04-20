@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
+import { useLocation, Link } from "react-router-dom";
+
 import ProductForm from "../components/ProductForm";
+import { X } from "lucide-react";
 
 const Selling = () => {
-  // State to store user's products
   const [products, setProducts] = useState([]);
-  // State to control when editing form is shown
   const [showForm, setShowForm] = useState(false);
-  // State to store the product being edited (or empty for new product)
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
+
   const [editingProduct, setEditingProduct] = useState({
     name: "",
     price: "",
@@ -17,33 +19,36 @@ const Selling = () => {
 
   // Simulate fetching products from API/database on component mount
   useEffect(() => {
-    // This would be replaced with a real API call
     const fetchProducts = async () => {
-      // Mock data
-      const mockProducts = [
-        {
-          id: "1",
-          name: "Vintage Camera",
-          price: "299.99",
-          description: "A beautiful vintage film camera in excellent condition",
-          categories: ["Electronics", "Art & Collectibles"],
-          images: ["/public/Pictures/Dell1.jpg"],
-        },
-        {
-          id: "2",
-          name: "Leather Jacket",
-          price: "149.50",
-          description: "Genuine leather jacket, worn only a few times",
-          categories: ["Clothing"],
-          images: [],
-        },
-      ];
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch(
+          "http://localhost:3030/api/product/myProduct",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userID: storedUser.ID, // Assuming you have userId defined elsewhere in your component
+            }),
+          },
+        );
 
-      setProducts(mockProducts);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const datajson = await response.json();
+        setProducts(datajson.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        // You might want to set an error state here
+      }
     };
 
     fetchProducts();
-  }, []);
+  }, []); // Add userId to dependency array if it might change
 
   // Handle creating or updating a product
   const handleSaveProduct = () => {
@@ -138,66 +143,71 @@ const Selling = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                <Link
+                  key={product.ProductID}
+                  to={`/product/${product.ProductID}`}
                 >
-                  <div className="h-48 bg-gray-200 flex items-center justify-center">
-                    {product.images && product.images.length > 0 ? (
-                      <img
-                        src={product.images[0] || ""}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-gray-400">No image</div>
-                    )}
-                  </div>
-
-                  <div className="p-4">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {product.name}
-                      </h3>
+                  <div
+                    key={product.ProductID}
+                    className="border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <div className="h-48 bg-gray-200 flex items-center justify-center">
+                      {product.image_url && product.image_url.length > 0 ? (
+                        <img
+                          src={product.image_url || ""}
+                          alt={product.Name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-gray-400">No image</div>
+                      )}
                     </div>
 
-                    <p className="text-emerald-600 font-bold mt-1">
-                      ${product.price}
-                    </p>
-
-                    {product.categories && product.categories.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {product.categories.map((category) => (
-                          <span
-                            key={category}
-                            className="text-xs bg-gray-100 text-gray-600 px-2 py-1 "
-                          >
-                            {category}
-                          </span>
-                        ))}
+                    <div className="p-4">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {product.Name}
+                        </h3>
                       </div>
-                    )}
 
-                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">
-                      {product.description}
-                    </p>
+                      <p className="text-emerald-600 font-bold mt-1">
+                        ${product.Price}
+                      </p>
 
-                    <div className="mt-4 flex justify-end gap-2">
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
-                      <button
-                        onClick={() => handleEditProduct(product)}
-                        className="text-emerald-600 hover:text-emerald-800 font-medium"
-                      >
-                        Edit
-                      </button>
+                      {product.categories && product.categories.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {product.CategoryID.map((category) => (
+                            <span
+                              key={category}
+                              className="text-xs bg-gray-100 text-gray-600 px-2 py-1 "
+                            >
+                              {category}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="text-gray-500 text-sm mt-2 line-clamp-2">
+                        {product.Description}
+                      </p>
+
+                      <div className="mt-4 flex justify-end gap-2">
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => handleEditProduct(product.id)}
+                          className="text-emerald-600 hover:text-emerald-800 font-medium"
+                        >
+                          Edit
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

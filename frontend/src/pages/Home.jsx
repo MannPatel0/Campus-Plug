@@ -201,7 +201,7 @@ const Home = () => {
             <img
               src="../public/Ucalgary.png"
               alt="University of Calgary"
-              className="w-full h-full object-cover object-bottom opacity-50"
+              className="w-full h-full object-cover object-bottom opacity-45"
             />
             {/* Dark overlay for better text readability */}
           </div>
@@ -217,7 +217,7 @@ const Home = () => {
             </p>
             <button
               onClick={handleSelling}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-6 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-colors"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-6 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-colors"
             >
               Post an Item
             </button>

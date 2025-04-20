@@ -1,22 +1,34 @@
 const db = require("../utils/database");
 
 exports.addProduct = async (req, res) => {
-  const { userID, name, price, stockQty, Description } = req.body;
-  console.log(userID);
+  const { userID, name, price, qty, description, category, images } = req.body;
+
   try {
-    // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
-      `INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)`,
-      [userID, productID],
+      `INSERT INTO Product (Name, Price, StockQuantity, UserID, Description, CategoryID) VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, price, qty, userID, description, category],
     );
+
+    const productID = result.insertId;
+    if (images && images.length > 0) {
+      const imageInsertPromises = images.map((imagePath) =>
+        db.execute(`INSERT INTO Image_URL (URL, ProductID) VALUES (?, ?)`, [
+          imagePath,
+          productID,
+        ]),
+      );
+
+      await Promise.all(imageInsertPromises); //perallel
+    }
 
     res.json({
       success: true,
-      message: "Product added to favorites successfully",
+      message: "Product and images added successfully",
     });
   } catch (error) {
-    console.error("Error adding favorite product:", error);
-    return res.json({ error: "Could not add favorite product" });
+    console.error("Error adding product or images:", error);
+    console.log(error);
+    return res.json({ error: "Could not add product or images" });
   }
 };
 
@@ -64,7 +76,7 @@ exports.myProduct = async (req, res) => {
   const { userID } = req.body;
 
   try {
-    const [favorites] = await db.execute(
+    const [result] = await db.execute(
       `
       SELECT
       p.ProductID,
@@ -95,7 +107,7 @@ exports.myProduct = async (req, res) => {
 
     res.json({
       success: true,
-      favorites: favorites,
+      data: result,
     });
   } catch (error) {
     console.error("Error retrieving favorites:", error);
