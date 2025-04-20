@@ -16,7 +16,6 @@ const {
   cleanupExpiredCodes,
   checkDatabaseConnection,
 } = require("./utils/helper");
-const { getAllCategory } = require("./controllers/category");
 
 const app = express();
 

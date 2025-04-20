@@ -66,7 +66,6 @@ const Home = () => {
       location.reload();
     }
   }
-  reloadPage();
 
   useEffect(() => {
     const fetchrecomProducts = async () => {
