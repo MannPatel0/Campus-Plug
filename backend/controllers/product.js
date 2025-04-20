@@ -6,7 +6,7 @@ exports.addProduct = async (req, res) => {
   try {
     const [result] = await db.execute(
       `INSERT INTO Product (Name, Price, StockQuantity, UserID, Description, CategoryID) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, price, qty, userID, description, category],
+      [name, price, qty, userID, description, category]
     );
 
     const productID = result.insertId;
@@ -15,7 +15,7 @@ exports.addProduct = async (req, res) => {
         db.execute(`INSERT INTO Image_URL (URL, ProductID) VALUES (?, ?)`, [
           imagePath,
           productID,
-        ]),
+        ])
       );
 
       await Promise.all(imageInsertPromises); //perallel
@@ -39,7 +39,7 @@ exports.addFavorite = async (req, res) => {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
       `INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)`,
-      [userID, productID],
+      [userID, productID]
     );
 
     res.json({
@@ -59,7 +59,7 @@ exports.removeFavorite = async (req, res) => {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
       `DELETE FROM Favorites WHERE UserID = ? AND ProductID = ?`,
-      [userID, productID],
+      [userID, productID]
     );
 
     res.json({
@@ -103,7 +103,7 @@ exports.getFavorites = async (req, res) => {
       p.Date,
       u.Name;
       `,
-      [userID],
+      [userID]
     );
 
     res.json({
@@ -168,7 +168,7 @@ exports.getProductById = async (req, res) => {
       JOIN User U ON p.UserID = U.UserID
       WHERE p.ProductID = ?
     `,
-      [id],
+      [id]
     );
 
     // Log raw data for debugging
@@ -208,6 +208,65 @@ exports.getProductById = async (req, res) => {
       message: "Database error occurred",
       error: error.message,
     });
+  }
+};
+
+exports.getProductWithPagination = async (req, res) => {
+  const limit = +req.query.limit;
+  const page = +req.query.page;
+
+  const offset = (page - 1) * limit;
+
+  try {
+    const [data, fields] = await db.execute(
+      `
+          SELECT
+        P.ProductID,
+        P.Name AS ProductName,
+        P.Price,
+        P.Date AS DateUploaded,
+        U.Name AS SellerName,
+        MIN(I.URL) AS ProductImage,
+        C.Name AS Category
+      FROM Product P
+      LEFT JOIN Image_URL I ON P.ProductID = I.ProductID
+      LEFT JOIN User U ON P.UserID = U.UserID
+      LEFT JOIN Category C ON P.CategoryID = C.CategoryID
+      GROUP BY
+        P.ProductID,
+        P.Name,
+        P.Price,
+        P.Date,
+        U.Name,
+        C.Name
+      ORDER BY P.ProductID ASC
+      LIMIT ? OFFSET ?
+    `,
+      [limit.toString(), offset.toString()]
+    );
+
+    const [result] = await db.execute(
+      `SELECT COUNT(*) AS totalProd FROM Product`
+    );
+    const { totalProd } = result[0];
+
+    return res.json({ totalProd, products: data });
+  } catch (error) {
+    res.json({ error: "Error fetching products!" });
+  }
+};
+
+exports.removeProduct = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.execute(
+      `DELETE FROM Product WHERE ProductID = ?`,
+      [id]
+    );
+    res.json({ message: "Delete product successfully!" });
+  } catch (error) {
+    res.json({ error: "Cannot remove product from database!" });
   }
 };
 

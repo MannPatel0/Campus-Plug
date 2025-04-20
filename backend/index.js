@@ -9,6 +9,7 @@ const searchRouter = require("./routes/search");
 const recommendedRouter = require("./routes/recommendation");
 const history = require("./routes/history");
 const review = require("./routes/review");
+const categoryRouter = require("./routes/category");
 
 const { generateEmailTransporter } = require("./utils/mail");
 const {
@@ -42,10 +43,10 @@ app.use("/api/search", searchRouter);
 app.use("/api/engine", recommendedRouter);
 app.use("/api/history", history);
 app.use("/api/review", review);
-
+app.use("/api/category", categoryRouter);
 
 // Set up a scheduler to run cleanup every hour
-clean_up_time = 30*60*1000;
+clean_up_time = 30 * 60 * 1000;
 setInterval(cleanupExpiredCodes, clean_up_time);
 
 app.listen(3030, () => {
