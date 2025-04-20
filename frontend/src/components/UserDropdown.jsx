@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Settings, ShoppingBag, DollarSign, LogOut } from "lucide-react";
+import { RiAdminLine } from "react-icons/ri";
 
-const UserDropdown = ({ onLogout, userName }) => {
+const UserDropdown = ({
+  onLogout,
+  userName,
+  isAdmin,
+  handleShowAdminDashboard,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -88,6 +94,20 @@ const UserDropdown = ({ onLogout, userName }) => {
               <Settings className="h-4 w-4 mr-2 text-gray-500" />
               Settings
             </Link>
+
+            {isAdmin ? (
+              <Link
+                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => {
+                  handleShowAdminDashboard();
+                }}
+              >
+                <RiAdminLine className="h-4 w-4 mr-2 text-gray-500" />
+                Admin
+              </Link>
+            ) : (
+              <></>
+            )}
 
             <button
               className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

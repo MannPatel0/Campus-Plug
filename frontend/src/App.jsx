@@ -13,6 +13,12 @@ import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
 import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
+import Dashboard from "./pages/Dashboard";
+import UserDashboard from "./pages/UserDashboard";
+import ProductDashboard from "./pages/ProductDashboard";
+import DashboardNav from "./components/DashboardNav";
+import CategoryDashboard from "./pages/CategoryDashboard";
+import { verifyIsAdmin } from "./api/admin";
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -56,6 +62,26 @@ function App() {
     sendSessionDataToServer();
   }, []);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
+
+  useEffect(() => {
+    const userInfo = sessionStorage.getItem("user")
+      ? JSON.parse(sessionStorage.getItem("user"))
+      : "";
+    const id = userInfo?.ID;
+    verifyIsAdmin(id).then((data) => {
+      setIsAdmin(data.isAdmin);
+    });
+  }, [user]);
+
+  const handleShowAdminDashboard = () => {
+    setShowAdminDashboard(true);
+  };
+  const handleCloseAdminDashboard = () => {
+    setShowAdminDashboard(false);
+  };
+
   // Send verification code
   const sendVerificationCode = async (userData) => {
     try {
@@ -76,7 +102,7 @@ function App() {
             email: userData.email,
             // Add any other required fields
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -125,7 +151,7 @@ function App() {
             email: tempUserData.email,
             code: code,
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -169,7 +195,7 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(userData),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -275,7 +301,7 @@ function App() {
               email: formValues.email,
               password: formValues.password,
             }),
-          },
+          }
         );
 
         if (!response.ok) {
@@ -580,8 +606,8 @@ function App() {
                     {isLoading
                       ? "Please wait..."
                       : isSignUp
-                        ? "Create Account"
-                        : "Sign In"}
+                      ? "Create Account"
+                      : "Sign In"}
                   </button>
                 </div>
               </form>
@@ -672,12 +698,36 @@ function App() {
     return children;
   };
 
+  // If user is admin, show admin naviagtion
+  if (showAdminDashboard) {
+    return (
+      <Router>
+        <div className="flex">
+          <DashboardNav handleCloseAdminDashboard={handleCloseAdminDashboard} />
+          <Routes>
+            {/* Admin routes */}
+            <Route path="/admin" element={<Dashboard />} />
+            <Route path="/admin/user" element={<UserDashboard />} />
+            <Route path="/admin/product" element={<ProductDashboard />} />
+            <Route path="/admin/category" element={<CategoryDashboard />} />
+            <Route path="*" element={<Dashboard />} />
+          </Routes>
+        </div>
+      </Router>
+    );
+  }
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
         {/* Only show navbar when authenticated */}
         {isAuthenticated && (
-          <Navbar onLogout={handleLogout} userName={user?.name} />
+          <Navbar
+            isAdmin={isAdmin}
+            onLogout={handleLogout}
+            userName={user?.name}
+            handleShowAdminDashboard={handleShowAdminDashboard}
+          />
         )}
         <Routes>
           {/* Public routes */}

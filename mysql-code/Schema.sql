@@ -24,7 +24,7 @@ CREATE TABLE UserRole (
 
 -- Category Entity (must be created before Product or else error)
 CREATE TABLE Category (
-    CategoryID INT PRIMARY KEY,
+    CategoryID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL
 );
 
@@ -38,15 +38,15 @@ CREATE TABLE Product (
     Description TEXT,
     CategoryID INT NOT NULL,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID)
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE SET NULL,
+    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID) ON DELETE SET NULL
 );
 
 -- Fixed Image_URL table
 CREATE TABLE Image_URL (
     URL VARCHAR(255),
     ProductID INT,
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE
 );
 
 -- Fixed Review Entity (Many-to-One with User, Many-to-One with Product)
@@ -60,8 +60,8 @@ CREATE TABLE Review (
         AND Rating <= 5
     ),
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE SET NULL,
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE
 );
 
 -- Transaction Entity (Many-to-One with User, Many-to-One with Product)
@@ -71,8 +71,8 @@ CREATE TABLE Transaction (
     ProductID INT,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
     PaymentStatus VARCHAR(50),
-    FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE,
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE SET NULL 
 );
 
 -- Recommendation Entity (Many-to-One with User, Many-to-One with Product)
@@ -81,8 +81,8 @@ CREATE TABLE Recommendation (
     UserID INT,
     RecommendedProductID INT,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (RecommendedProductID) REFERENCES Product (ProductID)
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE,
+    FOREIGN KEY (RecommendedProductID) REFERENCES Product (ProductID) ON DELETE CASCADE
 );
 
 -- History Entity (Many-to-One with User, Many-to-One with Product)
@@ -91,8 +91,8 @@ CREATE TABLE History (
     UserID INT,
     ProductID INT,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE,
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE
 );
 
 -- Favorites Entity (Many-to-One with User, Many-to-One with Product)
@@ -100,8 +100,8 @@ CREATE TABLE Favorites (
     FavoriteID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     ProductID INT,
-    FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID),
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE,
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE,
     UNIQUE (UserID, ProductID)
 );
 
@@ -110,8 +110,8 @@ CREATE TABLE Product_Category (
     ProductID INT,
     CategoryID INT,
     PRIMARY KEY (ProductID, CategoryID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID),
-    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID)
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE,
+    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID) ON DELETE CASCADE
 );
 
 -- Login Authentication table
