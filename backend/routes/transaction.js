@@ -1,0 +1,30 @@
+// routes/transaction.js
+const express = require("express");
+const txCtrl = require("../controllers/transaction");  // <— grab the module
+const router = express.Router();
+
+// logging middleware
+router.use((req, res, next) => {
+  console.log(`Incoming ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Create a new transaction
+router.post("/createTransaction", txCtrl.createTransaction);
+
+// Get all transactions for a specific product
+router.get("/getTransactionsByProduct/:productID", txCtrl.getTransactionsByProduct);
+
+// Get all transactions for a specific user
+router.post("/getTransactionsByUser", txCtrl.getTransactionsByUser);
+
+// Get all transactions in the system
+router.get("/getAllTransactions", txCtrl.getAllTransactions);
+
+// Update payment status on a transaction
+router.patch("/updatePaymentStatus", txCtrl.updatePaymentStatus);
+
+// Delete a transaction
+router.delete("/deleteTransaction", txCtrl.deleteTransaction);
+
+module.exports = router;

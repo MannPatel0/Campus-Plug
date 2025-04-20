@@ -1,0 +1,153 @@
+// controllers/transaction.js
+
+const db = require("../utils/database");
+
+// Create a new transaction
+exports.createTransaction = async (req, res) => {
+  const { userID, productID, date, paymentStatus } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `INSERT INTO Transaction (UserID, ProductID, Date, PaymentStatus)
+       VALUES (?, ?, ?, ?)`,
+      [userID, productID, date, paymentStatus]
+    );
+
+    res.json({
+      success: true,
+      message: "Transaction created successfully",
+      transactionID: result.insertId,
+    });
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    res.status(500).json({ error: "Could not create transaction" });
+  }
+};
+
+// Get all transactions for a given product
+exports.getTransactionsByProduct = async (req, res) => {
+  const { productID } = req.params;
+
+  try {
+    const [transactions] = await db.execute(
+      `SELECT
+         TransactionID,
+         UserID,
+         ProductID,
+         Date,
+         PaymentStatus
+       FROM Transaction
+       WHERE ProductID = ?`,
+      [productID]
+    );
+
+    res.json({
+      success: true,
+      transactions,
+    });
+  } catch (error) {
+    console.error("Error fetching transactions by product:", error);
+    res.status(500).json({ error: "Could not retrieve transactions" });
+  }
+};
+
+// Get all transactions for a given user
+exports.getTransactionsByUser = async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    const [transactions] = await db.execute(
+      `SELECT
+         TransactionID,
+         UserID,
+         ProductID,
+         Date,
+         PaymentStatus
+       FROM Transaction
+       WHERE UserID = ?`,
+      [userID]
+    );
+
+    res.json({
+      success: true,
+      transactions,
+    });
+  } catch (error) {
+    console.error("Error fetching transactions by user:", error);
+    res.status(500).json({ error: "Could not retrieve transactions" });
+  }
+};
+
+// Get all transactions in the system
+exports.getAllTransactions = async (req, res) => {
+  try {
+    const [transactions] = await db.execute(
+      `SELECT
+         TransactionID,
+         UserID,
+         ProductID,
+         Date,
+         PaymentStatus
+       FROM Transaction`
+    );
+
+    res.json({
+      success: true,
+      transactions,
+    });
+  } catch (error) {
+    console.error("Error fetching all transactions:", error);
+    res.status(500).json({ error: "Could not retrieve transactions" });
+  }
+};
+
+// Update the payment status of a transaction
+exports.updatePaymentStatus = async (req, res) => {
+  const { transactionID, paymentStatus } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `UPDATE Transaction
+       SET PaymentStatus = ?
+       WHERE TransactionID = ?`,
+      [paymentStatus, transactionID]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Transaction not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Payment status updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    res.status(500).json({ error: "Could not update payment status" });
+  }
+};
+
+// Delete a transaction
+exports.deleteTransaction = async (req, res) => {
+  const { transactionID } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `DELETE FROM Transaction
+       WHERE TransactionID = ?`,
+      [transactionID]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Transaction not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Transaction deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    res.status(500).json({ error: "Could not delete transaction" });
+  }
+};

@@ -9,6 +9,7 @@ const searchRouter = require("./routes/search");
 const recommendedRouter = require("./routes/recommendation");
 const history = require("./routes/history");
 const review = require("./routes/review");
+const transactionRouter = require("./routes/transaction");
 
 const { generateEmailTransporter } = require("./utils/mail");
 const {
@@ -42,6 +43,7 @@ app.use("/api/search", searchRouter);
 app.use("/api/engine", recommendedRouter);
 app.use("/api/history", history);
 app.use("/api/review", review);
+app.use("/api/transaction", transactionRouter);
 
 
 // Set up a scheduler to run cleanup every hour
