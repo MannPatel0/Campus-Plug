@@ -68,12 +68,11 @@ exports.getTransactionsByUser = async (req, res) => {
          T.Date,
          T.PaymentStatus,
          P.Name AS ProductName,
-         MIN(I.URL) AS Image_URL
+         I.URL AS Image_URL
        FROM Transaction T
        JOIN Product P ON T.ProductID = P.ProductID
        LEFT JOIN Image_URL I ON P.ProductID = I.ProductID
-       WHERE T.UserID = ?
-       GROUP BY T.TransactionID, T.UserID, T.ProductID, T.Date, T.PaymentStatus, P.Name`,
+       WHERE T.UserID = ?`,
       [userID]
     );
 
