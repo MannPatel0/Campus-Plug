@@ -66,11 +66,12 @@ CREATE TABLE Review (
 
 -- Transaction Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Transaction (
-    TransactionID INT PRIMARY KEY,
+    TransactionID INT NOT NULL AUTO_INCREMENT,
     UserID INT,
     ProductID INT,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
     PaymentStatus VARCHAR(50),
+    PRIMARY KEY (TransactionID),
     FOREIGN KEY (UserID) REFERENCES User (UserID),
     FOREIGN KEY (ProductID) REFERENCES Product (ProductID)
 );

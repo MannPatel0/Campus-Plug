@@ -7,10 +7,11 @@ exports.createTransaction = async (req, res) => {
   const { userID, productID, date, paymentStatus } = req.body;
 
   try {
+    const formattedDate = new Date(date).toISOString().slice(0, 19).replace("T", " ");
     const [result] = await db.execute(
       `INSERT INTO Transaction (UserID, ProductID, Date, PaymentStatus)
        VALUES (?, ?, ?, ?)`,
-      [userID, productID, date, paymentStatus]
+      [userID, productID, formattedDate, paymentStatus]
     );
 
     res.json({
