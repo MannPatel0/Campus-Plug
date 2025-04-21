@@ -26,7 +26,7 @@ const Transactions = () => {
             productId: tx.ProductID,
             name: tx.ProductName || "Unnamed Product",
             price: tx.Price != null ? parseFloat(tx.Price) : null,
-            image: tx.image_url || "/default-image.jpg",
+            image: tx.Image_URL || "/default-image.jpg",
             date: tx.Date,
             status: tx.PaymentStatus,
           }))
