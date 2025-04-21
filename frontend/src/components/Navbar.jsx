@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import UserDropdown from "./UserDropdown";
 import { Search, Heart } from "lucide-react";
 
-const Navbar = ({ onLogout, userName }) => {
+const Navbar = ({ onLogout, userName, isAdmin, handleShowAdminDashboard }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
@@ -76,7 +76,12 @@ const Navbar = ({ onLogout, userName }) => {
             </Link>
 
             {/* User Profile */}
-            <UserDropdown onLogout={onLogout} userName={userName} />
+            <UserDropdown
+              isAdmin={isAdmin}
+              onLogout={onLogout}
+              userName={userName}
+              handleShowAdminDashboard={handleShowAdminDashboard}
+            />
           </div>
         </div>
       </div>

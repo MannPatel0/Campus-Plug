@@ -7,8 +7,10 @@ const {
   getAllProducts,
   getProductById,
   addProduct,
-  myProduct,
   removeProduct,
+  removeAnyProduct,
+  getProductWithPagination,
+  myProduct,
   updateProduct,
 } = require("../controllers/product");
 const router = express.Router();
@@ -27,6 +29,12 @@ router.post("/delProduct", removeProduct);
 router.post("/myProduct", myProduct);
 router.post("/addProduct", addProduct);
 router.get("/getProduct", getAllProducts);
+
+//Remove product
+router.delete("/any/:id", removeAnyProduct);
+//Get products with pagination
+router.get("/getProductWithPagination", getProductWithPagination);
+
 router.get("/:id", getProductById); // Simplified route
 
 router.put("/update/:productId", updateProduct);

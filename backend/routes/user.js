@@ -8,6 +8,8 @@ const {
   updateUser,
   deleteUser,
   doLogin,
+  isAdmin,
+  getUsersWithPagination,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -35,5 +37,11 @@ router.post("/update", updateUser);
 
 //Delete A uses Data:
 router.post("/delete", deleteUser);
+
+//Check admin status
+router.get("/isAdmin/:id", isAdmin);
+
+//Fetch user with pagination
+router.get("/getUserWithPagination", getUsersWithPagination);
 
 module.exports = router;

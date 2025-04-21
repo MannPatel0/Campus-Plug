@@ -345,3 +345,62 @@ exports.getProductById = async (req, res) => {
     });
   }
 };
+
+exports.getProductWithPagination = async (req, res) => {
+  const limit = +req.query.limit;
+  const page = +req.query.page;
+
+  const offset = (page - 1) * limit;
+
+  try {
+    const [data, fields] = await db.execute(
+      `
+          SELECT
+        P.ProductID,
+        P.Name AS ProductName,
+        P.Price,
+        P.Date AS DateUploaded,
+        U.Name AS SellerName,
+        MIN(I.URL) AS ProductImage,
+        C.Name AS Category
+      FROM Product P
+      LEFT JOIN Image_URL I ON P.ProductID = I.ProductID
+      LEFT JOIN User U ON P.UserID = U.UserID
+      LEFT JOIN Category C ON P.CategoryID = C.CategoryID
+      GROUP BY
+        P.ProductID,
+        P.Name,
+        P.Price,
+        P.Date,
+        U.Name,
+        C.Name
+      ORDER BY P.ProductID ASC
+      LIMIT ? OFFSET ?
+    `,
+      [limit.toString(), offset.toString()],
+    );
+
+    const [result] = await db.execute(
+      `SELECT COUNT(*) AS totalProd FROM Product`,
+    );
+    const { totalProd } = result[0];
+
+    return res.json({ totalProd, products: data });
+  } catch (error) {
+    res.json({ error: "Error fetching products!" });
+  }
+};
+
+exports.removeAnyProduct = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const [result] = await db.execute(
+      `DELETE FROM Product WHERE ProductID = ?`,
+      [id],
+    );
+    res.json({ message: "Delete product successfully!" });
+  } catch (error) {
+    res.json({ error: "Cannot remove product from database!" });
+  }
+};

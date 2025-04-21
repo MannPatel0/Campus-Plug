@@ -68,39 +68,41 @@ VALUES
     (2, TRUE, FALSE);
 
 -- Insert Categories
+-- Insert Categories
 INSERT INTO
-    Category (CategoryID, Name)
+    Category (Name)
 VALUES
-    (1, 'Textbooks'),
-    (2, 'Electronics'),
-    (3, 'Furniture'),
-    (4, 'Clothing'),
-    (5, 'Sports Equipment'),
-    (6, 'Musical Instruments'),
-    (7, 'Art Supplies'),
-    (8, 'Kitchen Appliances'),
-    (9, 'Gaming'),
-    (10, 'Bicycles'),
-    (11, 'Computer Accessories'),
-    (12, 'Stationery'),
-    (13, 'Fitness Equipment'),
-    (14, 'Winter Sports'),
-    (15, 'Lab Equipment'),
-    (16, 'Camping Gear'),
-    (17, 'School Supplies'),
-    (18, 'Office Furniture'),
-    (19, 'Books (Non-textbook)'),
-    (20, 'Math & Science Resources'),
-    (21, 'Engineering Tools'),
-    (22, 'Backpacks & Bags'),
-    (23, 'Audio Equipment'),
-    (24, 'Dorm Essentials'),
-    (25, 'Smartphones & Tablets'),
-    (26, 'Winter Clothing'),
-    (27, 'Photography Equipment'),
-    (28, 'Event Tickets'),
-    (29, 'Software Licenses'),
-    (30, 'Transportation (Car Pool)');
+    ('Textbooks'),
+    ('Electronics'),
+    ('Furniture'),
+    ('Clothing'),
+    ('Sports Equipment'),
+    ('Musical Instruments'),
+    ('Art Supplies'),
+    ('Kitchen Appliances'),
+    ('Gaming'),
+    ('Bicycles'),
+    ('Computer Accessories'),
+    ('Stationery'),
+    ('Fitness Equipment'),
+    ('Winter Sports'),
+    ('Lab Equipment'),
+    ('Camping Gear'),
+    ('School Supplies'),
+    ('Office Furniture'),
+    ('Books (-textbook)'),
+    ('Math & Science Resources'),
+    ('Engineering Tools'),
+    ('Backpacks & Bags'),
+    ('Audio Equipment'),
+    ('Dorm Essentials'),
+    ('Smartphones & Tablets'),
+    ('Winter Clothing'),
+    ('Photography Equipment'),
+    ('Event Tickets'),
+    ('Software Licenses'),
+    ('Transportation (Car Pool)'),
+    ('Other');
 
 -- Insert Products
 INSERT INTO

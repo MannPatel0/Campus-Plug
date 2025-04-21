@@ -13,13 +13,13 @@ exports.sendVerificationCode = async (req, res) => {
     // Generate a random 6-digit code
     const verificationCode = crypto.randomInt(100000, 999999).toString();
     console.log(
-      `Generated verification code for ${email}: ${verificationCode}`,
+      `Generated verification code for ${email}: ${verificationCode}`
     );
 
     // Check if email already exists in verification table
     const [results, fields] = await db.execute(
       "SELECT * FROM AuthVerification WHERE Email = ?",
-      [email],
+      [email]
     );
 
     if (results.length > 0) {
@@ -27,7 +27,7 @@ exports.sendVerificationCode = async (req, res) => {
       const [result] = await db.execute(
         `UPDATE AuthVerification SET VerificationCode = ?, Authenticated = FALSE, Date = CURRENT_TIMESTAMP
          WHERE Email = ?`,
-        [verificationCode, email],
+        [verificationCode, email]
       );
 
       // Send email and respond
@@ -37,7 +37,7 @@ exports.sendVerificationCode = async (req, res) => {
       // Insert new record
       const [result] = await db.execute(
         "INSERT INTO AuthVerification (Email, VerificationCode, Authenticated) VALUES (?, ?, FALSE)",
-        [email, verificationCode],
+        [email, verificationCode]
       );
       // Send email and respond
       await sendVerificationEmail(email, verificationCode);
@@ -62,7 +62,7 @@ exports.verifyCode = async (req, res) => {
     // Check verification code
     const [results, fields] = await db.execute(
       "SELECT * FROM AuthVerification WHERE Email = ? AND VerificationCode = ? AND Authenticated = 0 AND Date > DATE_SUB(NOW(), INTERVAL 15 MINUTE)",
-      [email, code],
+      [email, code]
     );
     if (results.length === 0) {
       console.log(`Invalid or expired verification code for email ${email}`);
@@ -76,7 +76,7 @@ exports.verifyCode = async (req, res) => {
     // Mark as authenticated
     const [result] = await db.execute(
       "UPDATE AuthVerification SET Authenticated = TRUE WHERE Email = ?",
-      [email],
+      [email]
     );
     res.json({
       success: true,
@@ -95,7 +95,7 @@ exports.completeSignUp = async (req, res) => {
   try {
     const [results, fields] = await db.execute(
       `SELECT * FROM AuthVerification WHERE Email = ? AND Authenticated = 1;`,
-      [data.email],
+      [data.email]
     );
 
     if (results.length === 0) {
@@ -105,20 +105,20 @@ exports.completeSignUp = async (req, res) => {
     // Create the user
     const [createResult] = await db.execute(
       `INSERT INTO User (Name, Email, UCID, Password, Phone, Address)
-          VALUES ('${data.name}', '${data.email}', '${data.UCID}', '${data.password}', '${data.phone}', '${data.address}')`,
+          VALUES ('${data.name}', '${data.email}', '${data.UCID}', '${data.password}', '${data.phone}', '${data.address}')`
     );
 
     // Insert role using the user's ID
     const [insertResult] = await db.execute(
       `INSERT INTO UserRole (UserID, Client, Admin)
                 VALUES (LAST_INSERT_ID(), ${data.client || true}, ${
-                  data.admin || false
-                })`,
+        data.admin || false
+      })`
     );
 
     // Delete verification record
     const [deleteResult] = await db.execute(
-      `DELETE FROM AuthVerification WHERE Email = '${data.email}'`,
+      `DELETE FROM AuthVerification WHERE Email = '${data.email}'`
     );
 
     res.json({
@@ -310,7 +310,7 @@ exports.deleteUser = async (req, res) => {
     // Delete from UserRole first (assuming foreign key constraint)
     const [result1] = await db.execute(
       "DELETE FROM UserRole WHERE UserID = ?",
-      [userId],
+      [userId]
     );
 
     // Then delete from User table
@@ -326,5 +326,40 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     console.error("Error: ", error);
     return res.status(500).json({ error: "Could not delete user!" });
+  }
+};
+
+exports.getUsersWithPagination = async (req, res) => {
+  const limit = +req.query.limit;
+  const page = +req.query.page;
+
+  const offset = (page - 1) * limit;
+  try {
+    const [users, fields] = await db.execute(
+      "SELECT * FROM User LIMIT ? OFFSET ?",
+      [limit.toString(), offset.toString()]
+    );
+
+    const [result] = await db.execute("SELECT COUNT(*) AS count FROM User");
+    const { count: total } = result[0];
+
+    res.json({ users, total });
+  } catch (error) {
+    console.error("Errors: ", error);
+    return res.status(500).json({ error: "\nCould not fetch users!" });
+  }
+};
+
+exports.isAdmin = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.execute(
+      "SELECT R.Admin FROM marketplace.userrole R WHERE R.UserID = ?",
+      [id]
+    );
+    const { Admin } = result[0];
+    res.json({ isAdmin: Admin });
+  } catch (error) {
+    res.json({ error: "Cannot verify admin status!" });
   }
 };
