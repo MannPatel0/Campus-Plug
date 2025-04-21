@@ -391,9 +391,9 @@ exports.getProductWithPagination = async (req, res) => {
   }
 };
 
-exports.removeProduct = async (req, res) => {
+exports.removeAnyProduct = async (req, res) => {
   const { id } = req.params;
-
+  console.log(id);
   try {
     const [result] = await db.execute(
       `DELETE FROM Product WHERE ProductID = ?`,

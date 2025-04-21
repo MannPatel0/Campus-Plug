@@ -8,6 +8,7 @@ const {
   getProductById,
   addProduct,
   removeProduct,
+  removeAnyProduct,
   getProductWithPagination,
   myProduct,
   updateProduct,
@@ -30,7 +31,7 @@ router.post("/addProduct", addProduct);
 router.get("/getProduct", getAllProducts);
 
 //Remove product
-router.delete("/:id", removeProduct);
+router.delete("/any/:id", removeAnyProduct);
 //Get products with pagination
 router.get("/getProductWithPagination", getProductWithPagination);
 

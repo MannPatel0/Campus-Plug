@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -12,14 +13,10 @@ import Selling from "./pages/Selling";
 import Transactions from "./pages/Transactions";
 import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
-import SearchPage from "./pages/SearchPage"; // Make sure to import the SearchPage
-import Dashboard from "./pages/Dashboard";
-import UserDashboard from "./pages/UserDashboard";
-import ProductDashboard from "./pages/ProductDashboard";
+import SearchPage from "./pages/SearchPage";
+import Dashboard from "./pages/Dashboard"; // The single consolidated dashboard component
 import DashboardNav from "./components/DashboardNav";
-import CategoryDashboard from "./pages/CategoryDashboard";
 import { verifyIsAdmin } from "./api/admin";
-import TransactionDashboard from "./pages/TransactionDashboard";
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -41,6 +38,18 @@ function App() {
   const [isGeneratingRecommendations, setIsGeneratingRecommendations] =
     useState(false);
   const [recommendations, setRecommendations] = useState([]);
+
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
+
+  // Check URL to determine if we're in admin mode
+  useEffect(() => {
+    // If URL contains /admin, set showAdminDashboard to true
+    if (window.location.pathname.includes("/admin")) {
+      setShowAdminDashboard(true);
+    }
+  }, []);
 
   // New verification states
   const [verificationStep, setVerificationStep] = useState("initial"); // 'initial', 'code-sent', 'verifying'
@@ -127,9 +136,6 @@ function App() {
     }
   };
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
-
   useEffect(() => {
     const userInfo = sessionStorage.getItem("user")
       ? JSON.parse(sessionStorage.getItem("user"))
@@ -142,9 +148,14 @@ function App() {
 
   const handleShowAdminDashboard = () => {
     setShowAdminDashboard(true);
+    // Update URL without reloading page
+    window.history.pushState({}, "", "/admin");
   };
+
   const handleCloseAdminDashboard = () => {
     setShowAdminDashboard(false);
+    // Update URL without reloading page
+    window.history.pushState({}, "", "/");
   };
 
   // Send verification code
@@ -436,6 +447,7 @@ function App() {
     setVerificationStep("initial");
     setTempUserData(null);
     setRecommendations([]);
+    setShowAdminDashboard(false);
 
     // Clear localStorage
     sessionStorage.removeItem("user");
@@ -774,126 +786,119 @@ function App() {
     return children;
   };
 
-  // If user is admin, show admin naviagtion
-  if (showAdminDashboard) {
-    return (
-      <Router>
+  return (
+    <Router>
+      {/* If admin dashboard should be shown */}
+      {showAdminDashboard ? (
         <div className="flex">
           <DashboardNav handleCloseAdminDashboard={handleCloseAdminDashboard} />
           <Routes>
-            {/* Admin routes */}
-            <Route path="/admin" element={<Dashboard />} />
-            <Route path="/admin/user" element={<UserDashboard />} />
-            <Route path="/admin/product" element={<ProductDashboard />} />
-            <Route path="/admin/category" element={<CategoryDashboard />} />
-            <Route
-              path="/admin/transaction"
-              element={<TransactionDashboard />}
-            />
-            <Route path="*" element={<Dashboard />} />
+            {/* Single admin route for consolidated dashboard */}
+            <Route path="/admin/*" element={<Dashboard />} />
+            {/* Any other path in admin mode should go to dashboard */}
+            <Route path="*" element={<Navigate to="/admin" />} />
           </Routes>
         </div>
-      </Router>
-    );
-  }
+      ) : (
+        /* Normal user interface */
+        <div className="min-h-screen bg-gray-50">
+          {/* Show loading overlay when generating recommendations */}
+          {isGeneratingRecommendations && <LoadingOverlay />}
 
-  return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        {/* Show loading overlay when generating recommendations */}
-        {isGeneratingRecommendations && <LoadingOverlay />}
-
-        {/* Only show navbar when authenticated */}
-        {isAuthenticated && (
-          <Navbar
-            isAdmin={isAdmin}
-            onLogout={handleLogout}
-            userName={user?.name}
-            handleShowAdminDashboard={handleShowAdminDashboard}
-          />
-        )}
-        <Routes>
-          {/* Public routes */}
-          <Route
-            path="/login"
-            element={isAuthenticated ? <Navigate to="/" /> : <LoginComponent />}
-          />
-          {/* Protected routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <Home recommendations={recommendations} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/product/:id"
-            element={
-              <ProtectedRoute>
-                <ProductDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/search"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <SearchPage />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <Settings />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/selling"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <Selling />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/transactions"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <Transactions />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/favorites"
-            element={
-              <ProtectedRoute>
-                <div className="container mx-auto px-4 py-6">
-                  <Favorites />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          {/* Redirect to login for any unmatched routes */}
-          <Route
-            path="*"
-            element={<Navigate to={isAuthenticated ? "/" : "/login"} />}
-          />
-        </Routes>
-      </div>
+          {/* Only show navbar when authenticated */}
+          {isAuthenticated && (
+            <Navbar
+              isAdmin={isAdmin}
+              onLogout={handleLogout}
+              userName={user?.name}
+              handleShowAdminDashboard={handleShowAdminDashboard}
+            />
+          )}
+          <Routes>
+            {/* Public routes */}
+            <Route
+              path="/login"
+              element={
+                isAuthenticated ? <Navigate to="/" /> : <LoginComponent />
+              }
+            />
+            {/* Protected routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <div className="container mx-auto px-4 py-6">
+                    <Home recommendations={recommendations} />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/product/:id"
+              element={
+                <ProtectedRoute>
+                  <ProductDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <ProtectedRoute>
+                  <div className="container mx-auto px-4 py-6">
+                    <SearchPage />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <div className="container mx-auto px-4 py-6">
+                    <Settings />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/selling"
+              element={
+                <ProtectedRoute>
+                  <div className="container mx-auto px-4 py-6">
+                    <Selling />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions"
+              element={
+                <ProtectedRoute>
+                  <div className="container mx-auto px-4 py-6">
+                    <Transactions />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <div className="container mx-auto px-4 py-6">
+                    <Favorites />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+            {/* Redirect to login for any unmatched routes */}
+            <Route
+              path="*"
+              element={<Navigate to={isAuthenticated ? "/" : "/login"} />}
+            />
+          </Routes>
+        </div>
+      )}
     </Router>
   );
 }

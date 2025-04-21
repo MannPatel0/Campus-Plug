@@ -101,7 +101,8 @@ VALUES
     ('Photography Equipment'),
     ('Event Tickets'),
     ('Software Licenses'),
-    ('Transportation (Car Pool)');
+    ('Transportation (Car Pool)'),
+    ('Other');
 
 -- Insert Products
 INSERT INTO

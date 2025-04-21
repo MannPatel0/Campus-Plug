@@ -28,6 +28,7 @@ CREATE TABLE Category (
     Name VARCHAR(255) NOT NULL
 );
 
+-- Product Entity
 CREATE TABLE Product (
     ProductID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
@@ -37,22 +38,8 @@ CREATE TABLE Product (
     Description TEXT,
     CategoryID INT NOT NULL,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User (UserID),
-    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID)
-);
-
--- Product Entity
-CREATE TABLE Product (
-    ProductID INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(255) NOT NULL,
-    Price DECIMAL(10, 2) NOT NULL,
-    StockQuantity INT,
-    UserID INT,
-    Description TEXT,
-    CategoryID INT,
-    Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE SET NULL,
-    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID)
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE,
+    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID) ON DELETE SET NULL
 );
 
 -- Fixed Image_URL table
@@ -73,7 +60,7 @@ CREATE TABLE Review (
         AND Rating <= 5
     ),
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE SET NULL,
+    FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE,
     FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE
 );
 
@@ -85,7 +72,7 @@ CREATE TABLE Transaction (
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
     PaymentStatus VARCHAR(50),
     FOREIGN KEY (UserID) REFERENCES User (UserID) ON DELETE CASCADE,
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE SET NULL
+    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE 
 );
 
 -- Recommendation Entity (Many-to-One with User, Many-to-One with Product)
