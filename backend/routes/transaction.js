@@ -7,6 +7,8 @@ const {
   getAllTransactions,
   updatePaymentStatus,
   deleteTransaction,
+  getTransactionWithPagination,
+  removeTransation,
 } = require("../controllers/transaction");
 const router = express.Router();
 

@@ -79,7 +79,7 @@ CREATE TABLE Review (
 
 -- Transaction Entity (Many-to-One with User, Many-to-One with Product)
 CREATE TABLE Transaction (
-    TransactionID INT PRIMARY KEY,
+    TransactionID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     ProductID INT,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,

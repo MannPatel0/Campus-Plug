@@ -30,6 +30,8 @@ const ProductDetail = () => {
   const [reviews, setReviews] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [showAlert1, setShowAlert1] = useState(false);
+
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   const toggleFavorite = async (id) => {
@@ -303,6 +305,12 @@ const ProductDetail = () => {
           onClose={() => setShowAlert(false)}
         />
       )}
+      {showAlert1 && (
+        <FloatingAlert
+          message="Product added to transaction!"
+          onClose={() => setShowAlert1(false)}
+        />
+      )}
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-3/5">
@@ -438,13 +446,8 @@ const ProductDetail = () => {
                     const result = await response.json();
 
                     if (result.success) {
-                      alert("Transaction created successfully!");
-                    } else {
-                      throw new Error(
-                        result.message || "Failed to create transaction",
-                      );
+                      setShowAlert1(true);
                     }
-
                     // Toggle contact options visibility
                     setShowContactOptions(!showContactOptions);
                   } catch (error) {
