@@ -7,7 +7,7 @@ exports.getAllCategoriesWithPagination = async (req, res) => {
   try {
     const [data, _] = await db.execute(
       "SELECT * FROM Category C ORDER BY C.CategoryID ASC LIMIT ? OFFSET ?",
-      [limit.toString(), offset.toString()]
+      [limit.toString(), offset.toString()],
     );
 
     const [result] = await db.execute("SELECT COUNT(*) AS count FROM Category");
@@ -24,7 +24,7 @@ exports.addCategory = async (req, res) => {
   try {
     const [result] = await db.execute(
       "INSERT INTO Category (Name) VALUES (?)",
-      [name]
+      [name],
     );
     res.json({ message: "Adding new category successfully!" });
   } catch (error) {
@@ -38,10 +38,33 @@ exports.removeCategory = async (req, res) => {
   try {
     const [result] = await db.execute(
       `DELETE FROM Category WHERE CategoryID = ?`,
-      [id]
+      [id],
     );
     res.json({ message: "Delete category successfully!" });
   } catch (error) {
     res.json({ error: "Cannot remove category from database!" });
+  }
+};
+
+exports.getAllCategory = async (req, res) => {
+  try {
+    const [data, fields] = await db.execute(`SELECT * FROM Category`);
+
+    const formattedData = {};
+    data.forEach((row) => {
+      formattedData[row.CategoryID] = row.Name;
+    });
+
+    res.json({
+      success: true,
+      message: "Categories fetched successfully",
+      data: formattedData,
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Database error occurred",
+    });
   }
 };
