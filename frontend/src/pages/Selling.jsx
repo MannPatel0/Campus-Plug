@@ -93,88 +93,110 @@ const Selling = () => {
     fetchProducts();
   }, []); // Add userId to dependency array if it might change
 
-  const handleSaveProduct = async () => {
-    if (!(editingProduct.categories || []).length) {
-      alert("Please select at least one category");
-      return;
+  // When editing a product, save the original product properly
+const handleEditProduct = (product) => {
+  // Save the original product completely
+  setOriginalProduct(product);
+
+  // Convert category ID to category name if needed
+  const categoryName = getCategoryNameById(product.CategoryID);
+
+  setEditingProduct({
+    ...product,
+    categories: categoryName ? [categoryName] : [],
+    images: product.images || [], // Ensure images array exists
+  });
+
+  setShowForm(true);
+};
+
+// Then update the handleSaveProduct function to properly merge values
+const handleSaveProduct = async () => {
+  if (!(editingProduct.categories || []).length) {
+    alert("Please select at least one category");
+    return;
+  }
+
+  try {
+    const imagePaths = [];
+
+    // Handle images properly
+    if (editingProduct.images && editingProduct.images.length > 0) {
+      // If there are new images uploaded (File objects)
+      const newImages = editingProduct.images.filter(img => img instanceof File);
+      newImages.forEach((file) => {
+        const simulatedPath = `/public/uploads/${file.name}`;
+        imagePaths.push(simulatedPath);
+      });
+      
+      // Also include any existing image URLs that are strings, not File objects
+      const existingImages = editingProduct.images.filter(img => typeof img === 'string');
+      if (existingImages.length > 0) {
+        imagePaths.push(...existingImages);
+      }
+    } else if (originalProduct?.image_url) {
+      // If no new images but there was an original image URL
+      imagePaths.push(originalProduct.image_url);
     }
 
-    try {
-      const imagePaths = [];
+    const categoryName = (editingProduct.categories || [])[0];
+    const categoryID = categoryMapping[categoryName] || originalProduct?.CategoryID || 1;
 
-      if (editingProduct.images && editingProduct.images.length > 0) {
-        editingProduct.images.forEach((file) => {
-          const simulatedPath = `/public/uploads/${file.name}`;
-          imagePaths.push(simulatedPath);
-        });
-      } else if (originalProduct?.images?.length > 0) {
-        imagePaths.push(...originalProduct.images);
-      }
+    // Create payload with proper fallback to original values
+    const payload = {
+      name: editingProduct.Name || editingProduct.name || originalProduct?.Name || "",
+      price: parseFloat(editingProduct.Price || editingProduct.price || originalProduct?.Price || 0),
+      qty: 1,
+      userID: storedUser.ID,
+      description: editingProduct.Description || editingProduct.description || originalProduct?.Description || "",
+      category: categoryID,
+      images: imagePaths.length > 0 ? imagePaths : (originalProduct?.image_url ? [originalProduct.image_url] : []),
+    };
 
-      const categoryName = (editingProduct.categories || [])[0];
-      const categoryID =
-        categoryMapping[categoryName] || originalProduct?.category || 1;
+    console.log("Sending payload:", payload);
 
-      const payload = {
-        name: editingProduct.name || originalProduct?.name || "",
-        price:
-          parseFloat(editingProduct.price) ||
-          parseFloat(originalProduct?.price) ||
-          0,
-        qty: 1,
-        userID: storedUser.ID,
-        description:
-          editingProduct.description || originalProduct?.description || "",
-        category: categoryID,
-        images: imagePaths,
-      };
+    const endpoint = editingProduct.ProductID
+      ? `http://localhost:3030/api/product/update/${editingProduct.ProductID}`
+      : "http://localhost:3030/api/product/addProduct";
 
-      console.log("Sending payload:", payload);
+    const method = editingProduct.ProductID ? "PUT" : "POST";
 
-      const endpoint = editingProduct.ProductID
-        ? `http://localhost:3030/api/product/update/${editingProduct.ProductID}`
-        : "http://localhost:3030/api/product/addProduct";
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-      const method = editingProduct.ProductID ? "PUT" : "POST";
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(
-          `${
-            editingProduct.ProductID ? "Failed to update" : "Failed to add"
-          } product: ${errorData}`,
-        );
-      }
-
-      const data = await response.json();
-      console.log("Product saved:", data);
-
-      // Reset form and hide it
-      setShowForm(false);
-      setEditingProduct({
-        name: "",
-        price: "",
-        description: "",
-        categories: [],
-        images: [],
-      });
-
-      setOriginalProduct(null); // reset original as well
-
-      reloadPage();
-    } catch (error) {
-      console.error("Error saving product:", error);
-      alert(`Error saving product: ${error.message}`);
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(
+        `${editingProduct.ProductID ? "Failed to update" : "Failed to add"} product: ${errorData}`
+      );
     }
-  };
+
+    const data = await response.json();
+    console.log("Product saved:", data);
+
+    // Reset form and hide it
+    setShowForm(false);
+    setEditingProduct({
+      name: "",
+      price: "",
+      description: "",
+      categories: [],
+      images: [],
+    });
+
+    setOriginalProduct(null); // reset original as well
+
+    reloadPage();
+  } catch (error) {
+    console.error("Error saving product:", error);
+    alert(`Error saving product: ${error.message}`);
+  }
+};
 
   // Handle product deletion
   const handleDeleteProduct = async (productId) => {
@@ -203,20 +225,6 @@ const Selling = () => {
       console.error("Error fetching products:", error);
       // You might want to set an error state here
     }
-  };
-
-  // Handle editing a product
-  const handleEditProduct = (product) => {
-    // Convert category ID to category name if needed
-    const categoryName = getCategoryNameById(product.CategoryID);
-
-    setEditingProduct({
-      ...product,
-      categories: categoryName ? [categoryName] : [],
-      images: product.images || [], // Ensure images array exists
-    });
-
-    setShowForm(true);
   };
 
   // Helper function to get category name from ID
