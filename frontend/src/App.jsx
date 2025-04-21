@@ -19,6 +19,7 @@ import ProductDashboard from "./pages/ProductDashboard";
 import DashboardNav from "./components/DashboardNav";
 import CategoryDashboard from "./pages/CategoryDashboard";
 import { verifyIsAdmin } from "./api/admin";
+import TransactionDashboard from "./pages/TransactionDashboard";
 
 function App() {
   // Authentication state - initialize from localStorage if available
@@ -710,6 +711,10 @@ function App() {
             <Route path="/admin/user" element={<UserDashboard />} />
             <Route path="/admin/product" element={<ProductDashboard />} />
             <Route path="/admin/category" element={<CategoryDashboard />} />
+            <Route
+              path="/admin/transaction"
+              element={<TransactionDashboard />}
+            />
             <Route path="*" element={<Dashboard />} />
           </Routes>
         </div>

@@ -40,6 +40,19 @@ export const getCategories = async (page, limit = 10) => {
   }
 };
 
+export const getTransactions = async (page, limit = 10) => {
+  try {
+    const { data } = await client.get(
+      `/transaction/getTransactions?limit=${limit}&page=${page}`
+    );
+    return { transactions: data.data, total: data.total };
+  } catch (error) {
+    const { response } = error;
+    if (response?.data) return response.data;
+    return { error: error.message || error };
+  }
+};
+
 export const addCategory = async (name) => {
   try {
     const { data } = await client.post(`/category/addCategory`, { name: name });
@@ -88,6 +101,17 @@ export const verifyIsAdmin = async (id) => {
   try {
     const { data } = await client.get(`/user/isAdmin/${id}`);
     return { isAdmin: data.isAdmin };
+  } catch (error) {
+    const { response } = error;
+    if (response?.data) return response.data;
+    return { error: error.message || error };
+  }
+};
+
+export const removeTransaction = async (id) => {
+  try {
+    const { data } = await client.delete(`/transaction/${id}`);
+    return { message: data.message };
   } catch (error) {
     const { response } = error;
     if (response?.data) return response.data;

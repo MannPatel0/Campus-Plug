@@ -3,6 +3,7 @@ import { FaUserTag } from "react-icons/fa";
 import { FaBoxArchive } from "react-icons/fa6";
 import { MdOutlineCategory } from "react-icons/md";
 import { FaArrowLeft } from "react-icons/fa";
+import { FaMoneyBillTransfer } from "react-icons/fa6";
 
 export default function DashboardNav({ handleCloseAdminDashboard }) {
   const handleClick = () => {
@@ -67,6 +68,20 @@ export default function DashboardNav({ handleCloseAdminDashboard }) {
             >
               <MdOutlineCategory />
               <span className="pl-3">Categories</span>
+            </NavLink>
+          </li>
+          <li className="w-fit pl-10">
+            <NavLink
+              to="/admin/transaction"
+              className={({ isActive }) =>
+                (isActive
+                  ? "text-green-400"
+                  : "text-white transition-all hover:text-green-200") +
+                " flex items-center px-5 text-lg pt-5"
+              }
+            >
+              <FaMoneyBillTransfer />
+              <span className="pl-3">Transaction</span>
             </NavLink>
           </li>
         </ul>
