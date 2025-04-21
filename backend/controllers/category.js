@@ -7,7 +7,7 @@ exports.getAllCategoriesWithPagination = async (req, res) => {
   try {
     const [data, _] = await db.execute(
       "SELECT * FROM Category C ORDER BY C.CategoryID ASC LIMIT ? OFFSET ?",
-      [limit.toString(), offset.toString()],
+      [limit.toString(), offset.toString()]
     );
 
     const [result] = await db.execute("SELECT COUNT(*) AS count FROM Category");
@@ -24,7 +24,7 @@ exports.addCategory = async (req, res) => {
   try {
     const [result] = await db.execute(
       "INSERT INTO Category (Name) VALUES (?)",
-      [name],
+      [name]
     );
     res.json({ message: "Adding new category successfully!" });
   } catch (error) {
@@ -34,15 +34,23 @@ exports.addCategory = async (req, res) => {
 
 exports.removeCategory = async (req, res) => {
   const { id } = req.params;
-
   try {
+    if (id == "1") throw Error("You're not allowed to delete this category!");
+    const [updateResult] = await db.execute(
+      "UPDATE Product SET CategoryID = 1 WHERE CategoryID = ?",
+      [id]
+    );
+
     const [result] = await db.execute(
       `DELETE FROM Category WHERE CategoryID = ?`,
-      [id],
+      [id]
     );
+
     res.json({ message: "Delete category successfully!" });
   } catch (error) {
-    res.json({ error: "Cannot remove category from database!" });
+    res.json({
+      error: error.message || "Cannot remove category from database!",
+    });
   }
 };
 

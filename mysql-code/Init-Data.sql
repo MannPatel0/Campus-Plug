@@ -72,6 +72,7 @@ VALUES
 INSERT INTO
     Category (Name)
 VALUES
+	('Other'),
     ('Textbooks'),
     ('Electronics'),
     ('Furniture'),
@@ -100,9 +101,8 @@ VALUES
     ('Winter Clothing'),
     ('Photography Equipment'),
     ('Event Tickets'),
-    ('Software Licenses'),
-    ('Transportation (Car Pool)'),
-    ('Other');
+    ('Software Licenses');
+    
 
 -- Insert Products
 INSERT INTO
@@ -454,4 +454,5 @@ VALUES
         1,
         'This is a great fake product! Totally recommend it.',
         5,
-    );
+        '2024-10-02 16:00:00'
+    )
