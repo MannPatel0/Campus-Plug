@@ -105,8 +105,8 @@ const Transactions = () => {
                     e.preventDefault();
                     deleteTransaction(tx.id);
                   }}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-600 z-10"
-                >
+                  className="absolute bottom-2 right-2 text-red-500 hover:text-red-600 z-10"
+                > 
                   <Trash2 size={20} />
                 </button>
 
