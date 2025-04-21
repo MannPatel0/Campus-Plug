@@ -7,10 +7,10 @@ const client = axios.create({
 });
 
 // Users
-export const getUsers = async (page, limit = 10) => {
+export const getUsers = async (page = 1, limit = 10) => {
   try {
     const { data } = await client.get(
-      `/user/getUserWithPagination?page=${page}&limit=${limit}`,
+      `/user/getUserWithPagination?page=${page}&limit=${limit}`
     );
     return { users: data.users, total: data.total };
   } catch (error) {
@@ -37,10 +37,10 @@ export const verifyIsAdmin = async (id) => {
 };
 
 // Products
-export const getProducts = async (page, limit = 10) => {
+export const getProducts = async (page = 1, limit = 10) => {
   try {
     const { data } = await client.get(
-      `/product/getProductWithPagination?limit=${limit}&page=${page}`,
+      `/product/getProductWithPagination?limit=${limit}&page=${page}`
     );
     return { products: data.products, total: data.totalProd };
   } catch (error) {
@@ -61,7 +61,7 @@ export const removeProduct = async (id) => {
 export const getCategories = async (page, limit = 10) => {
   try {
     const { data } = await client.get(
-      `/category/getCategories?page=${page}&limit=${limit}`,
+      `/category/getCategories?page=${page}&limit=${limit}`
     );
     return { data: data.data, total: data.total };
   } catch (error) {
@@ -81,6 +81,7 @@ export const addCategory = async (name) => {
 export const removeCategory = async (id) => {
   try {
     const { data } = await client.delete(`/category/${id}`);
+    if (data.error) throw Error(data.error);
     return { message: data.message };
   } catch (error) {
     return handleError(error);
@@ -88,10 +89,10 @@ export const removeCategory = async (id) => {
 };
 
 // Transactions
-export const getTransactions = async (page, limit = 10) => {
+export const getTransactions = async (page = 1, limit = 10) => {
   try {
     const { data } = await client.get(
-      `/transaction/getTransactions?limit=${limit}&page=${page}`,
+      `/transaction/getTransactions?limit=${limit}&page=${page}`
     );
     return { transactions: data.data, total: data.total };
   } catch (error) {
@@ -112,7 +113,7 @@ export const removeTransaction = async (id) => {
 const handleError = (error) => {
   const { response } = error;
   if (response?.data) return response.data;
-  return { error: error.message || error };
+  return alert(error.message || error);
 };
 
 // Optional: export client if you want to use it elsewhere

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   getUsers,
   removeUser,
@@ -11,10 +11,8 @@ import {
 } from "../api/admin";
 import { MdDelete } from "react-icons/md";
 import { IoAddCircleSharp } from "react-icons/io5";
-import { FaHome } from "react-icons/fa";
 import Pagination from "../components/Pagination";
 import CategoryForm from "../components/CategoryForm";
-import DashboardNav from "../components/DashboardNav";
 import { useNavigate } from "react-router-dom";
 
 // Spinner Component
@@ -64,24 +62,32 @@ const Dashboard = ({
   const [loading, setLoading] = useState(true);
   const pageLimit = 10;
 
+  const currentTab = useRef();
+
+  //Reset the current page to 1 whenever we switch between tab
+  useEffect(() => {
+    if (currentTab.current != idKey) setCurrentPage(1);
+    currentTab.current = idKey;
+  }, [idKey]);
+
   const fetchItems = useCallback(
     (page = 1, limit = 10) => {
-      setLoading(true);
       fetchDataFn(page, limit)
         .then((res) => {
+          console.log(res);
+
           const data =
             res.users || res.products || res.transactions || res.data || [];
           setItems(data);
           setTotal(res.total);
         })
         .catch((error) => {
-          console.error("Error fetching data:", error);
           setItems([]);
           setTotal(0);
         })
         .finally(() => setLoading(false));
     },
-    [fetchDataFn],
+    [fetchDataFn]
   );
 
   const handleRemove = (id) => {
@@ -323,7 +329,9 @@ export default function AdminDashboardTabs() {
           <select
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-500 focus:ring-opacity-50 p-2"
             value={activeTab}
-            onChange={(e) => setActiveTab(parseInt(e.target.value))}
+            onChange={(e) => {
+              setActiveTab(parseInt(e.target.value));
+            }}
           >
             {tabs.map((tab, index) => (
               <option key={tab.key} value={index}>
@@ -343,7 +351,9 @@ export default function AdminDashboardTabs() {
                   ? "text-green-700 bg-white border-l border-t border-r border-gray-200 border-b-0"
                   : "text-gray-600 hover:text-green-700 bg-gray-50"
               }`}
-              onClick={() => setActiveTab(index)}
+              onClick={() => {
+                setActiveTab(index);
+              }}
             >
               <span className="inline-block mr-2">{tab.icon}</span>
               {tab.title}

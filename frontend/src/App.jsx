@@ -105,7 +105,7 @@ function App() {
           body: JSON.stringify({
             userId: user.ID,
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -117,14 +117,14 @@ function App() {
       if (result.success) {
         console.log(
           "Recommendations generated successfully:",
-          result.recommendations,
+          result.recommendations
         );
         setRecommendations(result.recommendations);
 
         // Store recommendations in session storage for access across the app
         sessionStorage.setItem(
           "userRecommendations",
-          JSON.stringify(result.recommendations),
+          JSON.stringify(result.recommendations)
         );
       } else {
         console.error("Error generating recommendations:", result.message);
@@ -178,7 +178,7 @@ function App() {
             email: userData.email,
             // Add any other required fields
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -227,7 +227,7 @@ function App() {
             email: tempUserData.email,
             code: code,
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -271,7 +271,7 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(userData),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -382,7 +382,7 @@ function App() {
               email: formValues.email,
               password: formValues.password,
             }),
-          },
+          }
         );
 
         if (!response.ok) {
@@ -694,8 +694,8 @@ function App() {
                     {isLoading
                       ? "Please wait..."
                       : isSignUp
-                        ? "Create Account"
-                        : "Sign In"}
+                      ? "Create Account"
+                      : "Sign In"}
                   </button>
                 </div>
               </form>
