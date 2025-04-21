@@ -1,4 +1,5 @@
 const { generateEmailTransporter } = require("./mail");
+const db = require("../utils/database");
 
 // Helper function to send email
 async function sendVerificationEmail(email, verificationCode) {
@@ -17,18 +18,17 @@ async function sendVerificationEmail(email, verificationCode) {
 }
 
 // Clean up expired verification codes (run this periodically)
-function cleanupExpiredCodes() {
-  db_con.query(
-    "DELETE FROM AuthVerification WHERE Date < DATE_SUB(NOW(), INTERVAL 15 MINUTE) AND Authenticated = 0",
-    (err, result) => {
-      if (err) {
-        console.error("Error cleaning up expired codes:", err);
-      } else {
-        console.log(`Cleaned up ${result} expired verification codes`);
-      }
-    }
-  );
-}
+const cleanupExpiredCodes = () => {
+  db.execute(
+    "DELETE FROM AuthVerification WHERE Date < DATE_SUB(NOW(), INTERVAL 15 MINUTE) AND Authenticated = 0"
+  )
+    .then((res) => {
+      console.log(`Cleaned up expired verification codes`);
+    })
+    .catch((err) => {
+      console.error("Error cleaning up expired codes:", err);
+    });
+};
 
 const checkDatabaseConnection = async (db) => {
   try {
