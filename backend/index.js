@@ -46,6 +46,7 @@ app.use("/api/history", history);
 app.use("/api/review", review);
 app.use("/api/category", categoryRouter);
 app.use("/api/transaction", transactionRouter);
+app.use("/api/category", categoryRouter);
 
 // Set up a scheduler to run cleanup every hour
 clean_up_time = 30 * 60 * 1000;

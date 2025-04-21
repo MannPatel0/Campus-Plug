@@ -6,7 +6,7 @@ exports.addProduct = async (req, res) => {
   try {
     const [result] = await db.execute(
       `INSERT INTO Product (Name, Price, StockQuantity, UserID, Description, CategoryID) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, price, qty, userID, description, category]
+      [name, price, qty, userID, description, category],
     );
 
     const productID = result.insertId;
@@ -15,7 +15,7 @@ exports.addProduct = async (req, res) => {
         db.execute(`INSERT INTO Image_URL (URL, ProductID) VALUES (?, ?)`, [
           imagePath,
           productID,
-        ])
+        ]),
       );
 
       await Promise.all(imageInsertPromises); //perallel
@@ -32,14 +32,52 @@ exports.addProduct = async (req, res) => {
   }
 };
 
+exports.removeProduct = async (req, res) => {
+  const { userID, productID } = req.body;
+  console.log(userID);
+
+  try {
+    // First delete images
+    await db.execute(`DELETE FROM Image_URL WHERE ProductID = ?`, [productID]);
+    await db.execute(`DELETE FROM History WHERE ProductID = ?`, [productID]);
+    await db.execute(`DELETE FROM Favorites WHERE ProductID = ?`, [productID]);
+    await db.execute(`DELETE FROM Product_Category WHERE ProductID = ?`, [
+      productID,
+    ]);
+    await db.execute(`DELETE FROM Product_Category WHERE ProductID = ?`, [
+      productID,
+    ]);
+    await db.execute(`DELETE FROM Transaction WHERE ProductID = ?`, [
+      productID,
+    ]);
+    await db.execute(
+      `DELETE FROM Recommendation WHERE RecommendedProductID = ?`,
+      [productID],
+    );
+
+    // Then delete the product
+    await db.execute(`DELETE FROM Product WHERE UserID = ? AND ProductID = ?`, [
+      userID,
+      productID,
+    ]);
+
+    res.json({
+      success: true,
+      message: "Product removed successfully",
+    });
+  } catch (error) {
+    console.error("Error removing product:", error);
+    return res.json({ error: "Could not remove product" });
+  }
+};
+
 exports.addFavorite = async (req, res) => {
   const { userID, productID } = req.body;
   console.log(userID);
   try {
-    // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
       `INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)`,
-      [userID, productID]
+      [userID, productID],
     );
 
     res.json({
@@ -59,7 +97,7 @@ exports.removeFavorite = async (req, res) => {
     // Use parameterized query to prevent SQL injection
     const [result] = await db.execute(
       `DELETE FROM Favorites WHERE UserID = ? AND ProductID = ?`,
-      [userID, productID]
+      [userID, productID],
     );
 
     res.json({
@@ -69,6 +107,103 @@ exports.removeFavorite = async (req, res) => {
   } catch (error) {
     console.error("Error removing favorite product:", error);
     return res.json({ error: "Could not remove favorite product" });
+  }
+};
+
+exports.updateProduct = async (req, res) => {
+  const { productId } = req.params;
+  const { name, description, price, category, images } = req.body;
+
+  console.log(productId);
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Step 1: Check if the product exists
+    const [checkProduct] = await connection.execute(
+      "SELECT * FROM Product WHERE ProductID = ?",
+      [productId],
+    );
+    if (checkProduct.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Step 2: Update the product
+    await connection.execute(
+      `
+      UPDATE Product
+      SET Name = ?, Description = ?, Price = ?, CategoryID = ?
+      WHERE ProductID = ?
+      `,
+      [name, description, price, category, productId],
+    );
+
+    // Step 3: Delete existing images
+    await connection.execute(`DELETE FROM Image_URL WHERE ProductID = ?`, [
+      productId,
+    ]);
+
+    // Step 4: Insert new image URLs
+    for (const imageUrl of images) {
+      await connection.execute(
+        `INSERT INTO Image_URL (ProductID, URL) VALUES (?, ?)`,
+        [productId, imageUrl],
+      );
+    }
+
+    await connection.commit();
+    res.json({ success: true, message: "Product updated successfully" });
+  } catch (error) {
+    await connection.rollback();
+    console.error("Update product error:", error);
+    res.status(500).json({ error: "Failed to update product" });
+  } finally {
+    connection.release();
+  }
+};
+
+exports.myProduct = async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `
+      SELECT
+      p.ProductID,
+      p.Name,
+      p.Description,
+      p.Price,
+      p.CategoryID,
+      p.UserID,
+      p.Date,
+      u.Name AS SellerName,
+      MIN(i.URL) AS image_url
+  FROM Product p
+  JOIN User u ON p.UserID = u.UserID
+  LEFT JOIN Image_URL i ON p.ProductID = i.ProductID
+  WHERE p.UserID = ?
+  GROUP BY
+      p.ProductID,
+      p.Name,
+      p.Description,
+      p.Price,
+      p.CategoryID,
+      p.UserID,
+      p.Date,
+      u.Name;
+      `,
+      [userID],
+    );
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error retrieving favorites:", error);
+    res.status(500).json({ error: "Could not retrieve favorite products" });
   }
 };
 
@@ -103,7 +238,7 @@ exports.getFavorites = async (req, res) => {
       p.Date,
       u.Name;
       `,
-      [userID]
+      [userID],
     );
 
     res.json({
@@ -168,7 +303,7 @@ exports.getProductById = async (req, res) => {
       JOIN User U ON p.UserID = U.UserID
       WHERE p.ProductID = ?
     `,
-      [id]
+      [id],
     );
 
     // Log raw data for debugging
@@ -242,11 +377,11 @@ exports.getProductWithPagination = async (req, res) => {
       ORDER BY P.ProductID ASC
       LIMIT ? OFFSET ?
     `,
-      [limit.toString(), offset.toString()]
+      [limit.toString(), offset.toString()],
     );
 
     const [result] = await db.execute(
-      `SELECT COUNT(*) AS totalProd FROM Product`
+      `SELECT COUNT(*) AS totalProd FROM Product`,
     );
     const { totalProd } = result[0];
 
@@ -262,40 +397,10 @@ exports.removeProduct = async (req, res) => {
   try {
     const [result] = await db.execute(
       `DELETE FROM Product WHERE ProductID = ?`,
-      [id]
+      [id],
     );
     res.json({ message: "Delete product successfully!" });
   } catch (error) {
     res.json({ error: "Cannot remove product from database!" });
   }
 };
-
-// db_con.query(
-//   "SELECT ProductID FROM product WHERE ProductID = ?",
-//   [productID],
-//   (err, results) => {
-//     if (err) {
-//       console.error("Error checking product:", err);
-//       return res.json({ error: "Database error" });
-//     }
-
-//     if (results.length === 0) {
-//       return res.json({ error: "Product does not exist" });
-//     }
-//   },
-// );
-
-// db_con.query(
-//   "INSERT INTO Favorites (UserID, ProductID) VALUES (?, ?)",
-//   [userID, productID],
-//   (err, result) => {
-//     if (err) {
-//       console.error("Error adding favorite product:", err);
-//       return res.json({ error: "Could not add favorite product" });
-//     }
-//     res.json({
-//       success: true,
-//       message: "Product added to favorites successfully",
-//     });
-//   },
-// );
