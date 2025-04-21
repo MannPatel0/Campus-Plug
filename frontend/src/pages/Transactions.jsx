@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, CreditCard } from "lucide-react";
+import { Calendar, CreditCard, Trash2 } from "lucide-react";
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -11,46 +11,54 @@ const Transactions = () => {
         const response = await fetch(
           "http://localhost:3030/api/transaction/getTransactionsByUser",
           {
-            method: "POST", // Use POST to send the userID
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userID: 1, // Replace with the actual userID (e.g., from context or state)
-            }),
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userID: 1 }), // replace with actual userID
           }
         );
-  
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const { transactions: txData } = await response.json();
-  
-        console.log("API Response:", txData); // Log the API response for debugging
-  
-        if (!Array.isArray(txData)) {
-          console.error("Expected an array but got:", txData);
-          return;
-        }
-  
-        const transformed = txData.map((tx) => ({
-          id: tx.TransactionID,
-          productId: tx.ProductID,
-          name: tx.ProductName || "Unnamed Product", // Ensure ProductName is used
-          price: tx.Price != null ? parseFloat(tx.Price) : null,
-          image: tx.Image_URL || "/default-image.jpg", // Ensure Image_URL is used
-          date: tx.Date,
-          status: tx.PaymentStatus,
-        }));
-  
-        console.log("Transformed Data:", transformed); // Log the transformed data
-  
-        setTransactions(transformed);
+        if (!Array.isArray(txData)) return;
+
+        setTransactions(
+          txData.map((tx) => ({
+            id: tx.TransactionID,
+            productId: tx.ProductID,
+            name: tx.ProductName || "Unnamed Product",
+            price: tx.Price != null ? parseFloat(tx.Price) : null,
+            image: tx.image_url || "/default-image.jpg",
+            date: tx.Date,
+            status: tx.PaymentStatus,
+          }))
+        );
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
       }
     };
-  
+
     fetchTransactions();
   }, []);
+
+  const deleteTransaction = async (id) => {
+    try {
+      const res = await fetch(
+        "http://localhost:3030/api/transaction/deleteTransaction",
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transactionID: id }),
+        }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+      } else {
+        console.error("Delete failed:", data.message);
+      }
+    } catch (err) {
+      console.error("Error deleting transaction:", err);
+    }
+  };
 
   const formatDate = (dateString) => {
     const d = new Date(dateString);
@@ -64,7 +72,7 @@ const Transactions = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">All Transactions</h1>
+        <h1 className="text-2xl font-bold text-gray-800">My Transactions</h1>
       </div>
 
       {transactions.length === 0 ? (
@@ -89,8 +97,19 @@ const Transactions = () => {
             {transactions.map((tx) => (
               <div
                 key={tx.id}
-                className="border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                className="relative border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
+                {/* Delete Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    deleteTransaction(tx.id);
+                  }}
+                  className="absolute top-2 right-2 text-red-500 hover:text-red-600 z-10"
+                >
+                  <Trash2 size={20} />
+                </button>
+
                 <Link to={`/product/${tx.productId}`}>
                   <div className="h-48 bg-gray-200 flex items-center justify-center">
                     {tx.image ? (
@@ -153,7 +172,10 @@ const Transactions = () => {
                     </Link>
                   </li>
                   <li className="mb-1">
-                    <Link to="/selling" className="hover:text-white transition">
+                    <Link
+                      to="/selling"
+                      className="hover:text-white transition"
+                    >
                       Sell an Item
                     </Link>
                   </li>
@@ -177,7 +199,10 @@ const Transactions = () => {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
-            <p>© {new Date().getFullYear()} Campus Marketplace. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} Campus Marketplace. All rights
+              reserved.
+            </p>
           </div>
         </div>
       </footer>
