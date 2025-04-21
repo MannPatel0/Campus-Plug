@@ -1,12 +1,6 @@
-import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Tag,
-  ChevronLeft,
-  ChevronRight,
-  Bookmark,
-  BookmarkCheck,
-} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Tag, ChevronLeft, ChevronRight, Bookmark, Loader } from "lucide-react";
 
 import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
@@ -14,38 +8,50 @@ const Home = () => {
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
   const [recommended, setRecommended] = useState([]);
-  const [history, sethistory] = useState([]);
+  const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    recommendations: true,
+    listings: true,
+    history: true,
+  });
+  const recommendationsFetched = useRef(false);
+  const historyFetched = useRef(false);
 
   //After user data storing the session.
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   const toggleFavorite = async (id) => {
-    const response = await fetch(
-      "http://localhost:3030/api/product/addFavorite",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    try {
+      const response = await fetch(
+        "http://localhost:3030/api/product/addFavorite",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: storedUser.ID,
+            productID: id,
+          }),
         },
-        body: JSON.stringify({
-          userID: storedUser.ID,
-          productID: id,
-        }),
-      },
-    );
-    const data = await response.json();
-    if (data.success) {
-      setShowAlert(true);
+      );
+      const data = await response.json();
+      if (data.success) {
+        setShowAlert(true);
+        // Close alert after 3 seconds
+        setTimeout(() => setShowAlert(false), 3000);
+      }
+      console.log(`Add Product -> Favorites: ${id}`);
+    } catch (error) {
+      console.error("Error adding favorite:", error);
     }
-    console.log(`Add Product -> History: ${id}`);
   };
 
   const addHistory = async (id) => {
-    const response = await fetch(
-      "http://localhost:3030/api/history/addHistory",
-      {
+    try {
+      await fetch("http://localhost:3030/api/history/addHistory", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,22 +60,23 @@ const Home = () => {
           userID: storedUser.ID,
           productID: id,
         }),
-      },
-    );
+      });
+    } catch (error) {
+      console.error("Error adding to history:", error);
+    }
   };
 
-  function reloadPage() {
-    var doctTimestamp = new Date(performance.timing.domLoading).getTime();
-    var now = Date.now();
-    var tenSec = 10 * 1000;
-    if (now > doctTimestamp + tenSec) {
-      location.reload();
-    }
-  }
-
+  // Fetch recommended products
   useEffect(() => {
-    const fetchrecomProducts = async () => {
+    const fetchRecommendedProducts = async () => {
+      // Skip if already fetched or no user data
+      if (recommendationsFetched.current || !storedUser || !storedUser.ID)
+        return;
+
+      setIsLoading((prev) => ({ ...prev, recommendations: true }));
       try {
+        recommendationsFetched.current = true; // Mark as fetched before the API call
+
         const response = await fetch(
           "http://localhost:3030/api/engine/recommended",
           {
@@ -82,36 +89,42 @@ const Home = () => {
             }),
           },
         );
-        if (!response.ok) throw new Error("Failed to fetch products");
+        if (!response.ok) throw new Error("Failed to fetch recommendations");
 
         const data = await response.json();
         if (data.success) {
           setRecommended(
             data.data.map((product) => ({
               id: product.ProductID,
-              title: product.ProductName, // Use the alias from SQL
+              title: product.ProductName,
               price: product.Price,
-              category: product.Category, // Ensure this gets the category name
-              image: product.ProductImage, // Use the alias for image URL
-              seller: product.SellerName, // Fetch seller name properly
-              datePosted: product.DateUploaded, // Use the actual date
-              isFavorite: false, // Default state
+              category: product.Category,
+              image: product.ProductImage,
+              seller: product.SellerName,
+              datePosted: product.DateUploaded,
+              isFavorite: false,
             })),
           );
-          reloadPage();
         } else {
-          throw new Error(data.message || "Error fetching products");
+          throw new Error(data.message || "Error fetching recommendations");
         }
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching recommendations:", error);
         setError(error.message);
+        // Reset the flag if there's an error so it can try again
+        recommendationsFetched.current = false;
+      } finally {
+        setIsLoading((prev) => ({ ...prev, recommendations: false }));
       }
     };
-    fetchrecomProducts();
-  }, []);
 
+    fetchRecommendedProducts();
+  }, [storedUser]); // Keep dependency
+
+  // Fetch all products
   useEffect(() => {
     const fetchProducts = async () => {
+      setIsLoading((prev) => ({ ...prev, listings: true }));
       try {
         const response = await fetch(
           "http://localhost:3030/api/product/getProduct",
@@ -119,18 +132,17 @@ const Home = () => {
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
-
         if (data.success) {
           setListings(
             data.data.map((product) => ({
               id: product.ProductID,
-              title: product.ProductName, // Use the alias from SQL
+              title: product.ProductName,
               price: product.Price,
-              category: product.Category, // Ensure this gets the category name
-              image: product.ProductImage, // Use the alias for image URL
-              seller: product.SellerName, // Fetch seller name properly
-              datePosted: product.DateUploaded, // Use the actual date
-              isFavorite: false, // Default state
+              category: product.Category,
+              image: product.ProductImage,
+              seller: product.SellerName,
+              datePosted: product.DateUploaded,
+              isFavorite: false,
             })),
           );
         } else {
@@ -139,15 +151,24 @@ const Home = () => {
       } catch (error) {
         console.error("Error fetching products:", error);
         setError(error.message);
+      } finally {
+        setIsLoading((prev) => ({ ...prev, listings: false }));
       }
     };
+
     fetchProducts();
   }, []);
 
+  // Fetch user history
   useEffect(() => {
-    const fetchrecomProducts = async () => {
-      // Get the user's data from localStorage
+    const fetchUserHistory = async () => {
+      // Skip if already fetched or no user data
+      if (historyFetched.current || !storedUser || !storedUser.ID) return;
+
+      setIsLoading((prev) => ({ ...prev, history: true }));
       try {
+        historyFetched.current = true; // Mark as fetched before the API call
+
         const response = await fetch(
           "http://localhost:3030/api/history/getHistory",
           {
@@ -160,52 +181,168 @@ const Home = () => {
             }),
           },
         );
-        if (!response.ok) throw new Error("Failed to fetch products");
+        if (!response.ok) throw new Error("Failed to fetch history");
 
         const data = await response.json();
         if (data.success) {
-          sethistory(
+          setHistory(
             data.data.map((product) => ({
               id: product.ProductID,
-              title: product.ProductName, // Use the alias from SQL
+              title: product.ProductName,
               price: product.Price,
-              category: product.Category, // Ensure this gets the category name
-              image: product.ProductImage, // Use the alias for image URL
-              seller: product.SellerName, // Fetch seller name properly
-              datePosted: product.DateUploaded, // Use the actual date
+              category: product.Category,
+              image: product.ProductImage,
+              seller: product.SellerName,
+              datePosted: product.DateUploaded,
             })),
           );
         } else {
-          throw new Error(data.message || "Error fetching products");
+          throw new Error(data.message || "Error fetching history");
         }
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching history:", error);
         setError(error.message);
+        // Reset the flag if there's an error so it can try again
+        historyFetched.current = false;
+      } finally {
+        setIsLoading((prev) => ({ ...prev, history: false }));
       }
     };
-    fetchrecomProducts();
-  }, []);
+
+    fetchUserHistory();
+  }, [storedUser]); // Keep dependency
 
   const handleSelling = () => {
     navigate("/selling");
   };
+
+  // Loading indicator component
+  const LoadingSection = () => (
+    <div className="flex justify-center items-center h-48">
+      <Loader className="animate-spin text-emerald-600 h-8 w-8" />
+    </div>
+  );
+
+  // Product card component to reduce duplication
+  const ProductCard = ({ product, addToHistory = false }) => (
+    <Link
+      key={product.id}
+      to={`/product/${product.id}`}
+      onClick={addToHistory ? () => addHistory(product.id) : undefined}
+      className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
+    >
+      <div className="relative">
+        <img
+          src={product.image}
+          alt={product.title}
+          className="w-full h-48 object-cover"
+        />
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleFavorite(product.id);
+          }}
+          className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
+        >
+          <Bookmark className="text-white w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="p-4">
+        <h3 className="text-lg font-medium text-gray-800 leading-tight">
+          {product.title}
+        </h3>
+        <span className="font-semibold text-emerald-600 block mt-1">
+          ${product.price}
+        </span>
+
+        <div className="flex items-center text-sm text-gray-500 mt-2">
+          <Tag className="h-4 w-4 mr-1" />
+          <span>{product.category}</span>
+        </div>
+
+        <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-3">
+          <span className="text-xs text-gray-500">{product.datePosted}</span>
+          <span className="text-sm font-medium text-gray-700">
+            {product.seller}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+
+  // Scrollable product list component to reduce duplication
+  const ScrollableProductList = ({
+    containerId,
+    products,
+    children,
+    isLoading,
+    addToHistory = false,
+  }) => (
+    <div className="relative py-4">
+      {children}
+
+      <div className="relative">
+        <button
+          onClick={() =>
+            document
+              .getElementById(containerId)
+              .scrollBy({ left: -400, behavior: "smooth" })
+          }
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
+        >
+          <ChevronLeft size={24} />
+        </button>
+
+        <div
+          id={containerId}
+          className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0 rounded min-h-[250px]"
+        >
+          {isLoading ? (
+            <LoadingSection />
+          ) : products.length > 0 ? (
+            products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                addToHistory={addToHistory}
+              />
+            ))
+          ) : (
+            <div className="flex justify-center items-center w-full h-48 text-gray-500">
+              No products available
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() =>
+            document
+              .getElementById(containerId)
+              .scrollBy({ left: 400, behavior: "smooth" })
+          }
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
+        >
+          <ChevronRight size={24} />
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow">
         {/* Hero Section with School Background */}
         <div className="relative py-12 px-4 mb-8 shadow-sm">
-          {/* Background Image - Positioned at bottom */}
           <div className="absolute inset-0 z-0 overflow-hidden bg-black bg-opacity-100">
             <img
               src="../public/Ucalgary.png"
               alt="University of Calgary"
               className="w-full h-full object-cover object-bottom opacity-45"
             />
-            {/* Dark overlay for better text readability */}
           </div>
 
-          {/* Content */}
           <div className="max-w-2xl mx-auto text-center relative z-1">
             <h1 className="text-3xl font-bold text-white mb-4">
               Buy and Sell on Campus
@@ -223,290 +360,53 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Recent Listings */}
+        {/* Floating Alert */}
         {showAlert && (
           <FloatingAlert
             message="Product added to favorites!"
             onClose={() => setShowAlert(false)}
           />
         )}
-        <div className="relative py-4">
+
+        {/* Recommendations Section */}
+        <ScrollableProductList
+          containerId="RecomContainer"
+          products={recommended}
+          isLoading={isLoading.recommendations}
+          addToHistory={true}
+        >
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Recommendation
+            Recommended For You
           </h2>
+        </ScrollableProductList>
 
-          <div className="relative">
-            {/* Left Button - Overlaid on products */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("RecomContainer")
-                  .scrollBy({ left: -400, behavior: "smooth" })
-              }
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
-            >
-              <ChevronLeft size={24} />{" "}
-            </button>
-
-            {/* Scrollable Listings Container */}
-            <div
-              id="RecomContainer"
-              className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0 rounded"
-            >
-              {recommended.map((recommended) => (
-                <Link
-                  key={recommended.id}
-                  to={`/product/${recommended.id}`}
-                  onClick={() => addHistory(recommended.id)}
-                  className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
-                >
-                  <div className="relative">
-                    <img
-                      src={recommended.image}
-                      alt={recommended.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        toggleFavorite(recommended.id);
-                      }}
-                      className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
-                    >
-                      <Bookmark className="text-white w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium text-gray-800 leading-tight">
-                      {recommended.title}
-                    </h3>
-                    <span className="font-semibold text-emerald-600 block mt-1">
-                      ${recommended.price}
-                    </span>
-
-                    <div className="flex items-center text-sm text-gray-500 mt-2">
-                      <Tag className="h-4 w-4 mr-1" />
-                      <span>{recommended.category}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-3">
-                      <span className="text-xs text-gray-500">
-                        {recommended.datePosted}
-                      </span>
-                      <span className="text-sm font-medium text-gray-700">
-                        {recommended.seller}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Button - Overlaid on products */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("RecomContainer")
-                  .scrollBy({ left: 400, behavior: "smooth" })
-              }
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
-            >
-              <ChevronRight size={24} />{" "}
-            </button>
-          </div>
-        </div>
-
-        {/* Recent Listings */}
-        {showAlert && (
-          <FloatingAlert
-            message="Product added to favorites!"
-            onClose={() => setShowAlert(false)}
-          />
-        )}
-        <div className="relative py-4">
+        {/* Recent Listings Section */}
+        <ScrollableProductList
+          containerId="listingsContainer"
+          products={listings}
+          isLoading={isLoading.listings}
+          addToHistory={true}
+        >
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Recent Listings
           </h2>
-
-          <div className="relative">
-            {/* Left Button - Overlaid on products */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("listingsContainer")
-                  .scrollBy({ left: -400, behavior: "smooth" })
-              }
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
-            >
-              <ChevronLeft size={24} />{" "}
-            </button>
-
-            {/* Scrollable Listings Container */}
-            <div
-              id="listingsContainer"
-              className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0"
-            >
-              {listings.map((listing) => (
-                <Link
-                  key={listing.id}
-                  to={`/product/${listing.id}`}
-                  className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
-                >
-                  <div className="relative">
-                    <img
-                      src={listing.image}
-                      alt={listing.title}
-                      onClick={() => addHistory(listing.id)}
-                      className="w-full h-48 object-cover"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        toggleFavorite(listing.id);
-                      }}
-                      className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
-                    >
-                      <Bookmark className="text-white w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium text-gray-800 leading-tight">
-                      {listing.title}
-                    </h3>
-                    <span className="font-semibold text-emerald-600 block mt-1">
-                      ${listing.price}
-                    </span>
-
-                    <div className="flex items-center text-sm text-gray-500 mt-2">
-                      <Tag className="h-4 w-4 mr-1" />
-                      <span>{listing.category}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-3">
-                      <span className="text-xs text-gray-500">
-                        {listing.datePosted}
-                      </span>
-                      <span className="text-sm font-medium text-gray-700">
-                        {listing.seller}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Button - Overlaid on products */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("listingsContainer")
-                  .scrollBy({ left: 400, behavior: "smooth" })
-              }
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
-            >
-              <ChevronRight size={24} />{" "}
-            </button>
-          </div>
-        </div>
+        </ScrollableProductList>
 
         {/* History Section */}
-        {showAlert && (
-          <FloatingAlert
-            message="Product added to favorites!"
-            onClose={() => setShowAlert(false)}
-          />
+        {(history.length > 0 || isLoading.history) && (
+          <ScrollableProductList
+            containerId="HistoryContainer"
+            products={history}
+            isLoading={isLoading.history}
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Your Browsing History
+            </h2>
+          </ScrollableProductList>
         )}
-        <div className="relative py-4">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">History</h2>
-
-          <div className="relative">
-            {/* Left Button - Overlaid on products */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("HistoryContainer")
-                  .scrollBy({ left: -400, behavior: "smooth" })
-              }
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
-            >
-              <ChevronLeft size={24} />{" "}
-            </button>
-
-            {/* Scrollable Listings Container */}
-            <div
-              id="HistoryContainer"
-              className="overflow-x-auto whitespace-nowrap flex space-x-6 scroll-smooth scrollbar-hide px-10 pl-0"
-            >
-              {history.map((history) => (
-                <Link
-                  key={history.id}
-                  to={`/product/${history.id}`}
-                  className="bg-white border border-gray-200 hover:shadow-md transition-shadow w-70 flex-shrink-0 relative"
-                >
-                  <div className="relative">
-                    <img
-                      src={history.image}
-                      alt={history.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        toggleFavorite(history.id);
-                      }}
-                      className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
-                    >
-                      <Bookmark className="text-white w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium text-gray-800 leading-tight">
-                      {history.title}
-                    </h3>
-                    <span className="font-semibold text-emerald-600 block mt-1">
-                      ${history.price}
-                    </span>
-
-                    <div className="flex items-center text-sm text-gray-500 mt-2">
-                      <Tag className="h-4 w-4 mr-1" />
-                      <span>{history.category}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-3">
-                      <span className="text-xs text-gray-500">
-                        {history.datePosted}
-                      </span>
-                      <span className="text-sm font-medium text-gray-700">
-                        {history.seller}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Button - Overlaid on products */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("HistoryContainer")
-                  .scrollBy({ left: 400, behavior: "smooth" })
-              }
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 text-white p-4 rounded-full z-20 hidden md:flex items-center justify-center w-12 h-12"
-            >
-              <ChevronRight size={24} />{" "}
-            </button>
-          </div>
-        </div>
       </div>
 
-      {/* Footer - Added here */}
+      {/* Footer */}
       <footer className="bg-gray-800 text-white py-6 mt-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
