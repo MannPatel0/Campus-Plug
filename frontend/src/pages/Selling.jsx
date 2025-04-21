@@ -9,6 +9,7 @@ const Selling = () => {
   const [categories, setCategories] = useState([]);
   const [categoryMapping, setCategoryMapping] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [originalProduct, setOriginalProduct] = useState(null);
 
   const [editingProduct, setEditingProduct] = useState({
     name: "",
@@ -92,7 +93,6 @@ const Selling = () => {
     fetchProducts();
   }, []); // Add userId to dependency array if it might change
 
-  // Handle creating or updating a product
   const handleSaveProduct = async () => {
     if (!(editingProduct.categories || []).length) {
       alert("Please select at least one category");
@@ -107,17 +107,24 @@ const Selling = () => {
           const simulatedPath = `/public/uploads/${file.name}`;
           imagePaths.push(simulatedPath);
         });
+      } else if (originalProduct?.images?.length > 0) {
+        imagePaths.push(...originalProduct.images);
       }
 
       const categoryName = (editingProduct.categories || [])[0];
-      const categoryID = categoryMapping[categoryName] || 1;
+      const categoryID =
+        categoryMapping[categoryName] || originalProduct?.category || 1;
 
       const payload = {
-        name: editingProduct.name || "",
-        price: parseFloat(editingProduct.price) || 0,
+        name: editingProduct.name || originalProduct?.name || "",
+        price:
+          parseFloat(editingProduct.price) ||
+          parseFloat(originalProduct?.price) ||
+          0,
         qty: 1,
         userID: storedUser.ID,
-        description: editingProduct.description || "",
+        description:
+          editingProduct.description || originalProduct?.description || "",
         category: categoryID,
         images: imagePaths,
       };
@@ -160,7 +167,8 @@ const Selling = () => {
         images: [],
       });
 
-      // Reload products
+      setOriginalProduct(null); // reset original as well
+
       reloadPage();
     } catch (error) {
       console.error("Error saving product:", error);
