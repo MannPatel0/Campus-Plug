@@ -19,7 +19,7 @@ router.get("/getTransactionsByProduct/:productID", txCtrl.getTransactionsByProdu
 router.post("/getTransactionsByUser", txCtrl.getTransactionsByUser);
 
 // Get all transactions in the system
-router.get("/getAllTransactions", txCtrl.getAllTransactions);
+router.post("/getAllTransactions", txCtrl.getAllTransactions);
 
 // Update payment status on a transaction
 router.patch("/updatePaymentStatus", txCtrl.updatePaymentStatus);

@@ -91,12 +91,17 @@ exports.getAllTransactions = async (req, res) => {
   try {
     const [transactions] = await db.execute(
       `SELECT
-         TransactionID,
-         UserID,
-         ProductID,
-         Date,
-         PaymentStatus
-       FROM Transaction`
+         T.TransactionID,
+         T.UserID,
+         T.ProductID,
+         T.Date,
+         T.PaymentStatus,
+         P.Name AS ProductName,
+         MIN(I.URL) AS Image_URL
+       FROM Transaction T
+       JOIN Product P ON T.ProductID = P.ProductID
+       LEFT JOIN Image_URL I ON P.ProductID = I.ProductID
+       GROUP BY T.TransactionID, T.UserID, T.ProductID, T.Date, T.PaymentStatus, P.Name`
     );
 
     res.json({

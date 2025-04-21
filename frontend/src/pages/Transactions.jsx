@@ -9,7 +9,7 @@ const Transactions = () => {
     const fetchTransactions = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3030/api/transaction/getTransactionsByUser",
+          "http://localhost:3030/api/transaction/getAllTransactions",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
