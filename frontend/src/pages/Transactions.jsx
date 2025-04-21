@@ -9,32 +9,46 @@ const Transactions = () => {
     const fetchTransactions = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3030/api/transaction/getAllTransactions"
+          "http://localhost:3030/api/transaction/getTransactionsByUser",
+          {
+            method: "POST", // Use POST to send the userID
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userID: 1, // Replace with the actual userID (e.g., from context or state)
+            }),
+          }
         );
+  
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const { transactions: txData } = await response.json();
-
+  
+        console.log("API Response:", txData); // Log the API response for debugging
+  
         if (!Array.isArray(txData)) {
           console.error("Expected an array but got:", txData);
           return;
         }
-
+  
         const transformed = txData.map((tx) => ({
           id: tx.TransactionID,
           productId: tx.ProductID,
-          name: tx.ProductName,
+          name: tx.ProductName || "Unnamed Product", // Ensure ProductName is used
           price: tx.Price != null ? parseFloat(tx.Price) : null,
-          image: tx.image_url || "/default-image.jpg",
+          image: tx.Image_URL || "/default-image.jpg", // Ensure Image_URL is used
           date: tx.Date,
           status: tx.PaymentStatus,
         }));
-
+  
+        console.log("Transformed Data:", transformed); // Log the transformed data
+  
         setTransactions(transformed);
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
       }
     };
-
+  
     fetchTransactions();
   }, []);
 
