@@ -37,7 +37,10 @@ function App() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [userId, setUserId] = useState(null);
+  // Product recommendation states
+  const [isGeneratingRecommendations, setIsGeneratingRecommendations] =
+    useState(false);
+  const [recommendations, setRecommendations] = useState([]);
 
   // New verification states
   const [verificationStep, setVerificationStep] = useState("initial"); // 'initial', 'code-sent', 'verifying'
@@ -60,8 +63,69 @@ function App() {
   }, []);
 
   useEffect(() => {
-    sendSessionDataToServer();
-  }, []);
+    if (isAuthenticated && user) {
+      sendSessionDataToServer();
+    }
+  }, [isAuthenticated, user]);
+
+  // Generate product recommendations when user logs in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      generateProductRecommendations();
+    }
+  }, [isAuthenticated, user]);
+
+  // Generate product recommendations
+  const generateProductRecommendations = async () => {
+    try {
+      setIsGeneratingRecommendations(true);
+
+      // Add a short delay to simulate calculation time
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      console.log("Generating product recommendations for user:", user.ID);
+
+      // Make API call to get recommendations
+      const response = await fetch(
+        "http://localhost:3030/api/recommendations/generate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.ID,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate recommendations");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log(
+          "Recommendations generated successfully:",
+          result.recommendations,
+        );
+        setRecommendations(result.recommendations);
+
+        // Store recommendations in session storage for access across the app
+        sessionStorage.setItem(
+          "userRecommendations",
+          JSON.stringify(result.recommendations),
+        );
+      } else {
+        console.error("Error generating recommendations:", result.message);
+      }
+    } catch (err) {
+      console.error("Error generating product recommendations:", err);
+    } finally {
+      setIsGeneratingRecommendations(false);
+    }
+  };
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
@@ -103,7 +167,7 @@ function App() {
             email: userData.email,
             // Add any other required fields
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -152,7 +216,7 @@ function App() {
             email: tempUserData.email,
             code: code,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -196,7 +260,7 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(userData),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -209,6 +273,7 @@ function App() {
       if (result.success) {
         // Create user object from API response
         const newUser = {
+          ID: result.userID || result.ID,
           name: result.name || userData.name,
           email: result.email || userData.email,
           UCID: result.UCID || userData.ucid,
@@ -223,13 +288,17 @@ function App() {
         sessionStorage.setItem("user", JSON.stringify(newUser));
 
         // After successful signup, send session data to server
-        sendSessionDataToServer(); // Call it after signup
+        sendSessionDataToServer();
 
         // Reset verification steps
         setVerificationStep("initial");
         setTempUserData(null);
 
         console.log("Signup completed successfully");
+
+        // Generate recommendations for the new user
+        generateProductRecommendations();
+
         return true;
       } else {
         setError(result.message || "Failed to complete signup");
@@ -302,7 +371,7 @@ function App() {
               email: formValues.email,
               password: formValues.password,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -328,9 +397,11 @@ function App() {
           sessionStorage.setItem("isAuthenticated", "true");
           sessionStorage.setItem("user", JSON.stringify(userObj));
 
-          sessionStorage.getItem("user");
-
           console.log("Login successful for:", userData.email);
+
+          // Start generating recommendations with a slight delay
+          // This will happen in the useEffect, but we set a loading state to show to the user
+          setIsGeneratingRecommendations(true);
         } else {
           // Show error message for invalid credentials
           setError("Invalid email or password");
@@ -364,11 +435,12 @@ function App() {
     setUser(null);
     setVerificationStep("initial");
     setTempUserData(null);
+    setRecommendations([]);
 
     // Clear localStorage
-    //
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("isAuthenticated");
+    sessionStorage.removeItem("userRecommendations");
 
     console.log("User logged out");
   };
@@ -396,8 +468,6 @@ function App() {
     try {
       // Retrieve data from sessionStorage
       const user = JSON.parse(sessionStorage.getItem("user"));
-      // const isAuthenticated =
-      //   sessionStorage.getItem("isAuthenticated") === "true";
 
       if (!user || !isAuthenticated) {
         console.log("User is not authenticated");
@@ -410,8 +480,6 @@ function App() {
         email: user.email,
         isAuthenticated,
       };
-
-      console.log("Sending user data to the server:", requestData);
 
       // Send data to Python server (replace with your actual server URL)
       const response = await fetch("http://0.0.0.0:5000/api/user/session", {
@@ -433,6 +501,13 @@ function App() {
       console.error("Error sending session data:", error);
     }
   };
+
+  // Loading overlay component
+  const LoadingOverlay = () => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+    </div>
+  );
 
   // Login component
   const LoginComponent = () => (
@@ -607,8 +682,8 @@ function App() {
                     {isLoading
                       ? "Please wait..."
                       : isSignUp
-                      ? "Create Account"
-                      : "Sign In"}
+                        ? "Create Account"
+                        : "Sign In"}
                   </button>
                 </div>
               </form>
@@ -725,6 +800,9 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
+        {/* Show loading overlay when generating recommendations */}
+        {isGeneratingRecommendations && <LoadingOverlay />}
+
         {/* Only show navbar when authenticated */}
         {isAuthenticated && (
           <Navbar
@@ -746,7 +824,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <div className="container mx-auto px-4 py-6">
-                  <Home />
+                  <Home recommendations={recommendations} />
                 </div>
               </ProtectedRoute>
             }
