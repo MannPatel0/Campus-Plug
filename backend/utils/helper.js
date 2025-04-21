@@ -18,7 +18,7 @@ async function sendVerificationEmail(email, verificationCode) {
 
 // Clean up expired verification codes (run this periodically)
 function cleanupExpiredCodes() {
-  db_con.query(
+  db.query(
     "DELETE FROM AuthVerification WHERE Date < DATE_SUB(NOW(), INTERVAL 15 MINUTE) AND Authenticated = 0",
     (err, result) => {
       if (err) {

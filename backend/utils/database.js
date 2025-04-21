@@ -4,6 +4,7 @@ const pool = mysql.createPool({
   host: "localhost",
   user: "root",
   database: "Marketplace",
+  password: "12345678"
 });
 
 // const pool = mysql.createPool(

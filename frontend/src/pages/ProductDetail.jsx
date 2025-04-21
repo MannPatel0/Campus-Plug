@@ -414,8 +414,45 @@ const ProductDetail = () => {
 
             <div className="relative">
               <button
-                onClick={() => setShowContactOptions(!showContactOptions)}
-                className="w-full bg-emerald-700 hover:bg-emerald-700 text-white font-medium py-3 px-4 mb-3"
+                onClick={async () => {
+                  try {
+                    // Create a transaction record
+                    const transactionData = {
+                      userID: storedUser.ID, // User ID from session storage
+                      productID: product.ProductID, // Product ID from the product details
+                      date: new Date().toISOString(), // Current date in ISO format
+                      paymentStatus: "Pending", // Default payment status
+                    };
+
+                    const response = await fetch(
+                      "http://localhost:3030/api/transaction/createTransaction",
+                      {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(transactionData),
+                      },
+                    );
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                      alert("Transaction created successfully!");
+                    } else {
+                      throw new Error(
+                        result.message || "Failed to create transaction",
+                      );
+                    }
+
+                    // Toggle contact options visibility
+                    setShowContactOptions(!showContactOptions);
+                  } catch (error) {
+                    console.error("Error creating transaction:", error);
+                    alert(`Error: ${error.message}`);
+                  }
+                }}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 mb-3"
               >
                 Contact Seller
               </button>
