@@ -7,7 +7,23 @@ exports.createTransaction = async (req, res) => {
   const { userID, productID, date, paymentStatus } = req.body;
 
   try {
+    // Check if the transaction already exists for the same user and product
+    const [existingTransaction] = await db.execute(
+      `SELECT TransactionID FROM Transaction WHERE UserID = ? AND ProductID = ?`,
+      [userID, productID]
+    );
+
+    if (existingTransaction.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Transaction already exists for this user and product",
+      });
+    }
+
+    // Format the date
     const formattedDate = new Date(date).toISOString().slice(0, 19).replace("T", " ");
+
+    // Insert the new transaction
     const [result] = await db.execute(
       `INSERT INTO Transaction (UserID, ProductID, Date, PaymentStatus)
        VALUES (?, ?, ?, ?)`,
