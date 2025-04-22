@@ -35,7 +35,7 @@ const Navbar = ({ onLogout, userName, isAdmin, handleShowAdminDashboard }) => {
                 alt="Campus Plug"
                 className="h-8 px-2"
               />
-              <span className="hidden md:block text-emerald-600 font-bold text-xl">
+              <span className="hidden md:block text-emerald-700 font-bold text-xl">
                 Campus Plug
               </span>
             </Link>

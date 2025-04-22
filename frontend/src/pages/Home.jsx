@@ -219,7 +219,7 @@ const Home = () => {
   // Loading indicator component
   const LoadingSection = () => (
     <div className="flex justify-center items-center h-48">
-      <Loader className="animate-spin text-emerald-600 h-8 w-8" />
+      <Loader className="animate-spin text-emerald-700 h-8 w-8" />
     </div>
   );
 
@@ -243,7 +243,7 @@ const Home = () => {
             e.preventDefault();
             toggleFavorite(product.id);
           }}
-          className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-600 hover:bg-emerald-500 transition shadow-sm"
+          className="absolute top-0 right-0 p-2 rounded-bl-md bg-emerald-700 hover:bg-emerald-600 transition shadow-sm"
         >
           <Bookmark className="text-white w-5 h-5" />
         </button>
@@ -253,7 +253,7 @@ const Home = () => {
         <h3 className="text-lg font-medium text-gray-800 leading-tight">
           {product.title}
         </h3>
-        <span className="font-semibold text-emerald-600 block mt-1">
+        <span className="font-semibold text-emerald-700 block mt-1">
           ${product.price}
         </span>
 
@@ -353,7 +353,7 @@ const Home = () => {
             </p>
             <button
               onClick={handleSelling}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-6 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-colors"
+              className="bg-emerald-700 hover:bg-emerald-700 text-white font-medium py-2 px-6 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-colors"
             >
               Post an Item
             </button>
@@ -405,59 +405,9 @@ const Home = () => {
           </ScrollableProductList>
         )}
       </div>
-
-      {/* Footer */}
       <footer className="bg-gray-800 text-white py-6 mt-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-lg font-semibold mb-2">Campus Marketplace</h3>
-              <p className="text-gray-400 text-sm">
-                Your trusted university trading platform
-              </p>
-            </div>
-
-            <div className="flex space-x-6">
-              <div>
-                <h4 className="font-medium mb-2">Quick Links</h4>
-                <ul className="text-sm text-gray-400">
-                  <li className="mb-1">
-                    <Link to="/" className="hover:text-white transition">
-                      Home
-                    </Link>
-                  </li>
-                  <li className="mb-1">
-                    <Link to="/selling" className="hover:text-white transition">
-                      Sell an Item
-                    </Link>
-                  </li>
-                  <li className="mb-1">
-                    <Link
-                      to="/favorites"
-                      className="hover:text-white transition"
-                    >
-                      My Favorites
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-medium mb-2">Contact</h4>
-                <ul className="text-sm text-gray-400">
-                  <li className="mb-1">support@campusmarket.com</li>
-                  <li className="mb-1">University of Calgary</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
-            <p>
-              © {new Date().getFullYear()} Campus Marketplace. All rights
-              reserved.
-            </p>
-          </div>
+        <div className="border-t border-gray-700  text-center text-sm text-gray-400">
+          <p>© 2025 Campus Marketplace. All rights reserved.</p>
         </div>
       </footer>
     </div>

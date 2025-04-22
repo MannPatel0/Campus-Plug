@@ -22,7 +22,7 @@ export default function CategoryForm({ visible, onAddCategory }) {
           .classList.remove("opacity-0", "bg-red-200", "text-red-500");
         document
           .getElementById("noti")
-          .classList.add("bg-green-200", "text-green-800");
+          .classList.add("bg-emerald-200", "text-emerald-800");
         document.getElementById("noti").innerHTML = `${message.message}`;
         setCategory("");
         onAddCategory();
@@ -42,18 +42,18 @@ export default function CategoryForm({ visible, onAddCategory }) {
 
   return (
     <form onSubmit={handleSubmit} action="" className="flex p-2 items-center">
-      <label htmlFor="category" className="text-green-700">
+      <label htmlFor="category" className="text-emerald-700">
         Category:
       </label>
       <input
         type="text"
-        className="border border-green-700 ml-2 rounded-sm focus:bg-green-100 text-green-900"
+        className="border border-emerald-700 ml-2 rounded-sm focus:bg-emerald-100 text-emerald-900"
         name="category"
         id="category"
         onChange={handleChange}
         value={category}
       />
-      <button type="submit" className="text-2xl pl-1 text-green-700">
+      <button type="submit" className="text-2xl pl-1 text-emerald-700">
         <MdAddBox className="text-3xl" />
       </button>
       <p

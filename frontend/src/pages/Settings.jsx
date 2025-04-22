@@ -190,7 +190,7 @@ const Settings = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
@@ -234,7 +234,7 @@ const Settings = () => {
                   id="name"
                   value={userData.name}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-600"
                   required
                 />
               </div>
@@ -251,7 +251,7 @@ const Settings = () => {
                   id="email"
                   value={userData.email}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-600"
                   required
                   readOnly // Email is often used as identifier and not changeable
                 />
@@ -269,7 +269,7 @@ const Settings = () => {
                   id="phone"
                   value={userData.phone}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-600"
                 />
               </div>
 
@@ -285,7 +285,7 @@ const Settings = () => {
                   id="UCID"
                   value={userData.UCID}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-600"
                   required
                 />
               </div>
@@ -302,7 +302,7 @@ const Settings = () => {
                   id="address"
                   value={userData.address}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-600"
                 />
               </div>
               <div>
@@ -317,14 +317,14 @@ const Settings = () => {
                   id="password"
                   value={userData.password}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+                  className="w-full p-2 border border-gray-300 focus:outline-none focus:border-emerald-600"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4"
             >
               Update Profile
             </button>
@@ -395,6 +395,11 @@ const Settings = () => {
           </div>
         </div>
       </div>
+      <footer className="bg-gray-800 text-white py-6 mt-12">
+        <div className="border-t border-gray-700  text-center text-sm text-gray-400">
+          <p>© 2025 Campus Marketplace. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };

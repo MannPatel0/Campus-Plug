@@ -119,7 +119,7 @@ const Favorites = () => {
           </p>
           <Link
             to="/"
-            className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4"
+            className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4"
           >
             Browse Listings
           </Link>
@@ -161,7 +161,7 @@ const Favorites = () => {
                     </button>
                   </div>
 
-                  <p className="text-emerald-600 font-bold mt-1">
+                  <p className="text-emerald-700 font-bold mt-1">
                     ${product.price.toFixed(2)}
                   </p>
 
@@ -200,56 +200,8 @@ const Favorites = () => {
       )}
 
       <footer className="bg-gray-800 text-white py-6 mt-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-lg font-semibold mb-2">Campus Marketplace</h3>
-              <p className="text-gray-400 text-sm">
-                Your trusted university trading platform
-              </p>
-            </div>
-
-            <div className="flex space-x-6">
-              <div>
-                <h4 className="font-medium mb-2">Quick Links</h4>
-                <ul className="text-sm text-gray-400">
-                  <li className="mb-1">
-                    <Link to="/" className="hover:text-white transition">
-                      Home
-                    </Link>
-                  </li>
-                  <li className="mb-1">
-                    <Link to="/selling" className="hover:text-white transition">
-                      Sell an Item
-                    </Link>
-                  </li>
-                  <li className="mb-1">
-                    <Link
-                      to="/favorites"
-                      className="hover:text-white transition"
-                    >
-                      My Favorites
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-medium mb-2">Contact</h4>
-                <ul className="text-sm text-gray-400">
-                  <li className="mb-1">support@campusmarket.com</li>
-                  <li className="mb-1">University of Calgary</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
-            <p>
-              © {new Date().getFullYear()} Campus Marketplace. All rights
-              reserved.
-            </p>
-          </div>
+        <div className="border-t border-gray-700  text-center text-sm text-gray-400">
+          <p>© 2025 Campus Marketplace. All rights reserved.</p>
         </div>
       </footer>
     </div>

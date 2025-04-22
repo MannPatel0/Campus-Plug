@@ -323,7 +323,7 @@ const Selling = () => {
         {!showForm && (
           <button
             onClick={handleAddProduct}
-            className="bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700"
+            className="bg-emerald-700 text-white px-4 py-2 hover:bg-emerald-700"
           >
             + Add New Product
           </button>
@@ -335,7 +335,7 @@ const Selling = () => {
           {/* Back Button */}
           <button
             onClick={() => setShowForm(false)}
-            className="mb-4 text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
+            className="mb-4 text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
           >
             <ChevronLeft size={16} />
             <span>Back to Listings</span>
@@ -363,7 +363,7 @@ const Selling = () => {
                     name: e.target.value,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-600 focus:outline-none"
               />
             </div>
 
@@ -382,7 +382,7 @@ const Selling = () => {
                     price: e.target.value,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-600 focus:outline-none"
               />
             </div>
 
@@ -406,7 +406,7 @@ const Selling = () => {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
+                  className="flex-1 px-3 py-2 border border-gray-300 focus:border-emerald-600 focus:outline-none"
                 >
                   <option value="" disabled>
                     Select a category
@@ -425,7 +425,7 @@ const Selling = () => {
                   type="button"
                   onClick={addCategory}
                   disabled={!selectedCategory}
-                  className="px-3 py-2 bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
+                  className="px-3 py-2 bg-emerald-700 text-white hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
                 >
                   <Plus size={16} />
                   <span>Add</span>
@@ -444,7 +444,7 @@ const Selling = () => {
                       <button
                         type="button"
                         onClick={() => removeCategory(category)}
-                        className="ml-1 text-emerald-600 hover:text-emerald-800"
+                        className="ml-1 text-emerald-700 hover:text-emerald-800"
                       >
                         <X size={14} />
                       </button>
@@ -475,7 +475,7 @@ const Selling = () => {
                   })
                 }
                 rows="4"
-                className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-600 focus:outline-none"
                 placeholder="Describe your product in detail..."
               ></textarea>
             </div>
@@ -504,7 +504,7 @@ const Selling = () => {
                 htmlFor="image-upload"
                 className="block w-full p-3 border border-gray-300 bg-gray-50 text-center cursor-pointer hover:bg-gray-100"
               >
-                <span className="text-emerald-600 font-medium">
+                <span className="text-emerald-700 font-medium">
                   Click to upload images
                 </span>
               </label>
@@ -588,7 +588,7 @@ const Selling = () => {
                 onClick={markAsSold}
                 className={`px-4 py-2 rounded-md transition-colors ${
                   editingProduct.isSold
-                    ? "bg-green-600 text-white hover:bg-green-700"
+                    ? "bg-emerald-700 text-white hover:bg-emerald-700"
                     : "bg-red-600 text-white hover:bg-red-700"
                 }`}
               >
@@ -598,7 +598,7 @@ const Selling = () => {
 
             <button
               onClick={handleSaveProduct}
-              className="bg-emerald-600 text-white px-6 py-2 hover:bg-emerald-700 rounded-md"
+              className="bg-emerald-700 text-white px-6 py-2 hover:bg-emerald-700 rounded-md"
             >
               {editingProduct.ProductID ? "Update Product" : "Add Product"}
             </button>
@@ -613,7 +613,7 @@ const Selling = () => {
               </p>
               <button
                 onClick={handleAddProduct}
-                className="bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700"
+                className="bg-emerald-700 text-white px-4 py-2 hover:bg-emerald-700"
               >
                 Create Your First Listing
               </button>
@@ -645,7 +645,7 @@ const Selling = () => {
                         </h3>
                       </div>
 
-                      <p className="text-emerald-600 font-bold mt-1">
+                      <p className="text-emerald-700 font-bold mt-1">
                         ${product.Price}
                       </p>
 
@@ -679,7 +679,7 @@ const Selling = () => {
                             e.preventDefault();
                             handleEditProduct(product);
                           }}
-                          className="text-emerald-600 hover:text-emerald-800 font-medium"
+                          className="text-emerald-700 hover:text-emerald-800 font-medium"
                         >
                           Edit
                         </button>
@@ -692,6 +692,11 @@ const Selling = () => {
           )}
         </>
       )}
+      <footer className="bg-gray-800 text-white py-6 mt-12">
+        <div className="border-t border-gray-700  text-center text-sm text-gray-400">
+          <p>© 2025 Campus Marketplace. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };

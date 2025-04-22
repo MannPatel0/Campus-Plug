@@ -55,7 +55,7 @@ const UserDropdown = ({
         onClick={toggleDropdown}
       >
         <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-          <User className="h-5 w-5 text-emerald-600" />
+          <User className="h-5 w-5 text-emerald-700" />
         </div>
       </button>
 

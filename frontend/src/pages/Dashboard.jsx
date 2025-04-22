@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 // Spinner Component
 const Spinner = () => (
   <div className="flex justify-center items-center h-40 w-full">
-    <div className="w-12 h-12 border-4 border-green-500 border-dashed rounded-full animate-spin"></div>
+    <div className="w-12 h-12 border-4 border-emerald-600 border-dashed rounded-full animate-spin"></div>
   </div>
 );
 
@@ -87,7 +87,7 @@ const Dashboard = ({
         })
         .finally(() => setLoading(false));
     },
-    [fetchDataFn]
+    [fetchDataFn],
   );
 
   const handleRemove = (id) => {
@@ -116,7 +116,7 @@ const Dashboard = ({
     <div className="w-full mt-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 w-full">
         <h2 className="text-xl font-semibold text-gray-700 mb-2 md:mb-0">
-          Total: <span className="text-green-600">{total}</span>
+          Total: <span className="text-emerald-700">{total}</span>
         </h2>
         {headerAction && <div>{headerAction}</div>}
       </div>
@@ -124,7 +124,7 @@ const Dashboard = ({
       {items.length > 0 ? (
         <div className="w-full overflow-x-auto bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200 table-fixed">
-            <thead className="bg-green-600">
+            <thead className="bg-emerald-700">
               <tr>
                 {columns.map((col) => (
                   <th
@@ -296,7 +296,7 @@ export default function AdminDashboardTabs() {
             headerAction={
               <button
                 onClick={toggleForm}
-                className="flex items-center bg-green-500 rounded-md px-4 py-2 text-white text-sm hover:bg-green-600 transition-colors font-medium shadow"
+                className="flex items-center bg-emerald-600 rounded-md px-4 py-2 text-white text-sm hover:bg-emerald-700 transition-colors font-medium shadow"
               >
                 <IoAddCircleSharp className="mr-1" size={18} />
                 Add Category
@@ -318,16 +318,10 @@ export default function AdminDashboardTabs() {
   return (
     <div className="w-full min-h-screen bg-gray-50">
       <div className="w-full px-4 py-8">
-        <div className="mb-8 flex justify-between items-center w-full">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-            Admin Dashboard
-          </h1>
-        </div>
-
         {/* Mobile Tabs */}
         <div className="md:hidden w-full mb-4">
           <select
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-500 focus:ring-opacity-50 p-2"
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-600 focus:ring focus:ring-emerald-600 focus:ring-opacity-50 p-2"
             value={activeTab}
             onChange={(e) => {
               setActiveTab(parseInt(e.target.value));
@@ -348,8 +342,8 @@ export default function AdminDashboardTabs() {
               key={tab.key}
               className={`px-6 py-3 font-medium text-sm rounded-t-lg transition-colors ${
                 index === activeTab
-                  ? "text-green-700 bg-white border-l border-t border-r border-gray-200 border-b-0"
-                  : "text-gray-600 hover:text-green-700 bg-gray-50"
+                  ? "text-emerald-700 bg-white border-l border-t border-r border-gray-200 border-b-0"
+                  : "text-gray-600 hover:text-emerald-700 bg-gray-50"
               }`}
               onClick={() => {
                 setActiveTab(index);

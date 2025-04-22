@@ -32,7 +32,7 @@ export default function Pagination({ pageNum, onChange }) {
               onClick={() => {
                 handleTogglePage("previous");
               }}
-              className=" flex items-center justify-center px-3 h-8 ms-0 leading-tight border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 text-white bg-green-700 border border-gray-300 hover:bg-green-600 hover:text-white"
+              className=" flex items-center justify-center px-3 h-8 ms-0 leading-tight border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 text-white bg-emerald-700 border border-gray-300 hover:bg-emerald-700 hover:text-white"
             >
               <span className="sr-only">Previous</span>
               <svg
@@ -56,9 +56,9 @@ export default function Pagination({ pageNum, onChange }) {
             <li key={page}>
               <NavLink
                 className={`${
-                  currentPage == page ? "bg-green-600" : "bg-green-700"
+                  currentPage == page ? "bg-emerald-700" : "bg-emerald-700"
                 } +
-                  " flex items-center justify-center px-3 h-8 leading-tight text-white  border border-gray-300 hover:bg-green-600 hover:text-white"`}
+                  " flex items-center justify-center px-3 h-8 leading-tight text-white  border border-gray-300 hover:bg-emerald-700 hover:text-white"`}
                 onClick={() => {
                   handleClick(page);
                 }}
@@ -72,7 +72,7 @@ export default function Pagination({ pageNum, onChange }) {
               onClick={() => {
                 handleTogglePage("next");
               }}
-              className="flex items-center justify-center px-3 h-8 leading-tight border border-gray-300 rounded-e-lg text-white bg-green-700 border border-gray-300 hover:bg-green-600 hover:text-white"
+              className="flex items-center justify-center px-3 h-8 leading-tight border border-gray-300 rounded-e-lg text-white bg-emerald-700 border border-gray-300 hover:bg-emerald-700 hover:text-white"
             >
               <span className="sr-only">Next</span>
               <svg

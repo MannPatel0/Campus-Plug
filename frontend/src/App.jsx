@@ -105,7 +105,7 @@ function App() {
           body: JSON.stringify({
             userId: user.ID,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -117,14 +117,14 @@ function App() {
       if (result.success) {
         console.log(
           "Recommendations generated successfully:",
-          result.recommendations
+          result.recommendations,
         );
         setRecommendations(result.recommendations);
 
         // Store recommendations in session storage for access across the app
         sessionStorage.setItem(
           "userRecommendations",
-          JSON.stringify(result.recommendations)
+          JSON.stringify(result.recommendations),
         );
       } else {
         console.error("Error generating recommendations:", result.message);
@@ -178,7 +178,7 @@ function App() {
             email: userData.email,
             // Add any other required fields
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -227,7 +227,7 @@ function App() {
             email: tempUserData.email,
             code: code,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -271,7 +271,7 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(userData),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -382,7 +382,7 @@ function App() {
               email: formValues.email,
               password: formValues.password,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -517,7 +517,7 @@ function App() {
   // Loading overlay component
   const LoadingOverlay = () => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent"></div>
     </div>
   );
 
@@ -584,7 +584,7 @@ function App() {
                       id="name"
                       name="name"
                       placeholder="Enter your name"
-                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                       required={isSignUp}
                     />
                   </div>
@@ -603,7 +603,7 @@ function App() {
                       id="ucid"
                       name="ucid"
                       placeholder="1234567"
-                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                       required={isSignUp}
                     />
                   </div>
@@ -621,7 +621,7 @@ function App() {
                     id="email"
                     name="email"
                     placeholder="your.email@ucalgary.ca"
-                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                     required
                   />
                 </div>
@@ -639,7 +639,7 @@ function App() {
                       id="phone"
                       name="phone"
                       placeholder="+1(123)456 7890"
-                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                       required={isSignUp}
                     />
                   </div>
@@ -658,7 +658,7 @@ function App() {
                       id="address"
                       name="address"
                       placeholder="Your address"
-                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                       required={isSignUp}
                     />
                   </div>
@@ -680,7 +680,7 @@ function App() {
                         ? "Create a secure password"
                         : "Enter your password"
                     }
-                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                     required
                   />
                 </div>
@@ -689,13 +689,13 @@ function App() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full px-6 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-colors disabled:bg-green-300"
+                    className="w-full px-6 py-2 text-base font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 transition-colors disabled:bg-emerald-300"
                   >
                     {isLoading
                       ? "Please wait..."
                       : isSignUp
-                      ? "Create Account"
-                      : "Sign In"}
+                        ? "Create Account"
+                        : "Sign In"}
                   </button>
                 </div>
               </form>
@@ -716,7 +716,7 @@ function App() {
                     id="verificationCode"
                     name="verificationCode"
                     placeholder="Enter the 6-digit code"
-                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500">
@@ -728,7 +728,7 @@ function App() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full px-6 py-2 text-base font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-colors disabled:bg-green-300"
+                    className="w-full px-6 py-2 text-base font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 transition-colors disabled:bg-emerald-300"
                   >
                     {isLoading ? "Please wait..." : "Verify Code"}
                   </button>
@@ -746,7 +746,7 @@ function App() {
                     type="button"
                     onClick={handleResendCode}
                     disabled={isLoading}
-                    className="text-sm text-green-500 hover:text-green-700"
+                    className="text-sm text-emerald-600 hover:text-emerald-700"
                   >
                     Resend code
                   </button>
@@ -764,7 +764,7 @@ function App() {
                   <button
                     onClick={toggleAuthMode}
                     type="button"
-                    className="text-green-500 font-medium hover:text-green-700"
+                    className="text-emerald-600 font-medium hover:text-emerald-700"
                   >
                     {isSignUp ? "Sign in" : "Sign up"}
                   </button>
