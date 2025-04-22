@@ -292,7 +292,8 @@ function App() {
 
         // Set authenticated user
         setUser(newUser);
-        setIsAuthenticated(true);
+        setIsSignUp(false);
+        //setIsAuthenticated(true);
 
         // Save to localStorage to persist across refreshes
         sessionStorage.setItem("isAuthenticated", "true");
@@ -338,12 +339,11 @@ function App() {
       setError("Email and password are required");
       setIsLoading(false);
       return;
+    } else if (!formValues.email.endsWith("@ucalgary.ca")) {
+      setError("Please use your UCalgary email address (@ucalgary.ca)");
+      setIsLoading(false);
+      return;
     }
-    // else if (!formValues.email.endsWith("@ucalgary.ca")) {
-    //   setError("Please use your UCalgary email address (@ucalgary.ca)");
-    //   setIsLoading(false);
-    //   return;
-    // }
     try {
       if (isSignUp) {
         // Handle Sign Up with verification

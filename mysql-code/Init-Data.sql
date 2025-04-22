@@ -44,7 +44,7 @@ VALUES
     (
         1,
         'John Doe',
-        'john.doe@example.com',
+        'john.doe@ucalgary.ca',
         'U123456',
         'hashedpassword1',
         '555-123-4567',
@@ -53,7 +53,7 @@ VALUES
     (
         2,
         'Jane Smith',
-        'jane.smith@example.com',
+        'jane.smith@ucalgary.ca',
         'U234567',
         'hashedpassword2',
         '555-234-5678',
@@ -72,7 +72,7 @@ VALUES
 INSERT INTO
     Category (Name)
 VALUES
-	('Other'),
+    ('Other'),
     ('Textbooks'),
     ('Electronics'),
     ('Furniture'),
@@ -102,7 +102,6 @@ VALUES
     ('Photography Equipment'),
     ('Event Tickets'),
     ('Software Licenses');
-    
 
 -- Insert Products
 INSERT INTO

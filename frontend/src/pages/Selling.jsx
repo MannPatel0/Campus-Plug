@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { X, ChevronLeft, Plus, Trash2 } from "lucide-react";
+import { X, ChevronLeft, Trash2 } from "lucide-react";
 
 const Selling = () => {
   const [products, setProducts] = useState([]);
@@ -8,14 +8,13 @@ const Selling = () => {
   const storedUser = JSON.parse(sessionStorage.getItem("user"));
   const [categories, setCategories] = useState([]);
   const [categoryMapping, setCategoryMapping] = useState({});
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [originalProduct, setOriginalProduct] = useState(null);
 
   const [editingProduct, setEditingProduct] = useState({
     name: "",
     price: "",
     description: "",
-    categories: [],
+    category: "",
     images: [],
   });
 
@@ -59,7 +58,7 @@ const Selling = () => {
     fetchCategories();
   }, []);
 
-  // Simulate fetching products from API/database on component mount
+  // Fetch products from API/database on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -89,61 +88,87 @@ const Selling = () => {
     };
 
     fetchProducts();
-  }, []); // Add userId to dependency array if it might change
+  });
 
-  // When editing a product, save the original product properly
   const handleEditProduct = (product) => {
-    // Save the original product completely
     setOriginalProduct(product);
 
-    // Convert category ID to category name if needed
     const categoryName = getCategoryNameById(product.CategoryID);
 
     setEditingProduct({
       ...product,
-      categories: categoryName ? [categoryName] : [],
-      images: product.images || [], // Ensure images array exists
+      category: categoryName || "", // Single category string
+      images: product.images || [],
     });
 
     setShowForm(true);
   };
 
-  // Then update the handleSaveProduct function to properly merge values
+  // Upload images to server and get their paths
+  const uploadImages = async (images) => {
+    console.log(images);
+    const uploadedImagePaths = [];
+
+    // Filter out only File objects (new images to upload)
+    const filesToUpload = images.filter((img) => img instanceof File);
+
+    for (const file of filesToUpload) {
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        // Send the file to your upload endpoint
+        const response = await fetch("http://localhost:3030/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload image: ${file.name}`);
+        }
+
+        const result = await response.json();
+        // Assuming the server returns the path where the file was saved
+        uploadedImagePaths.push(`/public/uploads/${file.name}`);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        // If upload fails, still add the expected path (this is a fallback)
+        uploadedImagePaths.push(`/public/uploads/${file.name}`);
+      }
+    }
+
+    // Also include any existing image URLs that are strings, not File objects
+    const existingImages = images.filter((img) => typeof img === "string");
+    if (existingImages.length > 0) {
+      uploadedImagePaths.push(...existingImages);
+    }
+
+    return uploadedImagePaths;
+  };
+
+  // Handle saving product with updated image logic
   const handleSaveProduct = async () => {
-    if (!(editingProduct.categories || []).length) {
-      alert("Please select at least one category");
+    if (!editingProduct.category) {
+      alert("Please select a category");
       return;
     }
 
     try {
-      const imagePaths = [];
+      let imagePaths = [];
 
-      // Handle images properly
+      // Handle image uploads and get their paths
       if (editingProduct.images && editingProduct.images.length > 0) {
-        // If there are new images uploaded (File objects)
-        const newImages = editingProduct.images.filter(
-          (img) => img instanceof File,
-        );
-        newImages.forEach((file) => {
-          const simulatedPath = `/public/uploads/${file.name}`;
-          imagePaths.push(simulatedPath);
-        });
-
-        // Also include any existing image URLs that are strings, not File objects
-        const existingImages = editingProduct.images.filter(
-          (img) => typeof img === "string",
-        );
-        if (existingImages.length > 0) {
-          imagePaths.push(...existingImages);
-        }
+        imagePaths = await uploadImages(editingProduct.images);
       } else if (originalProduct?.image_url) {
         // If no new images but there was an original image URL
-        imagePaths.push(originalProduct.image_url);
+        imagePaths = [originalProduct.image_url];
       }
 
-      const categoryName = (editingProduct.categories || [])[0];
       const categoryID =
-        categoryMapping[categoryName] || originalProduct?.CategoryID || 1;
+        categoryMapping[editingProduct.category] ||
+        originalProduct?.CategoryID ||
+        1;
 
       // Create payload with proper fallback to original values
       const payload = {
@@ -166,12 +191,7 @@ const Selling = () => {
           originalProduct?.Description ||
           "",
         category: categoryID,
-        images:
-          imagePaths.length > 0
-            ? imagePaths
-            : originalProduct?.image_url
-              ? [originalProduct.image_url]
-              : [],
+        images: imagePaths.length > 0 ? imagePaths : [],
       };
 
       console.log("Sending payload:", payload);
@@ -206,7 +226,7 @@ const Selling = () => {
         name: "",
         price: "",
         description: "",
-        categories: [],
+        category: "",
         images: [],
       });
 
@@ -243,7 +263,7 @@ const Selling = () => {
         throw new Error("Network response was not ok");
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error deleting product:", error);
       // You might want to set an error state here
     }
   };
@@ -267,53 +287,18 @@ const Selling = () => {
       name: "",
       price: "",
       description: "",
-      categories: [],
+      category: "",
       images: [],
     });
     setShowForm(true);
   };
 
-  const addCategory = () => {
-    if (
-      selectedCategory &&
-      !(editingProduct.categories || []).includes(selectedCategory)
-    ) {
-      setEditingProduct((prev) => ({
-        ...prev,
-        categories: [...(prev.categories || []), selectedCategory],
-      }));
-      setSelectedCategory("");
-    }
-  };
-
-  const removeCategory = (categoryToRemove) => {
-    setEditingProduct((prev) => ({
-      ...prev,
-      categories: (prev.categories || []).filter(
-        (cat) => cat !== categoryToRemove,
-      ),
-    }));
-  };
-
-  const markAsSold = async () => {
-    // This would call an API to move the product to the transaction table
-    try {
-      // API call would go here
-      console.log(
-        "Moving product to transaction table:",
-        editingProduct.ProductID,
-      );
-
-      // Toggle the sold status in the UI
-      setEditingProduct((prev) => ({
-        ...prev,
-        isSold: !prev.isSold,
-      }));
-
-      // You would add your API call here to update the backend
-    } catch (error) {
-      console.error("Error marking product as sold:", error);
-    }
+  // Handle category change
+  const handleCategoryChange = (e) => {
+    setEditingProduct({
+      ...editingProduct,
+      category: e.target.value,
+    });
   };
 
   return (
@@ -386,74 +371,29 @@ const Selling = () => {
               />
             </div>
 
-            {/* Sold Status */}
-            <div className="md:col-span-2">
-              <div className="flex items-center mt-2">
-                {editingProduct.isSold && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    Sold
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Categories */}
+            {/* Category - Single Selection Dropdown */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Categories
+                Category
               </label>
-              <div className="flex gap-2">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 focus:border-emerald-600 focus:outline-none"
-                >
-                  <option value="" disabled>
-                    Select a category
+              <select
+                value={editingProduct.category || ""}
+                onChange={handleCategoryChange}
+                className="w-full px-3 py-2 border border-gray-300 focus:border-emerald-600 focus:outline-none"
+                required
+              >
+                <option value="" disabled>
+                  Select a category
+                </option>
+                {categories.map((category, index) => (
+                  <option key={index} value={category}>
+                    {category}
                   </option>
-                  {categories
-                    .filter(
-                      (cat) => !(editingProduct.categories || []).includes(cat),
-                    )
-                    .map((category, index) => (
-                      <option key={index} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={addCategory}
-                  disabled={!selectedCategory}
-                  className="px-3 py-2 bg-emerald-700 text-white hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
-                >
-                  <Plus size={16} />
-                  <span>Add</span>
-                </button>
-              </div>
-
-              {/* Selected Categories */}
-              {(editingProduct.categories || []).length > 0 ? (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {(editingProduct.categories || []).map((category, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-800"
-                    >
-                      {category}
-                      <button
-                        type="button"
-                        onClick={() => removeCategory(category)}
-                        className="ml-1 text-emerald-700 hover:text-emerald-800"
-                      >
-                        <X size={14} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              ) : (
+                ))}
+              </select>
+              {!editingProduct.category && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Please select at least one category
+                  Please select a category
                 </p>
               )}
             </div>
@@ -505,7 +445,7 @@ const Selling = () => {
                 className="block w-full p-3 border border-gray-300 bg-gray-50 text-center cursor-pointer hover:bg-gray-100"
               >
                 <span className="text-emerald-700 font-medium">
-                  Click to upload images
+                  Click to upload images (will be saved to /public/uploads)
                 </span>
               </label>
 
@@ -535,7 +475,11 @@ const Selling = () => {
                         className="relative w-20 h-20 border border-gray-200 overflow-hidden"
                       >
                         <img
-                          src={URL.createObjectURL(img)}
+                          src={
+                            typeof img === "string"
+                              ? img
+                              : URL.createObjectURL(img)
+                          }
                           alt={`Product ${idx + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -559,18 +503,19 @@ const Selling = () => {
               )}
 
               {/* Show current image if editing */}
-              {editingProduct.image_url && (
-                <div className="mt-3">
-                  <p className="text-sm text-gray-600 mb-2">Current image:</p>
-                  <div className="relative w-20 h-20 border border-gray-200 overflow-hidden">
-                    <img
-                      src={editingProduct.image_url}
-                      alt="Current product"
-                      className="w-full h-full object-cover"
-                    />
+              {editingProduct.image_url &&
+                !(editingProduct.images || []).length && (
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-600 mb-2">Current image:</p>
+                    <div className="relative w-20 h-20 border border-gray-200 overflow-hidden">
+                      <img
+                        src={editingProduct.image_url}
+                        alt="Current product"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
 
@@ -582,19 +527,6 @@ const Selling = () => {
             >
               Cancel
             </button>
-
-            {editingProduct.ProductID && (
-              <button
-                onClick={markAsSold}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  editingProduct.isSold
-                    ? "bg-emerald-700 text-white hover:bg-emerald-700"
-                    : "bg-red-600 text-white hover:bg-red-700"
-                }`}
-              >
-                Mark as {editingProduct.isSold ? "Available" : "Sold"}
-              </button>
-            )}
 
             <button
               onClick={handleSaveProduct}

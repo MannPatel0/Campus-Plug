@@ -498,7 +498,10 @@ const ProductDetail = () => {
                     {product.SellerName || "Unknown Seller"}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Member since {product.SellerJoinDate || "N/A"}
+                    Product listed since{" "}
+                    {product.Date
+                      ? new Date(product.Date).toLocaleDateString()
+                      : "N/A"}
                   </p>
                 </div>
               </div>
