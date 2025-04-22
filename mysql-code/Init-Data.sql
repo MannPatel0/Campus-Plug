@@ -2,8 +2,6 @@
 SET
     FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE TABLE Product_Category;
-
 TRUNCATE TABLE Favorites;
 
 TRUNCATE TABLE History;
@@ -343,62 +341,6 @@ VALUES
     ('/Uploads/HP-Calculator.jpg', 18),
     ('/Uploads/Bluetooth-Speaker.jpg', 19),
     ('/Uploads/Backpack.jpg', 20);
-
--- Insert Product-Category relationships (products with multiple categories)
-INSERT INTO
-    Product_Category (ProductID, CategoryID)
-VALUES
-    (1, 1),
-    (1, 17),
-    (1, 20), -- Calculus book: Textbooks, School Supplies, Math Resources
-    (2, 2),
-    (2, 11),
-    (2, 25), -- Laptop: Electronics, Computer Accessories, Smartphones & Tablets
-    (3, 3),
-    (3, 18),
-    (3, 24), -- Desk: Furniture, Office Furniture, Dorm Essentials
-    (4, 4),
-    (4, 26), -- Hoodie: Clothing, Winter Clothing
-    (5, 5),
-    (5, 13), -- Basketball: Sports Equipment, Fitness Equipment
-    (6, 6),
-    (6, 23), -- Guitar: Musical Instruments, Audio Equipment
-    (7, 1),
-    (7, 15),
-    (7, 20), -- Physics book: Textbooks, Lab Equipment, Math & Science Resources
-    (8, 8),
-    (8, 24), -- Mini Fridge: Kitchen Appliances, Dorm Essentials
-    (9, 9),
-    (9, 2), -- PS5 Controller: Gaming, Electronics
-    (10, 10),
-    (10, 5),
-    (10, 13), -- Mountain Bike: Bicycles, Sports Equipment, Fitness Equipment
-    (11, 11),
-    (11, 2), -- Mouse: Computer Accessories, Electronics
-    (12, 15),
-    (12, 17), -- Lab Coat: Lab Equipment, School Supplies
-    (13, 12),
-    (13, 17),
-    (13, 20), -- Calculator: Stationery, School Supplies, Math & Science Resources
-    (14, 13),
-    (14, 5), -- Yoga Mat: Fitness Equipment, Sports Equipment
-    (15, 26),
-    (15, 4),
-    (15, 14), -- Winter Jacket: Winter Clothing, Clothing, Winter Sports
-    (16, 1),
-    (16, 17),
-    (16, 19), -- CS Book: Textbooks, School Supplies, Books (Non-textbook)
-    (17, 24),
-    (17, 2), -- Desk Lamp: Dorm Essentials, Electronics
-    (18, 12),
-    (18, 17),
-    (18, 20), -- Scientific Calculator: Stationery, School Supplies, Math & Science
-    (19, 23),
-    (19, 2),
-    (19, 24), -- Bluetooth Speaker: Audio Equipment, Electronics, Dorm Essentials
-    (20, 22),
-    (20, 17),
-    (20, 24);
 
 -- Insert History records
 INSERT INTO

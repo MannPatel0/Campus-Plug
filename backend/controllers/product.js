@@ -41,12 +41,7 @@ exports.removeProduct = async (req, res) => {
     await db.execute(`DELETE FROM Image_URL WHERE ProductID = ?`, [productID]);
     await db.execute(`DELETE FROM History WHERE ProductID = ?`, [productID]);
     await db.execute(`DELETE FROM Favorites WHERE ProductID = ?`, [productID]);
-    await db.execute(`DELETE FROM Product_Category WHERE ProductID = ?`, [
-      productID,
-    ]);
-    await db.execute(`DELETE FROM Product_Category WHERE ProductID = ?`, [
-      productID,
-    ]);
+
     await db.execute(`DELETE FROM Transaction WHERE ProductID = ?`, [
       productID,
     ]);

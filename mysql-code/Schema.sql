@@ -105,15 +105,6 @@ CREATE TABLE Favorites (
     UNIQUE (UserID, ProductID)
 );
 
--- Product-Category Junction Table (Many-to-Many)
-CREATE TABLE Product_Category (
-    ProductID INT,
-    CategoryID INT,
-    PRIMARY KEY (ProductID, CategoryID),
-    FOREIGN KEY (ProductID) REFERENCES Product (ProductID) ON DELETE CASCADE,
-    FOREIGN KEY (CategoryID) REFERENCES Category (CategoryID) ON DELETE CASCADE
-);
-
 -- Login Authentication table
 CREATE TABLE AuthVerification (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
