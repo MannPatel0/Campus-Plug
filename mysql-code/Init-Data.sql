@@ -370,7 +370,6 @@ VALUES
     (1, 5), -- User 4 likes Basketball
     (2, 8);
 
--- User 5 likes Mini Fridge
 -- Insert Transactions
 INSERT INTO
     Transaction (

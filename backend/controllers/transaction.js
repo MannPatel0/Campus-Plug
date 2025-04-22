@@ -96,7 +96,7 @@ exports.getTransactionsByProduct = async (req, res) => {
          MIN(I.URL) AS Image_URL
        FROM Transaction T
        JOIN Product P ON T.ProductID = P.ProductID
-       LEFT JOIN Image_URL I ON P.ProductID = I.ProductID
+       JOIN Image_URL I ON I.ProductID = T.ProductID
        GROUP BY T.TransactionID, T.UserID, T.ProductID, T.Date, T.PaymentStatus, P.Name`,
     );
 
@@ -123,11 +123,19 @@ exports.getTransactionsByUser = async (req, res) => {
          T.Date,
          T.PaymentStatus,
          P.Name AS ProductName,
-         I.URL AS Image_URL
+         MIN(I.URL) AS Image_URL
        FROM Transaction T
        JOIN Product P ON T.ProductID = P.ProductID
-       LEFT JOIN Image_URL I ON P.ProductID = I.ProductID
-       WHERE T.UserID = ?`,
+       JOIN Image_URL I ON I.ProductID = T.ProductID
+       WHERE T.UserID = ?
+   GROUP BY
+   T.TransactionID,
+   T.UserID,
+   T.ProductID,
+   T.Date,
+   T.PaymentStatus,
+   P.Name;
+       `,
       [userID],
     );
 
@@ -155,7 +163,7 @@ exports.getAllTransactions = async (req, res) => {
          MIN(I.URL) AS Image_URL
        FROM Transaction T
        JOIN Product P ON T.ProductID = P.ProductID
-       LEFT JOIN Image_URL I ON P.ProductID = I.ProductID
+      JOIN Image_URL I ON P.ProductID = I.ProductID
        GROUP BY T.TransactionID, T.UserID, T.ProductID, T.Date, T.PaymentStatus, P.Name`,
     );
 
@@ -166,34 +174,6 @@ exports.getAllTransactions = async (req, res) => {
   } catch (error) {
     console.error("Error fetching all transactions:", error);
     res.status(500).json({ error: "Could not retrieve transactions" });
-  }
-};
-
-// Update the payment status of a transaction
-exports.updatePaymentStatus = async (req, res) => {
-  const { transactionID, paymentStatus } = req.body;
-
-  try {
-    const [result] = await db.execute(
-      `UPDATE Transaction
-       SET PaymentStatus = ?
-       WHERE TransactionID = ?`,
-      [paymentStatus, transactionID],
-    );
-
-    if (result.affectedRows === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Transaction not found" });
-    }
-
-    res.json({
-      success: true,
-      message: "Payment status updated successfully",
-    });
-  } catch (error) {
-    console.error("Error updating payment status:", error);
-    res.status(500).json({ error: "Could not update payment status" });
   }
 };
 
@@ -217,6 +197,27 @@ exports.deleteTransaction = async (req, res) => {
     res.json({
       success: true,
       message: "Transaction deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    res.status(500).json({ error: "Could not delete transaction" });
+  }
+};
+
+exports.updateTransactionStatus = async (req, res) => {
+  const { transactionID } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `UPDATE Transaction
+      SET PaymentStatus = 'completed'
+      WHERE TransactionID = ?;`,
+      [transactionID],
+    );
+
+    res.json({
+      success: true,
+      message: "Transaction updated successfully",
     });
   } catch (error) {
     console.error("Error deleting transaction:", error);

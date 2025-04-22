@@ -1,32 +1,45 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, CreditCard, Trash2 } from "lucide-react";
+import FloatingAlert from "../components/FloatingAlert"; // adjust path if needed
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
+
+  function reloadPage() {
+    const docTimestamp = new Date(performance.timing.domLoading).getTime();
+    const now = Date.now();
+    if (now > docTimestamp) {
+      location.reload();
+    }
+  }
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3030/api/transaction/getAllTransactions",
+          "http://localhost:3030/api/transaction/getTransactionsByUser",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userID: 1 }), // replace with actual userID
+            body: JSON.stringify({ userID: storedUser.ID }),
           },
         );
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const { transactions: txData } = await response.json();
         if (!Array.isArray(txData)) return;
 
+        console.log(txData);
+
         setTransactions(
           txData.map((tx) => ({
             id: tx.TransactionID,
             productId: tx.ProductID,
-            name: tx.ProductName || "Unnamed Product",
+            name: tx.ProductName,
             price: tx.Price != null ? parseFloat(tx.Price) : null,
-            image: tx.Image_URL || "/default-image.jpg",
+            image: tx.Image_URL,
             date: tx.Date,
             status: tx.PaymentStatus,
           })),
@@ -52,8 +65,29 @@ const Transactions = () => {
       const data = await res.json();
       if (data.success) {
         setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+        reloadPage();
       } else {
         console.error("Delete failed:", data.message);
+      }
+    } catch (err) {
+      console.error("Error deleting transaction:", err);
+    }
+  };
+
+  const updateTransaction = async (id) => {
+    try {
+      const res = await fetch(
+        "http://localhost:3030/api/transaction/updateStatus",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transactionID: id }),
+        },
+      );
+      const data = await res.json();
+      if (data) {
+        setShowAlert(true);
+        reloadPage();
       }
     } catch (err) {
       console.error("Error deleting transaction:", err);
@@ -71,6 +105,12 @@ const Transactions = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
+      {showAlert && (
+        <FloatingAlert
+          message="Status Updated"
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">My Transactions</h1>
       </div>
@@ -99,28 +139,34 @@ const Transactions = () => {
                 key={tx.id}
                 className="relative border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
-                {/* Delete Button */}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    deleteTransaction(tx.id);
-                  }}
-                  className="absolute bottom-2 right-2 text-red-500 hover:text-red-600 z-10"
-                >
-                  <Trash2 size={20} />
-                </button>
+                <div className="absolute bottom-2 right-2 flex gap-2 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      updateTransaction(tx.id);
+                    }}
+                    className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+                  >
+                    Complete
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      deleteTransaction(tx.id);
+                    }}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
 
                 <Link to={`/product/${tx.productId}`}>
                   <div className="h-48 bg-gray-200 flex items-center justify-center">
-                    {tx.image ? (
-                      <img
-                        src={tx.image}
-                        alt={tx.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-gray-400">No image</div>
-                    )}
+                    <img
+                      src={tx.image}
+                      alt={tx.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-800">
