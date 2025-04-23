@@ -87,12 +87,7 @@ function App() {
   // Generate product recommendations
   const generateProductRecommendations = async () => {
     setIsGeneratingRecommendations(true);
-
-    // Add a short delay to simulate calculation time
     await new Promise((resolve) => setTimeout(resolve, 500));
-
-    console.log("Generating product recommendations for user:", user.ID);
-
     setIsGeneratingRecommendations(false);
   };
 
@@ -216,7 +211,6 @@ function App() {
   // Complete signup
   const completeSignUp = async (userData) => {
     try {
-      setIsLoading(true);
       setError("");
 
       console.log("Completing signup for:", userData.email);
