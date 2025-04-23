@@ -86,54 +86,14 @@ function App() {
 
   // Generate product recommendations
   const generateProductRecommendations = async () => {
-    try {
-      setIsGeneratingRecommendations(true);
+    setIsGeneratingRecommendations(true);
 
-      // Add a short delay to simulate calculation time
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    // Add a short delay to simulate calculation time
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-      console.log("Generating product recommendations for user:", user.ID);
+    console.log("Generating product recommendations for user:", user.ID);
 
-      // Make API call to get recommendations
-      const response = await fetch(
-        "http://localhost:3030/api/recommendations/generate",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: user.ID,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to generate recommendations");
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        console.log(
-          "Recommendations generated successfully:",
-          result.recommendations,
-        );
-        setRecommendations(result.recommendations);
-
-        // Store recommendations in session storage for access across the app
-        sessionStorage.setItem(
-          "userRecommendations",
-          JSON.stringify(result.recommendations),
-        );
-      } else {
-        console.error("Error generating recommendations:", result.message);
-      }
-    } catch (err) {
-      console.error("Error generating product recommendations:", err);
-    } finally {
-      setIsGeneratingRecommendations(false);
-    }
+    setIsGeneratingRecommendations(false);
   };
 
   useEffect(() => {

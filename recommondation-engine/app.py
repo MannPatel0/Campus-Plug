@@ -19,9 +19,9 @@ def delete_user_recommendations(user_id):
     cursor = db_con.cursor()
 
     try:
-        cursor.execute("DELETE FROM Recommendation WHERE UserID = %s", (user_id))
-        db_con.commit()
         print(f"Deleted existing recommendations for user {user_id}")
+        cursor.execute(f"DELETE FROM Recommendation WHERE UserID = {user_id}")
+        db_con.commit()
         logging.info(f"Deleted existing recommendations for user {user_id}")
         return True
     except Exception as e:
@@ -86,10 +86,10 @@ def has_user_history_or_recommendations(user_id):
     cursor = db_con.cursor()
 
     try:
-        cursor.execute("SELECT COUNT(*) FROM History WHERE UserID = %s", (user_id,))
+        cursor.execute(f"SELECT COUNT(*) FROM History WHERE UserID = {user_id}" )
         history_count = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM Recommendation WHERE UserID = %s", (user_id,))
+        cursor.execute(f"SELECT COUNT(*) FROM Recommendation WHERE UserID = {user_id}")
         recommendation_count = cursor.fetchone()[0]
 
         return history_count > 0 or recommendation_count > 0
